@@ -1,0 +1,138 @@
+##################################################################
+#                    DSSG Team Cincinnati                        #
+#                      Model Experiments                         #
+##################################################################
+
+# Temporal stuff
+#start_date: '01Jan2008'    #train only on inspections after this date
+fake_today: '01Apr2014'
+validation_window: '1Year'  # Or '1Month'
+
+# Generate full parcel predictions for Cincinnati
+# Turn on after model validation/evaluation is complete
+prepare_field_test: True
+inspection_date: '01Aug2015'
+
+# only use residential parcels
+residential_only: True
+
+############################
+# Feature selection        #
+############################
+
+features:
+    # Tax data
+    tax_foreclosure: True
+    mean_impr_value: True
+    mean_land_value: True
+    mean_market_value: True
+    change_impr_value: True
+    change_land_value: True
+    change_market_value: True
+
+    # Parcel/auditor data
+    home_use: False # do not use this feature if training only on residential parcels
+    area: True
+    year_built: True
+
+    # Owner Named Entity Recognition
+    owner_ner: True
+
+    # Crime
+    #crime_rate_past_year: True  # old crime feature
+    #"crime_rate_1yr": True
+    #"crime_rate_3yr": False
+    #"crime_rate_1yr_guns": True
+    #"crime_rate_3yr_guns": False
+
+    #census_2010
+    housing_density: True
+    population_density: True
+    rate_1_per_household: True
+    rate_2_per_household: True
+    rate_3_per_household: True
+    rate_4_per_household: True
+    rate_5_per_household: True
+    rate_6_per_household: True
+    rate_7_plus_per_household: True
+    rate_asian_householder: True
+    rate_asian_pop: True
+    rate_black_householder: True
+    rate_black_pop: True
+    rate_female_18_35: True
+    rate_female_35_50: True
+    rate_female_50_75: True
+    rate_female_under_18: True
+    rate_for_rent: True
+    rate_households: True
+    rate_male_18_35: True
+    rate_male_35_50: True
+    rate_male_50_75: True
+    rate_male_over_75: True
+    rate_male_under_18: True
+    rate_mortgage_or_loan: True
+    rate_native_householder: True
+    rate_native_pop: True
+    rate_occupied_units: True
+    rate_other_race_householder: True
+    rate_other_race_pop: True
+    rate_owner_occupied: True
+    rate_owner_occupied_asian: True
+    rate_owner_occupied_black: True
+    rate_owner_occupied_hispanic: True
+    rate_owner_occupied_native: True
+    rate_owner_occupied_no_children: True
+    rate_owner_occupied_other_race: True
+    rate_owner_occupied_w_children: True
+    rate_owner_occupied_white: True
+    rate_pop_occupied_units: True
+    rate_pop_over_18: True
+    rate_renter_occupied: True
+    rate_renter_occupied_asian: True
+    rate_renter_occupied_black: True
+    rate_renter_occupied_native: True
+    rate_renter_occupied_no_children: True
+    rate_renter_occupied_other: True
+    rate_renter_occupied_w_children: True
+    rate_renter_occupied_white: True
+    rate_vacant_units: True
+    rate_white_householder: True
+    rate_white_pop: True
+
+
+############################
+# Model selection          #
+############################
+
+# Model parameters
+#model: 'SVM'  # 'SVM', 'LogisticRegression', 'RandomForest', 'AdaBoost'
+model: 'RandomForest'
+
+## Hyperparameters
+#parameters:  # ranges for RandomForest
+#    n_estimators:  [1, 10, 25, 50, 100]
+#    depth: [3, 5, 10, 20]
+#    max_features: [2, 4, 8, 16, "auto"]
+#    criterion: ["gini", "entropy"]
+
+parameters:  # single parameters for RandomForest
+    n_estimators:  [100]
+    depth: [10]
+
+#parameters:   #SVM
+#    C_reg: [100.0]  # C regularization parameter
+#    kernel: 'linear'  
+
+#parameters:   # logistic regression
+#    C_reg: [0.01, 0.1, 1.0, 10.0, 100.0]  # C regularization parameter
+
+#parameters: # adaboost
+#     learning_rate: [0.01, 0.1, 1, 10, 100]
+
+############################
+# Output                   #
+############################
+
+output_dir: 'results/'
+pkl_prefix: 'modelresult_'  # prefix model result with string
+predictions_dir: 'predictions/'
