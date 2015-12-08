@@ -11,8 +11,8 @@ cat $TMP_FOLDER/crime_*.csv > "$TMP_FOLDER/2004-2014.csv"
 python crime.py "$TMP_FOLDER/2004-2014.csv" > "$TMP_FOLDER/2004-2014_cleaned.csv"
 
 #Use csvsql to create a SQL script with the CREATE TABLE statement
-csvsql -i postgresql --tables crime --db-schema public -d ';' "$TMP_FOLDER/2004-2014_cleaned.csv" > crime.sql
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < crime.sql  
+csvsql -i postgresql --tables crime --db-schema public -d ';' "$TMP_FOLDER/2004-2014_cleaned.csv" > "$TMP_FOLDER/crime.sql"
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/crime.sql"  
 
 #Import the data into the new create table
-#cat 2004-2014_cleaned.csv | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.crime FROM STDIN  WITH CSV HEADER DELIMITER ';';"
+cat "$TMP_FOLDER/2004-2014_cleaned.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.crime FROM STDIN  WITH CSV HEADER DELIMITER ';';"

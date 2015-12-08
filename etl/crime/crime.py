@@ -29,7 +29,7 @@ with open(file_path) as f:
         # some data conversions, will make sure that everything that should be int actually is
         converted = dict()
         converted["incident_number"] = raw[0]
-        converted["date_reported"] = raw[1]
+        converted["date_reported"] = datetime.strptime(raw[1], "%m/%d/%y %H:%M")
         converted["offense_title"] = raw[2]
         converted["location"] = raw[3]
         converted["address"] = raw[4]
