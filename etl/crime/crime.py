@@ -1,4 +1,4 @@
-from datetime import datetime
+import dateutil
 import sys
 
 """
@@ -29,7 +29,7 @@ with open(file_path) as f:
         # some data conversions, will make sure that everything that should be int actually is
         converted = dict()
         converted["incident_number"] = raw[0]
-        converted["date_reported"] = datetime.strptime(raw[1], "%m/%d/%y %H:%M")
+        converted["date_reported"] = dateutil.parser.parse(raw[1])
         converted["offense_title"] = raw[2]
         converted["location"] = raw[3]
         converted["address"] = raw[4]
