@@ -1,4 +1,4 @@
-from urllib.request import urlopen
+from urllib import urlopen
 import json
 import subprocess
 import pandas as pd
@@ -10,8 +10,6 @@ import uuid
 import time
 
 
-
-
 def census_single_query(addr):
     """
     Query the census API with a single address.
@@ -20,7 +18,7 @@ def census_single_query(addr):
     """
     url = "http://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address={}&benchmark=9&format=json".format(addr)
     response = urlopen(url)
-    data = response.readall().decode('utf-8')
+    data = response.read().decode('utf-8')
     data = json.loads(data)
 
     if "result" not in data:

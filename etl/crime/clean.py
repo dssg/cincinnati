@@ -32,7 +32,8 @@ with open(file_path) as f:
         converted["date_reported"] = parse(raw[1]) #method from dateutil
         converted["offense_title"] = raw[2]
         converted["location"] = raw[3]
-        converted["address"] = raw[4]
+        #Add name of the city and state so geocoding works
+        converted["address"] = raw[4]+' CINCINNATI, OH'
         converted["weekday"] = raw[5]
         converted["rpt_area"] = raw[6]
         converted["neighbourhood"] = raw[7]
