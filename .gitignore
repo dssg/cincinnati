@@ -1,6 +1,7 @@
 #### project-local gitignores
 .ipynb_checkpoints
 dbconfig.py
+environment.sh
 
 #### github defaults below
 

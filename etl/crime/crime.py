@@ -1,4 +1,5 @@
 from datetime import datetime
+import sys
 
 """
 Do some basic data cleaning and conversion on our crime data
@@ -10,7 +11,9 @@ order = ['incident_number', 'date_reported', "offense_title", "location", "addre
 
 print (";".join(order))
 
-with open("2004-2014.csv") as f:
+file_path = sys.argv[1]
+
+with open(file_path) as f:
     i = 0
     for r in f.readlines():
         # don't care about the header lines

@@ -1,5 +1,4 @@
-<!-- ![Travis build status](https://api.travis-ci.com/dssg/cincinnati2015-public.svg&branch=master)-->
-
+This is the continuation of the Cincinnati [summer project](https://github.com/dssg/cincinnati2015) done during DSSG 2015.
 
 ## About
 
