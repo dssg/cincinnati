@@ -1,11 +1,11 @@
 echo "Loading data from $CRIME_CPD_FOLDER"
 
 #Step 1 - Convert raw data files to csv and store results in tmp folder
-xlsx2csv -d x09 -s 1 "$CRIME_CPD_FOLDER/CRIME 2004-2006.xlsx"  > "$TMP_FOLDER/2004.csv"
-xlsx2csv -d x09 -s 2 "$CRIME_CPD_FOLDER/CRIME 2004-2006.xlsx" > "$TMP_FOLDER/2005.csv"
+xlsx2csv -d x09 -s 1 "$CRIME_CPD_FOLDER/CRIME 2004-2006.xlsx" > "$TMP_FOLDER/crime_2004.csv"
+xlsx2csv -d x09 -s 2 "$CRIME_CPD_FOLDER/CRIME 2004-2006.xlsx" > "$TMP_FOLDER/crime_2005.csv"
 
 #Put all files in a single CSV file
-cat $TMP_FOLDER/*.csv>> "$TMP_FOLDER/2004-2014.csv"
+cat $TMP_FOLDER/crime_*.csv > "$TMP_FOLDER/2004-2014.csv"
   
 #Perform cleaning on the  CSV file
 python crime.py "$TMP_FOLDER/2004-2014.csv" > "$TMP_FOLDER/2004-2014_cleaned.csv"

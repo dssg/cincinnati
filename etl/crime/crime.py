@@ -14,7 +14,6 @@ print (";".join(order))
 file_path = sys.argv[1]
 
 with open(file_path) as f:
-    i = 0
     for r in f.readlines():
         # don't care about the header lines
         if r.startswith("INCIDENT_NO	"):
@@ -30,18 +29,17 @@ with open(file_path) as f:
         # some data conversions, will make sure that everything that should be int actually is
         converted = dict()
         converted["incident_number"] = raw[0]
-        converted["date_reported"] = datetime(year=int(raw[4]), month=int(raw[2]), day=int(raw[3]),
-                                              hour=int(raw[5]), minute=int(raw[6]))
-        converted["offense_title"] = raw[7]
-        converted["location"] = raw[8]
-        converted["address"] = raw[9]
-        converted["weekday"] = raw[10]
-        converted["rpt_area"] = raw[11]
-        converted["neighbourhood"] = raw[12]
-        converted["hour_from"] = int(raw[13]) if len(raw[13]) > 0 else ''
-        converted["hour_to"] = int(raw[14]) if len(raw[14]) > 0 else ''
-        converted["weapon"] = raw[15]
-        converted["ucr"] = int(raw[16])
+        converted["date_reported"] = raw[1]
+        converted["offense_title"] = raw[2]
+        converted["location"] = raw[3]
+        converted["address"] = raw[4]
+        converted["weekday"] = raw[5]
+        converted["rpt_area"] = raw[6]
+        converted["neighbourhood"] = raw[7]
+        converted["hour_from"] = int(raw[8]) if len(raw[8]) > 0 else ''
+        converted["hour_to"] = int(raw[9]) if len(raw[9]) > 0 else ''
+        converted["weapon"] = raw[10]
+        converted["ucr"] = int(raw[11])
 
         # print ordered column data
         ordered = [str(converted[col]) for col in order]
