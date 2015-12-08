@@ -1,4 +1,4 @@
-import dateutil
+from dateutil.parser import parse
 import sys
 
 """
@@ -29,7 +29,7 @@ with open(file_path) as f:
         # some data conversions, will make sure that everything that should be int actually is
         converted = dict()
         converted["incident_number"] = raw[0]
-        converted["date_reported"] = dateutil.parser.parse(raw[1])
+        converted["date_reported"] = parse(raw[1]) #method from dateutil
         converted["offense_title"] = raw[2]
         converted["location"] = raw[3]
         converted["address"] = raw[4]
