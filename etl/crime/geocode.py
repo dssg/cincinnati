@@ -1,4 +1,4 @@
-from urllib.request import urlopen
+from urllib import urlopen
 import json
 import subprocess
 import pandas as pd
