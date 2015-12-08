@@ -75,7 +75,7 @@ def geocode_dataset():
             chunk = geocode_chunk(chunk)
             chunk.to_csv("geocoded/{}.csv".format(chunk_index), header=False)
         except:
-            print("...failed: "+e = sys.exc_info()[0])
+            print("...failed: "+sys.exc_info()[0])
             failed.append(chunk_file)
     return failed
 
