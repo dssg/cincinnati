@@ -9,6 +9,9 @@ import glob
 import dbconfig
 from geocode import census_batch_query
 
+from python_ds_tools import data_folder
+import os
+
 def format_address_url(address):
     """
     Format an address from the crime database such that it works with a call to the Census single-address geocode
@@ -79,6 +82,21 @@ def geocode_dataset():
             print("...failed: "+str(sys.exc_info()[0]))
             failed.append(chunk_file)
     return failed
+
+
+#Step 0: change working directory so all changes take place in the DATA_FOLDER
+data_folder = data_folder.for_file(__file__)
+os.chdir(data_folder)
+
+print 'Working in folder: %s' % data_folder
+
+#Step 1: Create folders that we are going to use if they don't exist
+if not os.path.exists('addresses'):
+    os.makedirs('addresses')
+
+if not os.path.exists('geocoded'):
+    os.makedirs('geocoded')
+
 
 # Step one: download the whole dataset in chunks of 1000 addresses and store as csv
 download_dataset()
