@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 from sqlalchemy import create_engine
 import pandas as pd
 import time
@@ -75,7 +76,7 @@ def geocode_dataset():
             chunk = geocode_chunk(chunk)
             chunk.to_csv("geocoded/{}.csv".format(chunk_index), header=False)
         except:
-            print("...failed: "+sys.exc_info()[0])
+            print("...failed: "+str(sys.exc_info()[0]))
             failed.append(chunk_file)
     return failed
 
