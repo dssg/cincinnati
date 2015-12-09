@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+CRIME_CPD_FOLDER="$DATA_FOLDER/etl/crime"
+TMP_FOLDER="$DATA_FOLDER/etl/crime/tmp"
+
+#mkdir if not exists
+mkdir -p $TMP_FOLDER
+
 echo "Converting data from $CRIME_CPD_FOLDER"
 
 #Step 1 - Convert raw data files to csv and store results in tmp folder
@@ -22,7 +28,7 @@ cat $TMP_FOLDER/crime_*.csv > "$TMP_FOLDER/2004-2014.csv"
 
 #Perform cleaning on the  CSV file and append CINCINNATI, OH to each address
 #this way geocoding will work
-python "$PROJECT_FOLDER/etl/crime/clean.py" "$TMP_FOLDER/2004-2014.csv" > "$TMP_FOLDER/2004-2014_cleaned.csv"
+python "$ROOT_FOLDER/etl/crime/clean.py" "$TMP_FOLDER/2004-2014.csv" > "$TMP_FOLDER/2004-2014_cleaned.csv"
 
 #Use csvsql to create a SQL script with the CREATE TABLE statement
 csvsql -i postgresql --tables crime --db-schema public -d ';' "$TMP_FOLDER/2004-2014_cleaned.csv" > "$TMP_FOLDER/crime.sql"
