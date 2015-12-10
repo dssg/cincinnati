@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 echo 'Starting python script to geocode...'
 
 #Now perform the geocoding
