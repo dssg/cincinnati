@@ -6,7 +6,7 @@ import pandas as pd
 import time
 import glob
 
-import dbconfig
+from python_ds_tools.config import main as dbconfig
 from geocode import census_batch_query
 
 from python_ds_tools import data_folder

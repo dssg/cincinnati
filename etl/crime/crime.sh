@@ -2,6 +2,11 @@
 CRIME_CPD_FOLDER="$DATA_FOLDER/etl/crime"
 TMP_FOLDER="$DATA_FOLDER/etl/crime/tmp"
 
+#Read variables from config file
+DB_HOST=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.host)
+DB_USER=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.user)
+DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
+
 #mkdir if not exists
 mkdir -p $TMP_FOLDER
 
