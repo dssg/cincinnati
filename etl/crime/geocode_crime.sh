@@ -3,6 +3,11 @@ echo 'Starting python script to geocode...'
 #Now perform the geocoding
 python "$ROOT_FOLDER/etl/crime/geocode_crime.py"
 
+#Read variables from config file
+DB_HOST=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.host)
+DB_USER=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.user)
+DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
+
 CRIME_DATA_FOLDER="$DATA_FOLDER/etl/crime/"
 CRIME_CODE_FOLDER="$ROOT_FOLDER/etl/crime/"
 
