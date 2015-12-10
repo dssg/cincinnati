@@ -22,6 +22,10 @@ our project [here](http://dssg.uchicago.edu/2015/08/20/cincy-blight-prevention.h
 
 `python -c 'from python_ds_tools import data_folder; data_folder.setup()'`
 
+#install unix dependencies
+
+gdal, gnumeric (for converting xls)
+
 --
 
 #### Install all pre-requisites
