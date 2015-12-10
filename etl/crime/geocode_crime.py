@@ -70,6 +70,8 @@ def download_dataset():
 def geocode_dataset():
     chunks = sorted(glob.glob("addresses/*.csv"))
     already_geocoded = sorted(glob.glob("geocoded/*.csv"))
+    #Ignore geocoded/geocoding_results.csv if exists
+    if 'geocoding_results.csv' in already_geocoded: already_geocoded.remove('geocoding_results.csv')
     already_geocoded = [int(g.replace("geocoded/", "").replace(".csv", "")) for g in already_geocoded]
     failed = []
 
