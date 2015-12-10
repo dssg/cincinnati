@@ -6,7 +6,7 @@ import pandas as pd
 import time
 import glob
 
-from python_ds_tools.config import main as dbconfig
+from python_ds_tools.config import main as config
 from geocode import census_batch_query
 
 from python_ds_tools import data_folder
@@ -43,7 +43,11 @@ def crime_data_in_chunks():
     Census only allows chunks of 1000 addresses
     :return:
     """
-    engine = create_engine('postgresql://{conf.user}:{conf.password}@{conf.host}:5432/{conf.database}'.format(conf=dbconfig))
+    user = config['db']['user']
+    password = config['db']['password']
+    host  = config['db']['host']
+    database  = config['db']['database']
+    engine = create_engine('postgresql://{user}:{password}@{host}:5432/{database}'.format(user=user, password=password, host=host, database=database))
     addresses = ("SELECT * FROM public.crime where address IS NOT NULL AND LENGTH(address) > 0")
     for i, ch in enumerate(pd.read_sql(addresses, con=engine, chunksize=1000)):
         ch = ch.set_index("incident_number")
