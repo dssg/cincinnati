@@ -1,13 +1,14 @@
 """
-Take tab-delimited csv data (as produced during extract step and do data transformation.
+Take tab-delimited tsv data (as produced during extract step and do data transformation.
 """
 
 
 import pandas as pd
 from attributes import plain_text_names
+import sys
 
-input_csv = "/tmp/salesinfo.csv"
-output_csv = "/tmp/salesinfo_converted.csv"
+input_csv = sys.argv[1]
+output_csv = sys.argv[2]
 
 df = pd.read_csv(input_csv, sep="\t")
 

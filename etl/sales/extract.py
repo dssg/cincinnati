@@ -4,9 +4,11 @@ Extract data from txt file and output tab-delimited csv data.
 
 from attributes import attributes
 from util import configure_split
+import sys
 
+input_file = sys.argv[1]
 
-input_file = "/mnt/data/cincinnati/Sales/salesinfo.txt"
+print 'Working in folder: %s' % data_folder
 
 columns, types, sizes, descriptions = zip(*attributes)
 split_line = configure_split(sizes)
