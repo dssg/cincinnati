@@ -12,6 +12,8 @@ DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
 CRIME_DATA_FOLDER="$DATA_FOLDER/etl/crime/"
 CRIME_CODE_FOLDER="$ROOT_FOLDER/etl/crime/"
 
+#Remove merged file if exists
+rm -f "$CRIME_DATA_FOLDER/geocoded/geocoding_results.csv"
 #Merge all the batch results into one
 cat "$CRIME_DATA_FOLDER/geocoded/"*.csv >> "$CRIME_DATA_FOLDER/geocoded/geocoding_results.csv"
 
