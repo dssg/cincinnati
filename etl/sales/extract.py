@@ -8,8 +8,6 @@ import sys
 
 input_file = sys.argv[1]
 
-print 'Working in folder: %s' % data_folder
-
 columns, types, sizes, descriptions = zip(*attributes)
 split_line = configure_split(sizes)
 
