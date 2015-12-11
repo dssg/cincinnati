@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 from python_ds_tools.config import main as config
 from python_ds_tools import data_folder
 import tax_defs
+import os
 
 #Change working directory so all changes take place in the DATA_FOLDER
 data_folder = data_folder.for_file(__file__)
