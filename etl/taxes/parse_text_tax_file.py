@@ -28,7 +28,7 @@ if not os.path.exists('tmp'):
     print 'Creating tmp folder in %s' % os.getcwd()
     os.makedirs('tmp')
 
-print 'Loading data...'
+print 'Loading data from %d...' % year
 
 df = pd.read_fwf(input_file, names=names, widths=widths)
 
