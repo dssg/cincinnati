@@ -33,6 +33,6 @@ df = pd.read_csv(input_file, names=names)
 
 output = 'tmp/taxes_%d.csv' % year
 
-df.to_csv(output)
+df.to_csv(output, index=False)
 
 print 'Result is in %s/%s' % (os.getcwd(), output)
