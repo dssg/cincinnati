@@ -12,4 +12,4 @@ echo "Loading data from $TAXES_FOLDER"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS taxes_2015;"
 
 #Load taxes file and create sql table
-python "$ROOT_FOLDER/etl/taxes/extract_taxes_2015.py.py"
+python "$ROOT_FOLDER/etl/taxes/extract_taxes_2015.py"
