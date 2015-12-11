@@ -145,6 +145,6 @@ if __name__ == '__main__':
     # generate_features_for_fake_inspection(d)
 
     # to generate features
-    # generate_features()
+    generate_features()
 
     pass
