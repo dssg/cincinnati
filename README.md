@@ -28,6 +28,8 @@ gdal, gnumeric (for converting xls)
 
 this repo assumes that your default schema is 'public'
 
+csvkit
+
 --
 
 #### Install all pre-requisites

@@ -22,8 +22,16 @@ python "$ROOT_FOLDER/etl/taxes/parse_text_tax_file.py" taxinfo2014.txt 2014
 #File from 2015 is a CSV, we only need to append the header
 python "$ROOT_FOLDER/etl/taxes/add_header_csv_tax_file.py" Tax_Information2015.CSV 2015
 
-#Create table in the database
-#echo "Loading data from $TAXES_FOLDER"
-#psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS taxes_2015;"
-#Load taxes file and create sql table
-#python "$ROOT_FOLDER/etl/taxes/extract_taxes_2015.py"
+
+#####
+
+#Use csvsql to create a SQL script with the CREATE TABLE statement
+csvsql -i postgresql --tables taxes_2007 --db-schema public -d ',' "$TMP_FOLDER/taxes_2007.csv" > "$TMP_FOLDER/taxes_2007.sql"
+
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS crime;"  
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/crime.sql"  
+
+#Import the data into the new create table
+cat "$TMP_FOLDER/2004-2014_cleaned.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.crime FROM STDIN  WITH CSV HEADER DELIMITER ';';"
+
+echo 'Done creating crime table!'
