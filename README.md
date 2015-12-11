@@ -26,6 +26,8 @@ our project [here](http://dssg.uchicago.edu/2015/08/20/cincy-blight-prevention.h
 
 gdal, gnumeric (for converting xls)
 
+this repo assumes that your default schema is 'public'
+
 --
 
 #### Install all pre-requisites
