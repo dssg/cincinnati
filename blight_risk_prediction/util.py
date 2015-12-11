@@ -8,9 +8,15 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sqlalchemy import create_engine
 import datetime
-
-import dbconfig
 import config
+
+#Load yaml configuration file
+from python_ds_tools.config import main
+#Get values from configuration file
+user = main['db']['user']
+password = main['db']['password']
+host  = main['db']['host']
+database  = main['db']['database']
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +35,7 @@ def format_parcels_list(parcels):
 
 
 def get_engine():
-    engine = create_engine('postgresql://{conf.user}:{conf.password}@{conf.host}:5432/{conf.database}'.format(conf=dbconfig))
+    engine = create_engine('postgresql://{user}:{password}@{host}:5432/{database}'.format(user=user, password=password, host=host, database=database))
     return engine
 
 
