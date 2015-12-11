@@ -34,6 +34,6 @@ df = pd.read_fwf(input_file, names=names, widths=widths)
 
 output = 'tmp/taxes_%d.csv' % year
 
-df.to_csv(output)
+df.to_csv(output, index=False)
 
 print 'Result is in %s/%s' % (os.getcwd(), output)
