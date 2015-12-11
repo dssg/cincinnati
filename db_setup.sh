@@ -8,3 +8,5 @@ DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
 #create schemas
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE SCHEMA shape_files;"  
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE SCHEMA features;"  
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE SCHEMA inspections;"
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE SCHEMA inspections_raw;"
