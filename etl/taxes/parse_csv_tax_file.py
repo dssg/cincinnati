@@ -4,6 +4,7 @@ import yaml
 import sys
 from python_ds_tools.config import main as config
 from python_ds_tools import data_folder
+import numpy as np
 
 input_file = sys.argv[1]
 year = int(sys.argv[2])
@@ -29,7 +30,7 @@ if not os.path.exists('tmp'):
 
 print 'Loading data from %d...' % year
 
-df = pd.read_csv(input_file, names=names, dtype=np.str)
+df = pd.read_csv(input_file, names=names, dtype=np.str, na_values=[' '])
 
 output = 'tmp/taxes_%d.csv' % year
 

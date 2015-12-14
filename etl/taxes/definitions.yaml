@@ -171,7 +171,7 @@ names:
                     'OWNER_ST_NAME', 'OWNER_ST_SUFFIX',
                     'OWNER_ST_SUFFIX_DIR', 'OWNER_SECONDARY_ADDR',
                     'OWNER_CITY', 'OWNER_STATE', 'OWNER_ZIP', 'OWNER_COUNTRY',
-                    'LOC_HOUSE_NO', 'LOC_ST_DIR', 'LOC_ST_DIR', 'LOC_ST_NAME',
+                    'LOC_HOUSE_NO', 'LOC_ST_DIR', 'LOC_ST_NAME',
                     'LOC_ST_SUFFIX', 'LOC_CITY', 'LOC_STATE', 'LOC_ZIP',
                     'MAIL_NAME', 'MAIL_ATTN', 'MAIL_ST_NO', 'MAIL_ST_DIR',
                     'MAIL_ST_NAME', 'MAIL_ST_SUFFIX', 'MAIL_ST_SUFFIX_DIR',
