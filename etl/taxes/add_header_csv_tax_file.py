@@ -29,7 +29,7 @@ if not os.path.exists('tmp'):
 
 print 'Loading data from %d...' % year
 
-df = pd.read_csv(input_file, names=names)
+df = pd.read_csv(input_file, names=names, dtype=np.str)
 
 output = 'tmp/taxes_%d.csv' % year
 
