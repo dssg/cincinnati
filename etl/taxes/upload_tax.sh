@@ -13,7 +13,8 @@ DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
 
 #Use csvsql to create a SQL script with the CREATE TABLE statement
 echo "Generating CREATE TABLE statement from csv file..."
-csvsql -i postgresql --tables $TABLE_NAME --db-schema public -d ',' "$FOLDER/$CSV_FILENAME" > "$FOLDER/$TABLE_NAME.sql"
+#For now, add the no inference parameter to avoid trouble with certain numeric columns that have commas
+csvsql --no-inference -i postgresql --tables $TABLE_NAME --db-schema public -d ',' "$FOLDER/$CSV_FILENAME" > "$FOLDER/$TABLE_NAME.sql"
 #Drop tables if they already exist
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS $TABLE_NAME;"  
 #Run the CREATE TABLE statements on the database

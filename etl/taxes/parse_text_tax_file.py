@@ -31,7 +31,7 @@ if not os.path.exists('tmp'):
 
 print 'Loading data from %d...' % year
 
-df = pd.read_fwf(input_file, names=names, widths=widths, dtype=np.str)
+df = pd.read_fwf(input_file, names=names, widths=widths)
 
 output = 'tmp/taxes_%d.csv' % year
 

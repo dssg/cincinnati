@@ -30,6 +30,9 @@ if not os.path.exists('tmp'):
 
 print 'Loading data from %d...' % year
 
+#Force all columns to be read as strings to prevent pandas elminating leading 0s
+#and other weird stuff. The are some columns with only one blank space, interpret those
+#as NA
 df = pd.read_csv(input_file, names=names, dtype=np.str, na_values=[' '])
 
 output = 'tmp/taxes_%d.csv' % year
