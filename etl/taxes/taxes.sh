@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-#Parse raw taxes data files and generate CSVs
+#1. Parse raw taxes data files and generate CSVs
 bash "$ROOT_FOLDER/etl/taxes/parse_taxes.sh"
 
-#Upload CSVs to the database
-
+#2. Upload CSVs to the database
 #Get tmp folder for taxes etl
 TMP_FOLDER="$DATA_FOLDER/etl/taxes/tmp"
-#Upload taxes to the database
+#Upload taxes to the database, parameters are: folder where csv files are located
+#csv file names and name for the table that will be created
 bash "$ROOT_FOLDER/etl/taxes/upload_tax.sh" $TMP_FOLDER taxes_2007.csv taxes_2007
 bash "$ROOT_FOLDER/etl/taxes/upload_tax.sh" $TMP_FOLDER taxes_2008.csv taxes_2008
 bash "$ROOT_FOLDER/etl/taxes/upload_tax.sh" $TMP_FOLDER taxes_2009.csv taxes_2009

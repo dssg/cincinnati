@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 import yaml
 import sys
 from python_ds_tools.config import main as config
@@ -30,7 +31,7 @@ if not os.path.exists('tmp'):
 
 print 'Loading data from %d...' % year
 
-df = pd.read_fwf(input_file, names=names, widths=widths)
+df = pd.read_fwf(input_file, names=names, widths=widths, dtype=np.str)
 
 output = 'tmp/taxes_%d.csv' % year
 
