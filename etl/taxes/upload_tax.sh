@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#Takes csv file and uploads it to the database
+#Takes csv file and uploads it to the database in the public shema
 
 #Filename
 FOLDER=$1
