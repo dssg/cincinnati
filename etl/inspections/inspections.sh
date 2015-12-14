@@ -18,3 +18,6 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$LOCAL_DATA_FOLDER/cag_code_violatio
 #Creates tables on inspections_raw schema
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$LOCAL_DATA_FOLDER/raw_vendor_tables.tables.sql"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$LOCAL_DATA_FOLDER/raw_vendor_tables.data.sql"
+
+#Create view on inspections
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/inspections/events_timeline.sql"
