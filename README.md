@@ -30,6 +30,8 @@ this repo assumes that your default schema is 'public'
 
 csvkit
 
+Setup your pgpass
+
 --
 
 #### Install all pre-requisites
