@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 LOCAL_DATA_FOLDER="$DATA_FOLDER/etl/inspections"
+LOCAL_CODE_FOLDER="$ROOT_FOLDER/etl/inspections"
 
 #Read variables from config file
 DB_HOST=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.host)
@@ -20,7 +21,7 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$LOCAL_DATA_FOLDER/cag_code_violatio
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$LOCAL_DATA_FOLDER/cag_code_violations.data.sql"
 
 #Creates tables on inspections_raw schema
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$LOCAL_DATA_FOLDER/drop_raw_vendor_tables.sql"
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$LOCAL_CODE_FOLDER/drop_raw_vendor_tables.sql"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$LOCAL_DATA_FOLDER/raw_vendor_tables.tables.sql"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$LOCAL_DATA_FOLDER/raw_vendor_tables.data.sql"
 
