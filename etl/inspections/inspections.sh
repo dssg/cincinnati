@@ -27,3 +27,5 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$LOCAL_DATA_FOLDER/raw_vendor_tables
 
 #Create view on inspections
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/inspections/events_timeline.sql"
+
+echo 'Done uploading inspections data to postgres!'
