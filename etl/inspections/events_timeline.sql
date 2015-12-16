@@ -115,7 +115,7 @@ WHERE comp_type = 'CBHHAZ_R' AND date_d IS NOT NULL
 
 CREATE VIEW inspections_views.number_key2parcel_no
 AS
-   (SELECT par.number_key, trim(par.parcel_no)
+   (SELECT par.number_key, trim(par.parcel_no) AS parcel_no
     FROM inspections_raw.t_dssg_apd_par AS par
     JOIN
       (SELECT number_key, count(distinct(parcel_no))
