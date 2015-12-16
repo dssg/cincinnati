@@ -13,7 +13,6 @@ DB_HOST=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.host)
 DB_USER=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.user)
 DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
 
-
 #All csvfiles and postgresq tables will have this prefix
 PREFIX="fire"
 
@@ -32,6 +31,6 @@ do
     #Drop tables if they already exist
     psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS $CSV_NAME;"  
     #Upload the csv file in the public schema
-    echo "Uploading $CSV_NAME to the database..."
-    csvsql --db "postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:5432/$DB_NAME"  --insert --db-schema public -d ',' "$TMP_FOLDER/$CSV_NAME"
+    echo "Uploading $CSV_NAME.csv to the database..."
+    csvsql --db "postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:5432/$DB_NAME"  --insert --tables test_fire --db-schema public -d ',' "$TMP_FOLDER/$CSV_NAME.csv"
 done
