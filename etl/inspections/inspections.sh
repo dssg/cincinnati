@@ -29,6 +29,11 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$LOCAL_CODE_FOLDER/drop_raw_vendor_t
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$LOCAL_DATA_FOLDER/raw_vendor_tables.tables.sql"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$LOCAL_DATA_FOLDER/raw_vendor_tables.data.sql"
 
+#Part 4: Inspection Views
+#Drop views if they already exist
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP VIEW  IF EXISTS inspections_views.events;"
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP VIEW  IF EXISTS inspections_views.number_key2parcel_no;"
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP VIEW  IF EXISTS inspections_views.events_parcel_id;"
 #Create view on inspections
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/inspections/events_timeline.sql"
 
