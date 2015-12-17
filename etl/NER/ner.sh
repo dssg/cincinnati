@@ -11,6 +11,10 @@ DB_HOST=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.host)
 DB_USER=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.user)
 DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
 
+#Start ner
+java -mx6000m edu.stanford.nlp.ie.NERServer -port 9191 -loadClassifier \
+    $NER_CLASSIFIERS/english.all.3class.distsim.crf.ser.gz -tokenizerFactory edu.stanford.nlp.process.WhitespaceTokenizer \
+    -tokenizerOptions "tokenizeNLs=true" -outputFormat tsv
 
 #Perform NER for all tax data from 2007 to 2015. One CSV is written per year. Must use python3 for this step!
 python "$LOCAL_CODE_FOLDER/get_tax_owners.py"

@@ -47,15 +47,19 @@ COPY requirements.txt /tmp/
 #Install Python dependencies
 RUN pip install -r /tmp/requirements.txt
 
+#Set /root as working dir
+WORKDIR /root
+
 #Install Stanford's NER
 #http://nlp.stanford.edu/software/CRF-NER.shtml#Download
 RUN apt-get install -y unzip
 ENV NAME="stanford-ner-2015-12-09"
 RUN wget http://nlp.stanford.edu/software/$NAME.zip
 RUN unzip $NAME.zip
-#java -mx6000m -cp "$NAME/stanford-ner.jar" edu.stanford.nlp.ie.NERServer -port 9191 -loadClassifier \
-#classifiers/english.all.3class.distsim.crf.ser.gz -tokenizerFactory edu.stanford.nlp.process.WhitespaceTokenizer \
-#-tokenizerOptions "tokenizeNLs=true" -outputFormat tsv  &
+RUN rm -rf $NAME.zip
+#Define CLASSPATH and path to the NER classifiers
+ENV CLASSPATH=/root/$NAME/stanford-ner.jar
+ENV NER_CLASSIFIERS=/root/$NAME/classifiers
 
 #Set /root as working dir
 WORKDIR /root
