@@ -1,0 +1,4 @@
+PyYAML==3.11
+shyaml==0.3.4
+xlsx2csv==0.7.2
+csvkit==0.9.1
