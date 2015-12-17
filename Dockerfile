@@ -19,3 +19,9 @@ RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true 
 #RUN apt-get update
 RUN apt-get install -y oracle-java8-installer
 
+#Setup enviromental variables
+ENV ROOT_FOLDER=/root/code
+ENV DATA_FOLDER=/root/data
+
+#Set /root as working dir
+WORKDIR /root
