@@ -2,3 +2,7 @@ PyYAML==3.11
 shyaml==0.3.4
 xlsx2csv==0.7.2
 csvkit==0.9.1
+pandas==0.16.2
+psycopg2==2.6
+SQLAlchemy==1.0.8
+xlsx2csv==0.7.2

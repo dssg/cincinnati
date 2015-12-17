@@ -4,7 +4,6 @@ FROM ubuntu:trusty
 #for some scripts)
 RUN apt-get install -y software-properties-common
 
-
 #Install Python 2.7 (which is used for most of the code)
 RUN add-apt-repository -y ppa:fkrull/deadsnakes-python2.7 && apt-get update
 RUN apt-get install -y python2.7
@@ -47,6 +46,16 @@ COPY requirements.txt /tmp/
 
 #Install Python dependencies
 RUN pip install -r /tmp/requirements.txt
+
+#Install Stanford's NER
+#http://nlp.stanford.edu/software/CRF-NER.shtml#Download
+RUN apt-get install -y unzip
+ENV NAME="stanford-ner-2015-12-09"
+RUN wget http://nlp.stanford.edu/software/$NAME.zip
+RUN unzip $NAME.zip
+#java -mx6000m -cp "$NAME/stanford-ner.jar" edu.stanford.nlp.ie.NERServer -port 9191 -loadClassifier \
+#classifiers/english.all.3class.distsim.crf.ser.gz -tokenizerFactory edu.stanford.nlp.process.WhitespaceTokenizer \
+#-tokenizerOptions "tokenizeNLs=true" -outputFormat tsv  &
 
 #Set /root as working dir
 WORKDIR /root

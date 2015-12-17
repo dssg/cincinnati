@@ -11,16 +11,6 @@ DB_HOST=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.host)
 DB_USER=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.user)
 DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
 
-#Get Stanford's NER and put it in the tmp folder
-#http://nlp.stanford.edu/software/CRF-NER.shtml#Download
-#This NER system requires Java 1.8 or later. Make sure you have Java 8.
-NAME="stanford-ner-2015-12-09"
-wget --directory-prefix=$TMP_FOLDER "http://nlp.stanford.edu/software/$NAME.zip"
-unzip "$TMP_FOLDER/$NAME.zip"
-
-java -mx6000m -cp "$TMP_FOLDER/$NAME/stanford-ner.jar" edu.stanford.nlp.ie.NERServer -port 9191 -loadClassifier \
-classifiers/english.all.3class.distsim.crf.ser.gz -tokenizerFactory edu.stanford.nlp.process.WhitespaceTokenizer \
--tokenizerOptions "tokenizeNLs=true" -outputFormat tsv  &
 
 #Perform NER for all tax data from 2007 to 2015. One CSV is written per year. Must use python3 for this step!
 python "$LOCAL_CODE_FOLDER/get_tax_owners.py"
