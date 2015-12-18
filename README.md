@@ -55,7 +55,7 @@ The ETL step depends on these programs:
 * mdbtools 0.7.1 
 * gnumeric 1.12.9
 * stanford-ner-2015-12-09
-* ...and many Ptyhon packages
+* ...and many Python packages
 
 To ease the setup, a Dockerfile is provided which builds an Ubuntu 14.04 image with all dependencies included and properly configured.
 
@@ -79,6 +79,8 @@ Note that we are passing our two environment variables, and linking them to two 
 
 ---
 This part is still work in progess... Ignore the rest of the file.
+
+##Setup your database
 
 ##Run the ETL
 
