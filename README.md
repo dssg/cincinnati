@@ -43,8 +43,8 @@ The code loads some parameters from a `config.yaml` file stored in the `$ROOT_FO
 
 Use the `config_sample.yaml` file to see the structure and then rename it to `config.yaml`, make sure that the file is stores in your `$ROOT_FOLDER`.
 
-pgpass (without the dot) is needed if your are going to use the Docker image and it will take
-the file in `$ROOT_FOLDER/pgpass` to build it. If you are not going to use Docker, just make sure that a standard `.pgpass` (note the dot) file is on your home folder. 
+`.pgpass` (note the dot) is needed if your are going to use the Docker image and it will take
+the file in `$ROOT_FOLDER/.pgpass` to build it. If you are not going to use Docker, just make sure that a standard `.pgpass` file is on your home folder. See `.pgpass_sample` for syntax details.
 
 ##Build docker ETL image
 
@@ -85,6 +85,8 @@ This part is still work in progess... Ignore the rest of the file.
 ##Setup your database
 
 Assumes default port.
+
+Run db_setup.sh
 
 ##Run the ETL
 
