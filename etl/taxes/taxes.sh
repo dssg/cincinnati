@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+CODE_FOLDER="$ROOT_FOLDER/etl/taxes"
+
+#Read variables from config file
+DB_HOST=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.host)
+DB_USER=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.user)
+DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
 
 #1. Parse raw taxes data files and generate CSVs
 bash "$ROOT_FOLDER/etl/taxes/parse_taxes.sh"
@@ -17,3 +23,6 @@ bash "$ROOT_FOLDER/etl/taxes/upload_tax.sh" $TMP_FOLDER taxes_2012.csv taxes_201
 bash "$ROOT_FOLDER/etl/taxes/upload_tax.sh" $TMP_FOLDER taxes_2013.csv taxes_2013
 bash "$ROOT_FOLDER/etl/taxes/upload_tax.sh" $TMP_FOLDER taxes_2014.csv taxes_2014
 bash "$ROOT_FOLDER/etl/taxes/upload_tax.sh" $TMP_FOLDER taxes_2015.csv taxes_2015
+
+#Run fixes on the db
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/taxdb_modifications.sql"  
