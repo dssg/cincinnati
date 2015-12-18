@@ -61,6 +61,7 @@ RUN conda install --file /tmp/requirements.conda
 RUN pip install -r /tmp/requirements.txt
 
 #Copy .pgpass
+COPY .pgpass /root/
 
 #Set /root as working dir
 WORKDIR /root
