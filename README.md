@@ -13,7 +13,7 @@ our project [here](http://dssg.uchicago.edu/2015/08/20/cincy-blight-prevention.h
 
 #Setup
 
-##1. Select one folder for the data and another for the code
+##Select one folder for the data and another for the code
 
 The code relies on two environment variables, before you start running the code, decide where are you going to store the *raw data* and the *code*.
 
