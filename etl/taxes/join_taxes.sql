@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS taxes_combined;
 
-CREATE TABLE taxes_combined AS(
+CREATE TABLE tax_combined AS(
 
     WITH t2007 AS (
         SELECT 2007 AS year,
