@@ -52,11 +52,11 @@ ADD COLUMN new_parcel_id text;
 UPDATE public.taxes_2015
 SET new_parcel_id = '0' || lpad(public.taxes_2015.property_number, 11);
 
-#Note: the code below no longer works since the ETL is detecting forcl_flag
-#as boolean instead of string
+--Note: the code below no longer works since the ETL is detecting forcl_flag
+--as boolean instead of string
 
-#UPDATE public.taxes_2015
-#SET forcl_flag = replace(forcl_flag, 'Yes', 'Y');
+--UPDATE public.taxes_2015
+--SET forcl_flag = replace(forcl_flag, 'Yes', 'Y');
 
-#UPDATE public.taxes_2015
-#SET forcl_flag = replace(forcl_flag, 'No', 'N');
+--UPDATE public.taxes_2015
+--SET forcl_flag = replace(forcl_flag, 'No', 'N');
