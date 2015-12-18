@@ -46,13 +46,41 @@ Use the `config_sample.yaml` file to see the structure and then rename it to `co
 
 ##Build docker ETL image
 
+The ETL step depends on these programs:
+
+* Python 2.7.11
+* GDAL 1.11.2
+* Java 1.8
+* sql (PostgreSQL) 9.3.10
+* mdbtools 0.7.1 
+* gnumeric 1.12.9
+* stanford-ner-2015-12-09
+* ...and many Ptyhon packages
+
+To ease the setup, a Dockerfile is provided which builds an Ubuntu 14.04 image with all dependencies included and properly configured.
+
+Most dependencies are needed for the ETL step, after the raw data is on the database, only Python (and a few packages) and psql is needed, hence, if you want, you can use the Docker image for the ETL phase.
+
+For information on how to setup Docker, see the [official docs](https://docs.docker.com/).
+
+Once Docker is properly setup, go to your `$ROOT_FOLDER` and run:
+
 `docker build -t cincinnati .`
+
+This process takes a long time since it needs to download and install all dependencies, but with a decent internet connection is should take less than 1 hour.
 
 ##Run docker image
 
-`docker run -v ~/data/cincinnati-data:/root/data -v /Users/Edu/Development/dsapp/cincinnati-dsapp:/root/code -i -t cincinnati /bin/bash`
+Once the image is ready, run it: 
 
-##Run the ETL pipeline
+`docker run -v $DATA_FOLDER:/root/data -v $ROOT_FOLDER:/root/code -i -t cincinnati /bin/bash`
+
+Note that we are passing our two environment variables, and linking them to two folders inside the container. The purpose of the Docker container is to run code but not to store anything (not code and of course, not data).
+
+---
+This part is still work in progess... Ignore the rest of the file.
+
+##Run the ETL
 
 ##Create features from the data
 
