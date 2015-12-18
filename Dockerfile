@@ -63,5 +63,10 @@ RUN pip install -r /tmp/requirements.txt
 #Copy .pgpass
 COPY .pgpass /root/
 
+#Install custom package
+COPY python_ds_tools/ /tmp/
+WORKDIR /tmp/python_ds_tools
+RUN python setup.py
+
 #Set /root as working dir
 WORKDIR /root
