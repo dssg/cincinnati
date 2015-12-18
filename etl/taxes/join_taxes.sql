@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS taxes_combined;
+DROP TABLE IF EXISTS tax_combined;
 
 CREATE TABLE tax_combined AS(
 
