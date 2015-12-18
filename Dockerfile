@@ -1,58 +1,47 @@
 FROM ubuntu:trusty
+MAINTAINER Eduardo Blancas Reyes
 
-#Install common packages (this installs Python 3 which we also need
-#for some scripts)
+#Setup project env variables
+ENV ROOT_FOLDER=/root/code
+ENV DATA_FOLDER=/root/data
+
+#Install wget and unzip
+RUN apt-get install -y wget
+RUN apt-get install -y unzip
+
+#Install Python 2.7 via miniconda
+RUN wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O /root/miniconda.sh
+RUN bash /root/miniconda.sh -b -p /root/miniconda
+RUN rm /root/miniconda.sh
+ENV PATH="/root/miniconda/bin:$PATH"
+
+#Install common packages
 RUN apt-get install -y software-properties-common
+#Add repository for gdal
+RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
+#Add repo for java 8
+RUN add-apt-repository -y ppa:webupd8team/java
+RUN apt-get update
 
-#Install Python 2.7 (which is used for most of the code)
-RUN add-apt-repository -y ppa:fkrull/deadsnakes-python2.7 && apt-get update
-RUN apt-get install -y python2.7
-#Alias python2.7 to python
-ENV python=python2.7
+#Install GDAL
+RUN apt-get install -y gdal-bin
 
-#Install pip (this will also install Python 2)
-#RUN apt-get install -y python python-dev python-distribute python-pip
-RUN apt-get install -y python-pip
-RUN pip install --upgrade pip
+#Auto accept oracle license and install required java version for NER (Java 1.8 or later)
+RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
+RUN apt-get install -y oracle-java8-installer
 
 #Install postgresql (only client)
 RUN apt-get -y install postgresql-client
-
-#Add repository with the required GDAL version
-RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && apt-get update
-RUN apt-get install -y gdal-bin
-RUN gdalinfo --version
 
 #Install mdbtools to convert access databases to csv files
 RUN apt-get install -y mdbtools
 
 #Install gnumeric to use ssconvert, which lets convert xls files to csv
 RUN apt-get install -y gnumeric
-
-#Install required java version for NER (Java 1.8 or later)
-#http://www.webupd8.org/2012/09/install-oracle-java-8-in-ubuntu-via-ppa.html
-RUN add-apt-repository -y ppa:webupd8team/java && apt-get update
-#Auto accept Oracle license
-RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
-#RUN apt-get update
-RUN apt-get install -y oracle-java8-installer
-
-#Setup enviromental variables
-ENV ROOT_FOLDER=/root/code
-ENV DATA_FOLDER=/root/data
-
-#Copy the requirements file
-COPY requirements.txt /tmp/
-
-#Install Python dependencies
-RUN pip install -r /tmp/requirements.txt
-
-#Set /root as working dir
-WORKDIR /root
-
+ 
 #Install Stanford's NER
 #http://nlp.stanford.edu/software/CRF-NER.shtml#Download
-RUN apt-get install -y unzip
+WORKDIR /root
 ENV NAME="stanford-ner-2015-12-09"
 RUN wget http://nlp.stanford.edu/software/$NAME.zip
 RUN unzip $NAME.zip
@@ -60,6 +49,16 @@ RUN rm -rf $NAME.zip
 #Define CLASSPATH and path to the NER classifiers
 ENV CLASSPATH=/root/$NAME/stanford-ner.jar
 ENV NER_CLASSIFIERS=/root/$NAME/classifiers
+
+#Copy the conda requirements file
+COPY requirements.conda /tmp/
+#For some reason conda is not listing pip installed packages
+#so, copy the pip requirements file too
+COPY requirements.txt /tmp/
+
+#Install Python dependencies
+RUN conda install --file /tmp/requirements.conda
+RUN pip install -r /tmp/requirements.txt
 
 #Set /root as working dir
 WORKDIR /root
