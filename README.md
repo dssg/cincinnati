@@ -1,6 +1,8 @@
+#Cincinnati project
+
 This is the continuation of the Cincinnati [summer project](https://github.com/dssg/cincinnati2015) done during DSSG 2015.
 
-## About
+#About
 
 First settled in 1788, Cincinnati is one of the oldest American cities west of the original colonies. Today, the 
 city struggles with aging home stock, stifling economic redevelopment in some neighborhoods. 
@@ -9,13 +11,38 @@ DSSG is working with the City of Cincinnati to identify properties at risk of co
 that early intervention strategies can prevent further damage and stimulate neighborhood revitalization. Read more about
 our project [here](http://dssg.uchicago.edu/2015/08/20/cincy-blight-prevention.html). 
 
-##Select one folder for the data and another for the code
+#Setup
+
+##1. Select one folder for the data and another for the code
+
+The code relies on two environment variables, before you start running the code, decide where are you going to store the *raw data* and the *code*.
+
+Then add these two environment variables:
+
+`export ROOT_FOLDER="/absolute/path/to/the/repo"`
+
+`export DATA_FOLDER="/absolute/path/to/the/raw/data"`
+
+Consider adding that to your profile so it gets loaded every time you log in.
 
 ##Clone the repo
 
+`git clone https://github.com/dssg/cincinnati $ROOT_FOLDER`
+
 ##Put the data following the repo structure
 
+The pipeline follows certain simple conventions to make the code easy to understand. It is assumed that a file in `$ROOT_FOLDER/etl/something/` will get its raw data from `$DATA_FOLDER/etl/something/`.
+
+Having, said that it's easy to know where to store the raw data. For example, the code that loads all taxes data is `$ROOT_FOLDER/etl/taxes/taxes.sh`, then, your raw taxes files should be stores in `$DATA_FOLDER/etl/taxes/`
+
+The other convention is that intermediate files are stored on a `tmp/` folder, for example, since we need to preprocess the taxes files before uploading them to the database, the intermediate csv files will be on `$DATA_FOLDER/etl/taxes/tmp/`.
+
 ##Provide config.yaml and .pgpass
+
+The code loads some parameters from a `config.yaml` file stored in the `$ROOT_FOLDER`.
+
+Use the `config_sample.yaml` file to see the structure and then rename it to `config.yaml`, make sure that the file is stores in your `$ROOT_FOLDER`.
+
 
 ##Build docker ETL image
 
