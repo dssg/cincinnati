@@ -39,6 +39,9 @@ print 'Loading data from %d...' % year
 #as NA
 df = pd.read_csv(input_file, names=names, dtype=np.str, na_values=[' '])
 
+#Create property number
+df['property_number'] = df['book'] + df['page'] + df['parcel'] + df['mltown']
+
 output = 'tmp/taxes_%d.csv' % year
 
 df.to_csv(output, index=False)

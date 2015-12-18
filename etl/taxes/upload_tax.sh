@@ -16,5 +16,5 @@ DB_PASSWORD=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.password)
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS $TABLE_NAME;"  
 
 #Use csvsql to create a SQL script with the CREATE TABLE statement
-echo "Uploading... csv file..."
+echo "Uploading csv file..."
 csvsql --db "postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:5432/$DB_NAME"  --insert  --tables $TABLE_NAME --db-schema public -d ',' "$FOLDER/$CSV_FILENAME" > "$FOLDER/$TABLE_NAME.sql"
