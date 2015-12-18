@@ -9,59 +9,40 @@ DSSG is working with the City of Cincinnati to identify properties at risk of co
 that early intervention strategies can prevent further damage and stimulate neighborhood revitalization. Read more about
 our project [here](http://dssg.uchicago.edu/2015/08/20/cincy-blight-prevention.html). 
 
-## Getting started
+##Select one folder for the data and another for the code
 
-#### Get the code
+##Clone the repo
 
-    git clone https://github.com/dssg/cincinnati.git
-    cd cincinnati
+##Put the data following the repo structure
 
-##Environmental variables
+##Provide config.yaml and .pgpass
 
-##Setup data folder
+##Build docker ETL image
 
-`python -c 'from python_ds_tools import data_folder; data_folder.setup()'`
+`docker build -t cincinnati .`
 
-#install unix dependencies
+##Run docker image
 
-gdal, gnumeric (for converting xls)
+`docker run -v ~/data/cincinnati-data:/root/data -v /Users/Edu/Development/dsapp/cincinnati-dsapp:/root/code -i -t cincinnati /bin/bash`
 
-this repo assumes that your default schema is 'public'
+##Run the ETL pipeline
 
-csvkit
-
-Setup your pgpass
-
---
-
-#### Install all pre-requisites
-    conda create -n "cincinnati" --yes --file requirements.conda python=2.7
-    source activate cincinnati
-
-#### Configure database
-    cp dbconfig.sample dbconfig.py
-    update database configuration in dbconfig.py
-
-## Load data into postgres
-
-... see the etl directory
-
-## Create features from the data
+##Create features from the data
 
 ... see the blight_risk_prediction directory
 
 ## Run the modeling pipeline
 
-#### Create output directories
+##Create output directories
 
     mkdir results
     mkdir predictions
     
-#### Configure the model
+##Configure the model
 
     edit default.yaml (options are documented in default.yaml)
     
-#### Run the model
+##Run the model
 
     python -m blight_risk_prediction/model
    
