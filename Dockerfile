@@ -64,7 +64,7 @@ RUN conda install --file /tmp/requirements.conda
 RUN pip install -r /tmp/requirements.txt
 
 #Copy .pgpass
-COPY .pgpass /root/
+COPY pgpass /root/.pgpass
 
 #Install custom package
 COPY python_ds_tools/ /tmp/python_ds_tools

@@ -37,12 +37,14 @@ Having, said that it's easy to know where to store the raw data. For example, th
 
 The other convention is that intermediate files are stored on a `tmp/` folder, for example, since we need to preprocess the taxes files before uploading them to the database, the intermediate csv files will be on `$DATA_FOLDER/etl/taxes/tmp/`.
 
-##Provide config.yaml and .pgpass
+##Provide config.yaml and pgpass
 
 The code loads some parameters from a `config.yaml` file stored in the `$ROOT_FOLDER`.
 
 Use the `config_sample.yaml` file to see the structure and then rename it to `config.yaml`, make sure that the file is stores in your `$ROOT_FOLDER`.
 
+pgpass (without the dot) is needed if your are going to use the Docker image and it will take
+the file in `$ROOT_FOLDER/pgpass` to build it. If you are not going to use Docker, just make sure that a standard `.pgpass` (note the dot) file is on your home folder. 
 
 ##Build docker ETL image
 
@@ -59,7 +61,7 @@ The ETL step depends on these programs:
 
 To ease the setup, a Dockerfile is provided which builds an Ubuntu 14.04 image with all dependencies included and properly configured.
 
-Most dependencies are needed for the ETL step, after the raw data is on the database, only Python (and a few packages) and psql is needed, hence, if you want, you can use the Docker image for the ETL phase.
+Most dependencies are needed for the ETL step, after the raw data is on the database, only Python (and a few packages) and psql is needed, hence, if you want, you can use the Docker image for the ETL phase only.
 
 For information on how to setup Docker, see the [official docs](https://docs.docker.com/).
 
@@ -81,6 +83,8 @@ Note that we are passing our two environment variables, and linking them to two 
 This part is still work in progess... Ignore the rest of the file.
 
 ##Setup your database
+
+Assumes default port.
 
 ##Run the ETL
 
