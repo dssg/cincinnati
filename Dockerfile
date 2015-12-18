@@ -2,7 +2,7 @@ FROM ubuntu:trusty
 MAINTAINER Eduardo Blancas Reyes
 
 #Set a better PS1
-ENV PS1='\[\e[0;31m\]\u\[\e[m\] \[\e[1;34m\]\w\[\e[m\] \[\e[0;31m\]$ \[\e[m\]\[\e[0;32m\]'
+RUN echo 'export PS1="\[\e[0;31m\]\u\[\e[m\] \[\e[1;34m\]\w\[\e[m\] \[\e[0;31m\]$ \[\e[m\]\[\e[0;32m\]"' >> /root/.bashrc
 
 #Setup project env variables
 ENV ROOT_FOLDER=/root/code
