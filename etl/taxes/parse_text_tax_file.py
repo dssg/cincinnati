@@ -9,6 +9,10 @@ from python_ds_tools import data_folder
 input_file = sys.argv[1]
 year = int(sys.argv[2])
 
+#Set folder where this file is located as working direcory
+script_dir = os.path.abspath(os.path.dirname(__file__))
+os.chdir(script_dir)
+
 print 'Loading definitions.yaml from: %s' % os.getcwd()
 
 with open('definitions.yaml') as f:
