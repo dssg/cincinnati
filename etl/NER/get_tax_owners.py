@@ -4,12 +4,8 @@ Perform name entity recognition for all property owners for all tax years. Store
 
 import pandas as pd
 from sqlalchemy import create_engine
-
 from NER_client import perform_NER
-
-import sys
-sys.path.append('../../')
-import dbconfig
+from python_ds_tools.config import main as config
 
 
 def format_owner(own):
@@ -32,7 +28,11 @@ def resolve_entities(data_for_year):
 
 
 def get_data_for_year(year):
-    engine = create_engine('postgresql://{conf.user}:{conf.password}@{conf.host}:5432/{conf.database}'.format(conf=dbconfig))
+    user = config['db']['user']
+    password = config['db']['password']
+    host  = config['db']['host']
+    database  = config['db']['database']
+    engine = create_engine('postgresql://{user}:{password}@{host}:5432/{database}'.format(user=user, password=password, host=host, database=database))
     if year == 2015:
         sql = ("SELECT  new_parcel_id AS parcel_id, "
                "CONCAT(CONCAT(owner_name, ' '), owner_attn) AS owner "
