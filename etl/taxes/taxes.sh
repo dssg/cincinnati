@@ -31,5 +31,5 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/taxdb_modifications.sql
 #delete from taxes_2008 where taxes_paid not like '0%';
 #delete from taxes_2009 where taxes_paid not like '0%';
 
-#Join taxes tables
+#Join taxes tables, drops old table if exists
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/join_taxes.sql"  
