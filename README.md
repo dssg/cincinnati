@@ -53,7 +53,7 @@ The ETL step depends on these programs:
 * Python 2.7.11
 * GDAL 1.11.2
 * Java 1.8
-* sql (PostgreSQL) 9.3.10
+* psql (PostgreSQL) 9.3.10
 * PostGIS 2.1.4
 * mdbtools 0.7.1 
 * gnumeric 1.12.9
