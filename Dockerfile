@@ -29,6 +29,9 @@ RUN apt-get update
 #Install GDAL
 RUN apt-get install -y gdal-bin
 
+#Install PostGIS (to get shp2pgsql)
+RUN apt-get install -y postgis
+
 #Auto accept oracle license and install required java version for NER (Java 1.8 or later)
 RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
 RUN apt-get install -y oracle-java8-installer

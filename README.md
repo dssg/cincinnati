@@ -54,6 +54,7 @@ The ETL step depends on these programs:
 * GDAL 1.11.2
 * Java 1.8
 * sql (PostgreSQL) 9.3.10
+* PostGIS 2.1.4
 * mdbtools 0.7.1 
 * gnumeric 1.12.9
 * stanford-ner-2015-12-09
