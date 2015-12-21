@@ -20,19 +20,6 @@ RUN wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O
 RUN bash /root/miniconda.sh -b -p /root/miniconda
 RUN rm /root/miniconda.sh
 ENV PATH="/root/miniconda/bin:$PATH"
-#Install custom package
-COPY python_ds_tools/ /tmp/python_ds_tools
-WORKDIR /tmp/python_ds_tools
-RUN python setup.py install
-
-#Install Python3 environment with some dependencies (this is required to run the NER code)
-#https://www.continuum.io/content/python-3-support-anaconda
-RUN conda create -n py3 python=3 pandas sqlalchemy yaml psycopg2
-#Install custom package on Python 3 env
-RUN source activate py3
-WORKDIR /tmp/python_ds_tools
-RUN python setup.py install
-RUN source deactivate
 
 #Install common packages
 RUN apt-get install -y software-properties-common
@@ -81,6 +68,21 @@ COPY requirements.txt /tmp/
 #Install Python dependencies
 RUN conda install --file /tmp/requirements.conda
 RUN pip install -r /tmp/requirements.txt
+
+#Install custom package on Python2.7
+COPY python_ds_tools/ /tmp/python_ds_tools
+WORKDIR /tmp/python_ds_tools
+RUN python setup.py install
+
+#Install Python3 environment with some dependencies (this is required to run the NER code)
+#https://www.continuum.io/content/python-3-support-anaconda
+RUN conda create -n py3 python=3 pandas sqlalchemy yaml psycopg2
+#Install custom package on Python 3 env
+RUN source activate py3
+WORKDIR /tmp/python_ds_tools
+RUN python setup.py install
+#RUN source deactivate
+
 
 #Copy .pgpass
 COPY .pgpass /root/
