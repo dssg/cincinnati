@@ -5,13 +5,15 @@ from python_ds_tools import data_folder
 #Data folder
 data_folder = data_folder.for_file(__file__)
 
+os.chdir(data_folder)
+
 #Create tmp file if it does not exist
 if not os.path.exists('tmp'):
     print 'Creating tmp folder in %s' % os.getcwd()
     os.makedirs('tmp')
 
 #Move to tmp folder
-os.chdir(os.path.join(data_folder, 'tmp'))
+os.chdir('tmp')
 
 print 'Changing working dir to: %s' % os.getcwd()
 
