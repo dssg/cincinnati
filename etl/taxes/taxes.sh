@@ -31,6 +31,11 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/taxdb_modifications.sql
 echo 'Deleting weird values from 2008 and 2009 taxes...'
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DELETE FROM taxes_2008 WHERE taxes_paid NOT LIKE '0%';"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DELETE FROM taxes_2009 WHERE taxes_paid NOT LIKE '0%';" 
+#Cast forcl flags to boolean
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE taxes_2008 ALTER forcl_flag \
+TYPE boolean USING CASE forcl_flag WHEN 'Y' THEN TRUE WHEN 'N' THEN FALSE END;"
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE taxes_2009 ALTER forcl_flag \
+TYPE boolean USING CASE forcl_flag WHEN 'Y' THEN TRUE WHEN 'N' THEN FALSE END;"
 
 #Join taxes tables, drops old table if exists
 #join_taxes.sql creates tax_combined
