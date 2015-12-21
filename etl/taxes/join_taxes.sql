@@ -96,6 +96,6 @@ CREATE TABLE tax_combined AS(
 )
 
 --Create tax_foreclosure table
-CREATE tax_foreclosure AS(
+CREATE TABLE tax_foreclosure AS(
     SELECT parcel_id, forcl_flag, year FROM tax_combined
 )
