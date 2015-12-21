@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS tax_combined;
+DROP TABLE IF EXISTS tax_foreclosure;
 
 CREATE TABLE tax_combined AS(
 
