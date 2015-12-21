@@ -1,8 +1,8 @@
 FROM ubuntu:trusty
 MAINTAINER Eduardo Blancas Reyes
 
-#Run commands with BASH (by default Docker uses sh)
-RUN /bin/bash
+#Run everything with bash instead of sh
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 #Set a better PS1
 RUN echo 'export PS1="\[\e[0;31m\]\u\[\e[m\] \[\e[1;34m\]\w\[\e[m\] \[\e[0;31m\]$ \[\e[m\]\[\e[0;32m\]"' >> /root/.bashrc
