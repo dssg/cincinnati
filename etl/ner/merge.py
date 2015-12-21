@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from python_ds_tools import data_folder
 
@@ -9,13 +10,13 @@ os.chdir(data_folder)
 
 #Create tmp file if it does not exist
 if not os.path.exists('tmp'):
-    print 'Creating tmp folder in %s' % os.getcwd()
+    print('Creating tmp folder in %s' % os.getcwd())
     os.makedirs('tmp')
 
 #Move to tmp folder
 os.chdir('tmp')
 
-print 'Changing working dir to: %s' % os.getcwd()
+print('Changing working dir to: %s' % os.getcwd())
 
 def read_for_year(year):
     df = pd.read_csv("owners_{}_resolved.csv".format(year))
@@ -35,5 +36,8 @@ owners = [read_for_year(y) for y in range(2007, 2016)]
 merged = pd.concat(owners, axis=1)
 merged = merged.reset_index()
 merged = merged.rename(columns={"index": "parcel_id"})
-merged.to_csv("owners_2007-2015.csv", index=False)
 
+output='owners_2007-2015.csv'
+merged.to_csv(output, index=False)
+
+print('Done! File saved to: %s/%s' % (os.getcwd(), output))
