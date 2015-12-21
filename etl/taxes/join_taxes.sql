@@ -94,8 +94,3 @@ CREATE TABLE tax_combined AS(
     UNION
     SELECT * FROM t2015
 )
-
---Create tax_foreclosure table
-CREATE TABLE tax_foreclosure AS(
-    SELECT parcel_id, forcl_flag, year FROM tax_combined
-)

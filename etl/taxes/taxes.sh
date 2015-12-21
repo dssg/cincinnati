@@ -33,5 +33,7 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DELETE FROM taxes_2008 WHERE taxes_
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DELETE FROM taxes_2009 WHERE taxes_paid NOT LIKE '0%';" 
 
 #Join taxes tables, drops old table if exists
-#join_taxes.sql creates tax_combined and tax_foreclosure tables
+#join_taxes.sql creates tax_combined
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/join_taxes.sql"  
+#Create tax_foreclosure tables
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/tax_foreclosure.sql"  
