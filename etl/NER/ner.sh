@@ -16,6 +16,9 @@ java -mx6000m edu.stanford.nlp.ie.NERServer -port 9191 -loadClassifier \
     $NER_CLASSIFIERS/english.all.3class.distsim.crf.ser.gz -tokenizerFactory edu.stanford.nlp.process.WhitespaceTokenizer \
     -tokenizerOptions "tokenizeNLs=true" -outputFormat tsv &
 
+#Activate Python 3 environment
+source activate py3
+
 #Perform NER for all tax data from 2007 to 2015. One CSV is written per year. Must use python3 for this step!
 python "$LOCAL_CODE_FOLDER/get_tax_owners.py"
 
@@ -28,3 +31,6 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$LOCAL_CODE_FOLDER/taxes_owners.sql"
 #Upload the data to the database
 cat owners_2007-2015.csv | psql -h $DB_HOST -U $DB_USER \
 -d $DB_NAME -c "\COPY public.taxes_owners FROM STDIN  WITH CSV HEADER DELIMITER ',';"
+
+#Deactivate Python 3 environment
+source deactivate

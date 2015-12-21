@@ -18,6 +18,14 @@ RUN bash /root/miniconda.sh -b -p /root/miniconda
 RUN rm /root/miniconda.sh
 ENV PATH="/root/miniconda/bin:$PATH"
 
+#Install Python3 environment with some dependencies (this is required to run the NER code)
+#https://www.continuum.io/content/python-3-support-anaconda
+RUN conda create -n py3 python=3 pandas sqlalchemy yaml psycopg2
+#Install custom package on Python 3 env
+COPY python_ds_tools/ /tmp/python_ds_tools
+WORKDIR /tmp/python_ds_tools
+RUN python setup.py install
+
 #Install common packages
 RUN apt-get install -y software-properties-common
 #Add repository for gdal

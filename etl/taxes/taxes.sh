@@ -28,6 +28,7 @@ bash "$ROOT_FOLDER/etl/taxes/upload_tax.sh" $TMP_FOLDER taxes_2015.csv taxes_201
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/taxdb_modifications.sql"  
 
 #Delete some weird values in taxes_2008 and taxes_2009
+echo 'Deleting weird values from 2008 and 2009 taxes...'
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DELETE FROM taxes_2008 WHERE taxes_paid NOT LIKE '0%';"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DELETE FROM taxes_2009 WHERE taxes_paid NOT LIKE '0%';" 
 

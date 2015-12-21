@@ -1,5 +1,4 @@
 """
-
 This is a module for communicating with a Stanford NERServer process.
 You can use this module to find out if the owner of a property is a person or an organization
 This module only runs under python3
