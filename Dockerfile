@@ -1,6 +1,9 @@
 FROM ubuntu:trusty
 MAINTAINER Eduardo Blancas Reyes
 
+#Run commands with BASH (by default Docker uses sh)
+RUN /bin/bash
+
 #Set a better PS1
 RUN echo 'export PS1="\[\e[0;31m\]\u\[\e[m\] \[\e[1;34m\]\w\[\e[m\] \[\e[0;31m\]$ \[\e[m\]\[\e[0;32m\]"' >> /root/.bashrc
 
@@ -17,13 +20,16 @@ RUN wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O
 RUN bash /root/miniconda.sh -b -p /root/miniconda
 RUN rm /root/miniconda.sh
 ENV PATH="/root/miniconda/bin:$PATH"
+#Install custom package
+COPY python_ds_tools/ /tmp/python_ds_tools
+WORKDIR /tmp/python_ds_tools
+RUN python setup.py install
 
 #Install Python3 environment with some dependencies (this is required to run the NER code)
 #https://www.continuum.io/content/python-3-support-anaconda
 RUN conda create -n py3 python=3 pandas sqlalchemy yaml psycopg2
 #Install custom package on Python 3 env
 RUN source activate py3
-COPY python_ds_tools/ /tmp/python_ds_tools
 WORKDIR /tmp/python_ds_tools
 RUN python setup.py install
 RUN source deactivate
@@ -78,11 +84,6 @@ RUN pip install -r /tmp/requirements.txt
 
 #Copy .pgpass
 COPY .pgpass /root/
-
-#Install custom package
-COPY python_ds_tools/ /tmp/python_ds_tools
-WORKDIR /tmp/python_ds_tools
-RUN python setup.py install
 
 #Set /root as working dir
 WORKDIR /root
