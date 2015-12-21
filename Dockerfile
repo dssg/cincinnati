@@ -83,7 +83,6 @@ WORKDIR /tmp/python_ds_tools
 RUN python setup.py install
 #RUN source deactivate
 
-
 #Copy .pgpass
 COPY .pgpass /root/
 
