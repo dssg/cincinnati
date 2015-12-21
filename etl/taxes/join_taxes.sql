@@ -1,5 +1,4 @@
 DROP TABLE IF EXISTS tax_combined;
-DROP TABLE IF EXISTS tax_foreclosure;
 
 CREATE TABLE tax_combined AS(
 
@@ -94,9 +93,4 @@ CREATE TABLE tax_combined AS(
     SELECT * FROM t2014
     UNION
     SELECT * FROM t2015
-)
-
---Create tax_foreclosure table
-CREATE tax_foreclosure AS(
-    SELECT parcel_id, forcl_flag, year FROM tax_combined
 )
