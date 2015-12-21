@@ -67,6 +67,6 @@ for year in range(2007, 2016):
     print (year)
     data = get_data_for_year(year)
     data = resolve_entities(data)
-    output = "tmp/owners_{year}_resolved.csv"
-    data.to_csv(output.format(year=year))
+    output = "tmp/owners_{year}_resolved.csv".format(year=year)
+    data.to_csv(output)
     print('Result is in %s/%s' % (os.getcwd(), output))
