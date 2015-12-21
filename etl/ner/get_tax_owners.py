@@ -7,6 +7,7 @@ from sqlalchemy import create_engine
 from NER_client import perform_NER
 from python_ds_tools.config import main as config
 from python_ds_tools import data_folder
+import os
 
 #Move current directory do all I/O operations take place in the corresponding
 #Data folder

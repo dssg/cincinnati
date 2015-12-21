@@ -78,9 +78,9 @@ RUN python setup.py install
 #https://www.continuum.io/content/python-3-support-anaconda
 RUN conda create -n py3 python=3 pandas sqlalchemy yaml psycopg2
 #Install custom package on Python 3 env
-RUN source activate py3
-WORKDIR /tmp/python_ds_tools
-RUN python setup.py install
+#RUN source activate py3
+#WORKDIR /tmp/python_ds_tools
+#RUN python setup.py install
 #RUN source deactivate
 
 #Copy .pgpass
