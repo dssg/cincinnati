@@ -27,9 +27,9 @@ bash "$ROOT_FOLDER/etl/taxes/upload_tax.sh" $TMP_FOLDER taxes_2015.csv taxes_201
 #Run fixes on the db
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/taxdb_modifications.sql"  
 
-#I needed to manually fix some tables..
-#delete from taxes_2008 where taxes_paid not like '0%';
-#delete from taxes_2009 where taxes_paid not like '0%';
+#Delete some weird values in taxes_2008 and taxes_2009
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DELETE FROM taxes_2008 WHERE taxes_paid NOT LIKE '0%';"
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DELETE FROM taxes_2009 WHERE taxes_paid NOT LIKE '0%';" 
 
 #Join taxes tables, drops old table if exists
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/join_taxes.sql"  
