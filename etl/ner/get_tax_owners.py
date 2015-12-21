@@ -7,17 +7,18 @@ from sqlalchemy import create_engine
 from NER_client import perform_NER
 from python_ds_tools.config import main as config
 from python_ds_tools import data_folder
+import os
 
 #Move current directory do all I/O operations take place in the corresponding
 #Data folder
 data_folder = data_folder.for_file(__file__)
 os.chdir(data_folder)
 
-print 'Changing working dir to: %s' % os.getcwd()
+print('Changing working dir to: %s' % os.getcwd())
 
 #Create tmp file if it does not exist
 if not os.path.exists('tmp'):
-    print 'Creating tmp folder in %s' % os.getcwd()
+    print('Creating tmp folder in %s' % os.getcwd())
     os.makedirs('tmp')
 
 
@@ -68,4 +69,4 @@ for year in range(2007, 2016):
     data = resolve_entities(data)
     output = "tmp/owners_{year}_resolved.csv"
     data.to_csv(output.format(year=year))
-    print 'Result is in %s/%s' % (os.getcwd(), output)
+    print('Result is in %s/%s' % (os.getcwd(), output))
