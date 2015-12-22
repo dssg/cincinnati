@@ -20,7 +20,14 @@ ogr2ogr -f "PostgreSQL" PG:"host=$DB_HOST port=5432 dbname=$DB_NAME user=$DB_USE
 #This one is throwing and error
 #shp2pgsql  "$LOCAL_DATA_FOLDER/Parcelpoly_with_Bldinfo_Full.shp" > "$TMP_FOLDER/parcels_w_building_info_full.sql"
 
-shp2pgsql  "$LOCAL_DATA_FOLDER/Parcpoly_with_Bldinfo.shp" shape_files.parcels_w_building_info > "$TMP_FOLDER/parcels_w_building_info.sql"
+#This fails...
+#ogr2ogr -f "PostgreSQL" PG:"host=$DB_HOST port=5432 dbname=$DB_NAME user=$DB_USER active_schema=shape_files" "$LOCAL_DATA_FOLDER/Parcpoly_with_Bldinfo.shp" -overwrite -progress --config PG_USE_COPY YES
+
+#Convert to pgsql, SRID is 3735
+shp2pgsql -s 3735 "$LOCAL_DATA_FOLDER/Parcpoly_with_Bldinfo.shp" shape_files.parcels_w_building_info > "$TMP_FOLDER/parcels_w_building_info.sql"
+#Drop table if exists
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS shape_files.parcels_w_building_info;"  
+#Upload to the database
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/parcels_w_building_info.sql"
 
 echo "Done uploading parcels data to postgres"

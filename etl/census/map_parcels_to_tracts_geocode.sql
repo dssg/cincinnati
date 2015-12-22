@@ -1,10 +1,12 @@
+--rename wkb_geometry column
+--
 
 --select all parcels in Hamilton county that are within the Cincinnati city boundry
 CREATE TABLE shape_files.parcels_cincy as 
 (SELECT parcels.*
-FROM	shape_files.parcels as parcels,
-		shape_files."Cinc_City_Boundary" as city_boundry
-WHERE ST_Within(parcels.geom, city_boundry.geom));
+FROM	shape_files.parcels_w_building_info as parcels,
+		shape_files.cinc_city_boundary as city_boundry
+WHERE ST_Within(parcels.geom, city_boundry.wkb_geometry));
 
 --spatial index for new table
 CREATE INDEX ON shape_files.parcels_cincy USING gist(geom);

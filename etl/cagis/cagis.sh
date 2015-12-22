@@ -11,4 +11,4 @@ DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
 #http://www.gdal.org/ogr2ogr.html
 ogr2ogr -f "PostgreSQL" PG:"host=$DB_HOST port=5432 dbname=$DB_NAME user=$DB_USER active_schema=shape_files" "$LOCAL_DATA_FOLDER/CAGIS_Boundaries.gdb" -overwrite -progress --config PG_USE_COPY YES
 
-echo 'Done uploading water cagis data to postgres'
+echo 'Done uploading CAGIS data to postgres'
