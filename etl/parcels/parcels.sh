@@ -10,6 +10,7 @@ DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
 #mkdir if not exists
 mkdir -p $TMP_FOLDER
 
+
 #Upload gdb to postgres in shape_files schema
 #http://gis.stackexchange.com/questions/83016/how-to-import-esri-geodatabase-format-gdb-into-postgis
 #http://www.gdal.org/ogr2ogr.html
