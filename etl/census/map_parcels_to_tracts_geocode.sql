@@ -1,5 +1,5 @@
 --rename wkb_geometry column
---
+--CODE HERE
 
 --select all parcels in Hamilton county that are within the Cincinnati city boundry
 CREATE TABLE shape_files.parcels_cincy as 
