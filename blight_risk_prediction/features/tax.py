@@ -100,7 +100,7 @@ def calculate_relative_value_changes(group):
 
 
 def count_foreclosed_years(group):
-    group = group["foreclosure"].replace({"Y": 1.0, "N": 0.0})
+    group = group["foreclosure"].replace({True: 1.0, False: 0.0})
     return pd.Series({"tax_foreclosure": group.sum()})
 
 
