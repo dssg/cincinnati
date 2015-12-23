@@ -17,41 +17,36 @@ mkdir -p $TMP_FOLDER
 #Full documentation: http://www2.census.gov/geo/pdfs/maps-data/data/tiger/tgrshp2010/TGRSHP10SF1.pdf
 
 #Function to download, unzip and upload census to the database
-# function get_census {
-#     URL=$1
-#     OUTPUT=$2
-#     wget $URL --directory-prefix=$TMP_FOLDER --output-file=$OUTPUT
-#     unzip "$TMP_FOLDER/$OUTPUT" -d $TMP_FOLDER
-#     shp2pgsql -s 4269:3735 "$TMP_FOLDER/tl_2010_39_tabblock10.shp" shape_files.census_blocks > "$TMP_FOLDER/census_blocks.sql"
-#     psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS shape_files.census_blocks;"  
-#     psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/census_blocks.sql"
-# } 
-
+#Pass URL to download the file and output name, such name will be used
+#for intermediate results (file downloaded, sql scripts) as well as table
+#name
+function get_census {
+    URL=$1
+    FILENAME=$2
+    OUTPUT=$3
+    echo "Downloading file..."
+    wget $URL --directory-prefix=$TMP_FOLDER
+    echo "Unziping..."
+    unzip "$TMP_FOLDER/$FILENAME.zip" -d $TMP_FOLDER
+    echo "Converting shp to sql..."
+    shp2pgsql -s 4269:3735 "$TMP_FOLDER/$FILENAME.shp" "shape_files.$OUTPUT" > "$TMP_FOLDER/$OUTPUT.sql"
+    echo "Running on db: DROP TABLE IF EXISTS shape_files.$OUTPUT;"  
+    psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS shape_files.$OUTPUT;"  
+    echo "Uploading data to the database..."
+    psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/$OUTPUT.sql"
+    echo "Done! Table $OUTPUT created!"
+}
 
 #BLOCK GROUPS
-#0. Get the files
-wget "ftp://ftp2.census.gov/geo/pvs/tiger2010st/39_Ohio/39/tl_2010_39_bg10.zip" --directory-prefix=$TMP_FOLDER
-unzip "$TMP_FOLDER/tl_2010_39_bg10.zip" -d $TMP_FOLDER
-#1. Convert to pgsql, SRID is 4269, convert to 3735
-shp2pgsql -s 4269:3735 "$TMP_FOLDER/tl_2010_39_bg10.shp" shape_files.census_blocks_groups > "$TMP_FOLDER/census_blocks_groups.sql"
-#2. Drop table if exists
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS shape_files.census_blocks_groups;"  
-#3. Upload to the database
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/census_blocks_groups.sql"
+get_census "ftp://ftp2.census.gov/geo/pvs/tiger2010st/39_Ohio/39/tl_2010_39_bg10.zip" tl_2010_39_bg10 census_blocks_groups
 
 #BLOCKS
-wget "ftp://ftp2.census.gov/geo/pvs/tiger2010st/39_Ohio/39/tl_2010_39_tabblock10.zip" --directory-prefix=$TMP_FOLDER
-unzip "$TMP_FOLDER/tl_2010_39_tabblock10.zip" -d $TMP_FOLDER
-shp2pgsql -s 4269:3735 "$TMP_FOLDER/tl_2010_39_tabblock10.shp" shape_files.census_blocks > "$TMP_FOLDER/census_blocks.sql"
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS shape_files.census_blocks;"  
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/census_blocks.sql"
+get_census "ftp://ftp2.census.gov/geo/pvs/tiger2010st/39_Ohio/39/tl_2010_39_tabblock10.zip" tl_2010_39_tabblock10 census_blocks
 
 #TRACTS
-wget "ftp://ftp2.census.gov/geo/pvs/tiger2010st/39_Ohio/39/tl_2010_39_tract10.zip" --directory-prefix=$TMP_FOLDER
-unzip "$TMP_FOLDER/tl_2010_39_tract10.zip" -d $TMP_FOLDER
-shp2pgsql -s 4269:3735 "$TMP_FOLDER/tl_2010_39_tract10.shp" shape_files.census_tracts > "$TMP_FOLDER/census_tracts.sql"
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS shape_files.census_tracts;"  
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/census_tracts.sql"
+get_census "ftp://ftp2.census.gov/geo/pvs/tiger2010st/39_Ohio/39/tl_2010_39_tract10.zip" tl_2010_39_tract10 census_tracts
+
+#Run script with changes to census tables, mostly column renaming
 
 #Download census data - creates table shape_files.census_pop_housing
 python "$CODE_FOLDER/census_api_util_download.py"
