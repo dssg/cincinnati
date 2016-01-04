@@ -1,0 +1,3 @@
+--This script performs some changes in the census tables
+--mostly column renaming to match the code produced by the
+--summer team

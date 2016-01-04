@@ -47,6 +47,7 @@ get_census "ftp://ftp2.census.gov/geo/pvs/tiger2010st/39_Ohio/39/tl_2010_39_tabb
 get_census "ftp://ftp2.census.gov/geo/pvs/tiger2010st/39_Ohio/39/tl_2010_39_tract10.zip" tl_2010_39_tract10 census_tracts
 
 #Run script with changes to census tables, mostly column renaming
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/process_census_tables.sql"  
 
 #Download census data - creates table shape_files.census_pop_housing
 python "$CODE_FOLDER/census_api_util_download.py"
