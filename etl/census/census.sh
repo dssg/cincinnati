@@ -16,7 +16,7 @@ mkdir -p $TMP_FOLDER
 #file definitions: http://www2.census.gov/geo/tiger/TIGER2012/2012_TIGERLine_Shapefiles_File_Name_Definitions.pdf
 #Full documentation: http://www2.census.gov/geo/pdfs/maps-data/data/tiger/tgrshp2010/TGRSHP10SF1.pdf
 
-#Function to download, unzip and upload census to the database
+#Function to download, unzip and upload census to the database (shape_files schema)
 #Pass URL to download the file and output name, such name will be used
 #for intermediate results (file downloaded, sql scripts) as well as table
 #name
@@ -37,14 +37,14 @@ function get_census {
     echo "Done! Table $OUTPUT created!"
 }
 
+#TRACTS
+get_census "ftp://ftp2.census.gov/geo/pvs/tiger2010st/39_Ohio/39/tl_2010_39_tract10.zip" tl_2010_39_tract10 census_tracts
+
 #BLOCK GROUPS
 get_census "ftp://ftp2.census.gov/geo/pvs/tiger2010st/39_Ohio/39/tl_2010_39_bg10.zip" tl_2010_39_bg10 census_blocks_groups
 
 #BLOCKS
 get_census "ftp://ftp2.census.gov/geo/pvs/tiger2010st/39_Ohio/39/tl_2010_39_tabblock10.zip" tl_2010_39_tabblock10 census_blocks
-
-#TRACTS
-get_census "ftp://ftp2.census.gov/geo/pvs/tiger2010st/39_Ohio/39/tl_2010_39_tract10.zip" tl_2010_39_tract10 census_tracts
 
 #Run script with changes to census tables, mostly column renaming
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/process_census_tables.sql"  

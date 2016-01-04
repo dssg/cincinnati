@@ -1,3 +1,18 @@
 --This script performs some changes in the census tables
 --mostly column renaming to match the code produced by the
 --summer team
+
+--TABLE: shape_files.census_tracts
+--Name conversion
+--NEW <- OLD
+--gid - no change
+--objectid <- statefp10
+--tractce10 - no change
+--shape_area?
+--shape_len?
+--tract?
+--area?
+--acres?
+--perimeter?
+--geom - no change
+--The rest of the columns are dropped
