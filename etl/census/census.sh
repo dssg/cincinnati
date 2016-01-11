@@ -29,6 +29,7 @@ function get_census {
     echo "Unziping..."
     unzip "$TMP_FOLDER/$FILENAME.zip" -d $TMP_FOLDER
     echo "Converting shp to sql..."
+    #Convert from 4269 SRID to 3735 SRID
     shp2pgsql -s 4269:3735 "$TMP_FOLDER/$FILENAME.shp" "shape_files.$OUTPUT" > "$TMP_FOLDER/$OUTPUT.sql"
     echo "Running on db: DROP TABLE IF EXISTS shape_files.$OUTPUT;"  
     psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS shape_files.$OUTPUT;"  
