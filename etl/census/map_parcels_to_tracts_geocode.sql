@@ -11,8 +11,6 @@ WHERE ST_Within(parcels.geom, city_boundry.wkb_geometry));
 --spatial index for new table
 CREATE INDEX ON shape_files.parcels_cincy USING gist(geom);
 
-
-
 --join parcels in Cincinnaty to blocks, block groups, tracts and neighborhoods
 --select parcels in census blocks
 CREATE TABLE shape_files.parcelid_blocks_groups_tracts as
@@ -24,7 +22,7 @@ WHERE	st_contains(blocks.geom, ST_Centroid(parcels.geom)));
 --select census tracts in neighborhoods
 CREATE TABLE shape_files.tracts_nhoods as
 (SELECT tracts.tractce10 as tract, 
-	(select nhoods."SNA_NAME" from shape_files."Cinc_SNA_Boundary_2010" as nhoods 
+	(select nhoods.sna_name from shape_files.cinc_sna_boundary_2010 as nhoods 
 	order by st_area(st_intersection(tracts.geom, nhoods.geom)) desc limit 1)
 FROM	shape_files.census_tracts as tracts);
 
@@ -37,7 +35,7 @@ CREATE TABLE shape_files.parcelid_blocks_grp_tracts_nhoods as
 		pid_bt.block as block, 
 		pid_bt.blkgrp as block_group,
 		pid_bt.tract as tract,
-		trc_nh."SNA_NAME" as nhood,
+		trc_nh.sna_name as nhood,
 		pid_bt.geom as geom
 FROM shape_files.parcelid_blocks_groups_tracts as pid_bt
 JOIN shape_files.tracts_nhoods as trc_nh

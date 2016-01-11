@@ -12,12 +12,14 @@ DELETE FROM shape_files.census_blocks WHERE countyfp10!='061';
 
 --add block group to census_blocks table
 --block group is the first character in the block id
---adding block group
+--also add some other columns
 CREATE TEMPORARY TABLE blocks AS(
     SELECT  *,
             SUBSTRING(blockce10 FROM 0 FOR 2) AS blkgrp,
             tractce10 AS tract,
-            blockce10 AS block
+            blockce10 AS block,
+            ST_AREA(geom) AS area,
+            ST_PERIMETER(geom) AS perimeter
     FROM shape_files.census_blocks
 
 );
@@ -28,6 +30,10 @@ CREATE TABLE shape_files.census_blocks AS(
     SELECT * FROM blocks
 );
 
+--changes for block groups table
+
+
+--changes for tracts table
 
 --TABLE: shape_files.census_tracts
 --Name conversion
