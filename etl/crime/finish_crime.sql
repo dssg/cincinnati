@@ -14,7 +14,8 @@ CREATE TEMPORARY TABLE crime_geocoded__temp AS (
     SELECT crime.*, 
     geo.latitude, 
     geo.longitude, 
-    ST_Transform(ST_SetSRID(ST_MakePoint(longitude, latitude),4269), 3735) AS geom   --4269 is census latitude / longitude, 3735 is cincinnati
+    ST_MakePoint(longitude, latitude) AS geom
+    --ST_Transform(ST_SetSRID(ST_MakePoint(longitude, latitude),4269), 3735) AS geom   --4269 is census latitude / longitude, 3735 is cincinnati
 FROM public.crime AS crime
 LEFT OUTER JOIN public.crime__latlong AS geo
 ON crime.incident_number = geo.incident_number);
