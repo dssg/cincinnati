@@ -19,6 +19,10 @@ FROM	shape_files.parcels_w_building_info as parcels,
 		shape_files.cinc_city_boundary as city_boundry
 WHERE ST_Within(parcels.geom, city_boundry.geom));
 
+--rename some columns on parcels_cincy
+ALTER TABLE shape_files.parcels_cincy
+  RENAME COLUMN shape_area TO area;
+
 --spatial index for new table
 CREATE INDEX ON shape_files.parcels_cincy USING gist(geom);
 
