@@ -93,8 +93,8 @@ Run db_setup.sh
 
 ##Create features from the data
 
-... see the blight_risk_prediction directory
-
+    python -m blight_risk_prediction.features.featurebot
+ 
 ## Run the modeling pipeline
 
 ##Create output directories
@@ -108,7 +108,7 @@ Run db_setup.sh
     
 ##Run the model
 
-    python -m blight_risk_prediction/model
+    python -m blight_risk_prediction.model
    
 #### Output
 
