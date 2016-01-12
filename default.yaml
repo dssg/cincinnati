@@ -10,7 +10,7 @@ validation_window: '1Year'  # Or '1Month'
 
 # Generate full parcel predictions for Cincinnati
 # Turn on after model validation/evaluation is complete
-prepare_field_test: True
+prepare_field_test: False
 inspection_date: '01Aug2015'
 
 # only use residential parcels
@@ -133,6 +133,6 @@ parameters:  # single parameters for RandomForest
 # Output                   #
 ############################
 
-output_dir: 'results/'
+output_dir: '/home/eblancasreyes/output/results/'
 pkl_prefix: 'modelresult_'  # prefix model result with string
-predictions_dir: 'predictions/'
+predictions_dir: '/home/eblancasreyes/output/predictions/'

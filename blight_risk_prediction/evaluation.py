@@ -11,7 +11,6 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-
 def plot_feature_importances(feature_names, feature_importances, filename):
     importances = list(zip(feature_names, list(feature_importances)))
     importances = pd.DataFrame(importances, columns=["Feature", "Importance"])

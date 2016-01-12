@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import matplotlib as mpl
+mpl.use('Agg')
 import pandas as pd
 import datetime
 import yaml
