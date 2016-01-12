@@ -33,8 +33,11 @@ FeatureToGenerate = namedtuple("FeatureToGenerate",
 #                                           census.make_census_features)]
 
 
-features_to_generate = [FeatureToGenerate("tax", tax.make_tax_features)]
+#features_to_generate = [FeatureToGenerate("tax", tax.make_tax_features)]
 #features_to_generate = [FeatureToGenerate("crime", crime.make_crime_features)]
+#features_to_generate = [FeatureToGenerate("named_entities", ner.make_owner_features)]
+#features_to_generate = [FeatureToGenerate("house_type", parcel.make_house_type_features)]
+features_to_generate = [FeatureToGenerate("parc_area", parcel.make_size_of_prop)]
 
 class SchemaMissing():
     def __init__(self, schema_name):
