@@ -200,7 +200,9 @@ def pickle_config_results(pkl_file, config, test, predictions,
                "test_predictions": predictions,
                "test_parcels": test.parcels}
 
-    with open(pkl_file, 'wb') as f:
+    #Preppend output folder to pkl_file so results are stored there
+    path_to_pkl = os.path.join(os.environ['OUTPUT_FOLDER'], pkl_file)
+    with open(path_to_pkl, 'wb') as f:
         pickle.dump(to_save, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
