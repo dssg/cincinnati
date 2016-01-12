@@ -133,6 +133,7 @@ parameters:  # single parameters for RandomForest
 # Output                   #
 ############################
 
-output_dir: '/home/eblancasreyes/output/results/'
+#Note that directories are relative to $OUTPUT_FOLDER
+output_dir: 'results/'
 pkl_prefix: 'modelresult_'  # prefix model result with string
-predictions_dir: '/home/eblancasreyes/output/predictions/'
+predictions_dir: 'predictions/'

@@ -10,6 +10,7 @@ RUN echo 'export PS1="\[\e[0;31m\]\u\[\e[m\] \[\e[1;34m\]\w\[\e[m\] \[\e[0;31m\]
 #Setup project env variables
 ENV ROOT_FOLDER=/root/code
 ENV DATA_FOLDER=/root/data
+ENV OUTPUT_FOLDER=/root/output
 
 #Install wget and unzip
 RUN apt-get install -y wget

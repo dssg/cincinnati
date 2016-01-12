@@ -107,4 +107,5 @@ def plot_precision_at_varying_percent(test_labels, test_predictions):
     cutoffs, precisions = zip(*cutoffs_and_precisions)
     plt.plot(percent_range, precisions)
     plt.plot(percent_range, cutoffs)
+
     plt.savefig("precision_at.png")

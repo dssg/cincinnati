@@ -23,6 +23,8 @@ Then add these two environment variables:
 
 `export DATA_FOLDER="/absolute/path/to/the/raw/data"`
 
+`export OUTPUT_FOLDER="/absolute/path/to/output/folder"`
+
 Consider adding that to your profile so it gets loaded every time you log in.
 
 ##Clone the repo
@@ -76,7 +78,7 @@ This process takes a long time since it needs to download and install all depend
 
 Once the image is ready, run it: 
 
-`docker run -v $DATA_FOLDER:/root/data -v $ROOT_FOLDER:/root/code -i -t cincinnati /bin/bash`
+`docker run -v $DATA_FOLDER:/root/data -v $ROOT_FOLDER:/root/code -v $OUTPUT_FOLDER:/root/output -i -t cincinnati /bin/bash`
 
 Note that we are passing our two environment variables, and linking them to two folders inside the container. The purpose of the Docker container is to run code but not to store anything (not code and of course not data).
 
