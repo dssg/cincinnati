@@ -13,11 +13,11 @@ our project [here](http://dssg.uchicago.edu/2015/08/20/cincy-blight-prevention.h
 
 #Setup
 
-##Select one folder for the data and another for the code
+##Select folders for the code, data and output
 
-The code relies on two environment variables, before you start running the code, decide where are you going to store the *raw data* and the *code*.
+The code relies on three environment variables, before you start running the code, decide where are you going to store the *raw data*,  *code* and *output*.
 
-Then add these two environment variables:
+Then add these three environment variables:
 
 `export ROOT_FOLDER="/absolute/path/to/the/repo"`
 
@@ -25,9 +25,11 @@ Then add these two environment variables:
 
 `export OUTPUT_FOLDER="/absolute/path/to/output/folder"`
 
-Consider adding that to your profile so it gets loaded every time you log in.
+Consider adding that to your shell profile.
 
 ##Clone the repo
+
+Clone the repo in `$ROOT_FOLDER`
 
 `git clone https://github.com/dssg/cincinnati $ROOT_FOLDER`
 
@@ -64,7 +66,7 @@ The ETL step depends on these programs:
 
 To ease the setup, a Dockerfile is provided which builds an Ubuntu 14.04 image with all dependencies included and properly configured.
 
-Most dependencies are needed for the ETL step, after the raw data is on the database, only Python (and a few packages) and psql is needed, hence, if you want, you can use the Docker image for the ETL phase only.
+Most dependencies are needed for the ETL step, after the raw data is on the database, only Python (and a few packages) and psql is needed, hence, if you want, you can use the Docker image for the ETL phase only. However, the Docker container is the easiest way to run the pipeline and hence, the rest of this instructions assume you are running code inside the container.
 
 For information on how to setup Docker, see the [official docs](https://docs.docker.com/).
 
@@ -80,18 +82,20 @@ Once the image is ready, run it:
 
 `docker run -v $DATA_FOLDER:/root/data -v $ROOT_FOLDER:/root/code -v $OUTPUT_FOLDER:/root/output -i -t cincinnati /bin/bash`
 
-Note that we are passing our two environment variables, and linking them to two folders inside the container. The purpose of the Docker container is to run code but not to store anything (not code and of course not data).
+Note that we are passing our three environment variables, and linking them to three folders inside the container. The purpose of the Docker container is to run code but not to store anything (not code and of course not data).
 
----
-This part is still work in progess... Ignore the rest of the file.
 
 ##Setup your database
 
-Assumes default port.
+The data is organized in different schemas, before you start loading any data, run the following script.
 
-Run db_setup.sh
+`./db_setup.sh`
+
+*Important:* it is assumed that you are using PostgreSQL with PostGIS installed as your database. Make sure that you have [PostGIS](http://postgis.net/) installed before proceeding. This is the only manual step you need to do.
 
 ##Run the ETL
+
+
 
 ##Create features from the data
 
