@@ -84,7 +84,6 @@ Once the image is ready, run it:
 
 Note that we are passing our three environment variables, and linking them to three folders inside the container. The purpose of the Docker container is to run code but not to store anything (not code and of course not data).
 
-
 ##Setup your database
 
 The data is organized in different schemas, before you start loading any data, run the following script.
@@ -93,34 +92,44 @@ The data is organized in different schemas, before you start loading any data, r
 
 *Important:* it is assumed that you are using PostgreSQL with PostGIS installed as your database. Make sure that you have [PostGIS](http://postgis.net/) installed before proceeding. This is the only manual step you need to do.
 
-##Run the ETL
+#Data Pipeline
 
+For this part, it is assumed that you are logged in the Docker container inside the `/root/code` folder.
 
+##ETL
 
-##Create features from the data
+Inside the [etl](etl/), you will find one folder for each dataset that we used. For each folder, a shell script (with the same name as the parent folder) is provided which performs the etl for that dataset.
 
-    python -m blight_risk_prediction.features.featurebot
+For example, to load the cagis data, run:
+
+`bash etl/cagis/cagis.sh`
+
+##Feature generation
+
+Once you have uploaded all the data, you will be able to generate features for the model, to do that run
+
+`python -m blight_risk_prediction.features.featurebot`
  
-## Run the modeling pipeline
+##Modeling
 
-##Create output directories
+###Create output directories
 
     mkdir results
     mkdir predictions
     
-##Configure the model
+###Configure the model
 
     edit default.yaml (options are documented in default.yaml)
     
-##Run the model
+###Run the model
 
     python -m blight_risk_prediction.model
    
-##Run the webapp
+###Run the webapp
 
     python run_webapp.py
 
-#### Output
+### Output
 
 Each model run produces a pickle file which contains:
 
