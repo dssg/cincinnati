@@ -10,7 +10,7 @@ validation_window: '1Year'  # Or '1Month'
 
 # Generate full parcel predictions for Cincinnati
 # Turn on after model validation/evaluation is complete
-prepare_field_test: True
+prepare_field_test: False
 inspection_date: '01Aug2015'
 
 # only use residential parcels
