@@ -1,15 +1,15 @@
 --Rename some wkb_geometry columns to geom
 --so all tables have the same name for the geographic column
-ALTER TABLE cinc_city_boundary
+ALTER TABLE shape_files.cinc_city_boundary
   RENAME COLUMN wkb_geometry TO geom;
 
-ALTER TABLE cinc_community_council_nhoods
+ALTER TABLE shape_files.cinc_community_council_nhoods
   RENAME COLUMN wkb_geometry TO geom;
 
-ALTER TABLE cinc_sna_boundary_2010
+ALTER TABLE shape_files.cinc_sna_boundary_2010
   RENAME COLUMN wkb_geometry TO geom;
 
-ALTER TABLE cinc_zoning
+ALTER TABLE shape_files.cinc_zoning
   RENAME COLUMN wkb_geometry TO geom;
 
 --select all parcels in Hamilton county that are within the Cincinnati city boundry
@@ -54,7 +54,6 @@ on pid_bt.tract = trc_nh.tract);
 
 --spatial index for new table
 CREATE INDEX ON shape_files.parcelid_blocks_grp_tracts_nhoods USING gist(geom);
-
 
 -- there are five parcels of which there are duplicates in the mapping table, just select one of the two rows for each of those
 CREATE TEMPORARY TABLE unique_parcel_tracts AS (
