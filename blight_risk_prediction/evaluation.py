@@ -8,6 +8,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -108,4 +109,6 @@ def plot_precision_at_varying_percent(test_labels, test_predictions):
     plt.plot(percent_range, precisions)
     plt.plot(percent_range, cutoffs)
 
-    plt.savefig("precision_at.png")
+    #Save file in output folder
+    path_to_fig = os.path.join(os.environ['OUTPUT_FOLDER'], 'precision_at.png')
+    plt.savefig(path_to_fig)

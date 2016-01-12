@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import pdb
 import datetime
 from itertools import groupby
@@ -360,7 +361,9 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
     dataset = dataset.reindex(np.random.permutation(dataset.index))
     dataset = dataset.set_index(["parcel_id", "inspection_date"])
 
-    dataset["mean_market_value"].to_csv("tax.csv")
+
+    path_to_tax = os.path.join(os.environ['OUTPUT_FOLDER'], 'tax.csv')
+    dataset["mean_market_value"].to_csv(path_to_tax)
 
     # split up the dataset into features, labels, etc
     labels = dataset["viol_outcome"].values
