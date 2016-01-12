@@ -41,7 +41,7 @@ The other convention is that intermediate files are stored on a `tmp/` folder, f
 
 The code loads some parameters from a `config.yaml` file stored in the `$ROOT_FOLDER`.
 
-Use the `config_sample.yaml` file to see the structure and then rename it to `config.yaml`, make sure that the file is stores in your `$ROOT_FOLDER`.
+Use the `config_sample.yaml` file to see the structure and then rename it to `config.yaml`, make sure that the file is stored in your `$ROOT_FOLDER`.
 
 `.pgpass` (note the dot) is needed if your are going to use the Docker image and it will take
 the file in `$ROOT_FOLDER/.pgpass` to build it. If you are not going to use Docker, just make sure that a standard `.pgpass` file is on your home folder. See `.pgpass_sample` for syntax details.
@@ -78,7 +78,7 @@ Once the image is ready, run it:
 
 `docker run -v $DATA_FOLDER:/root/data -v $ROOT_FOLDER:/root/code -i -t cincinnati /bin/bash`
 
-Note that we are passing our two environment variables, and linking them to two folders inside the container. The purpose of the Docker container is to run code but not to store anything (not code and of course, not data).
+Note that we are passing our two environment variables, and linking them to two folders inside the container. The purpose of the Docker container is to run code but not to store anything (not code and of course not data).
 
 ---
 This part is still work in progess... Ignore the rest of the file.
@@ -110,6 +110,10 @@ Run db_setup.sh
 
     python -m blight_risk_prediction.model
    
+##Run the webapp
+
+    python run_webapp.py
+
 #### Output
 
 Each model run produces a pickle file which contains:

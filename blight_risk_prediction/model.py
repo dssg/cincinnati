@@ -15,6 +15,8 @@ from sklearn import linear_model, preprocessing, svm, ensemble
 
 from blight_risk_prediction import dataset, evaluation
 
+from python_ds_tools import config
+
 """
 Purpose: train a binary classifier to identify those homes that are likely
 to have at least one violation.
@@ -206,7 +208,7 @@ def main():
 
     # config
     if len(sys.argv) <= 1:
-        config_file = "default.yaml"
+        config_file = config.load("default.yaml")
     else:
         config_file = sys.argv[1]
     config, config_raw = configure_model(config_file)
