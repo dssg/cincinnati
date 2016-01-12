@@ -106,9 +106,11 @@ For example, to load the cagis data, run:
 
 ##Feature generation
 
-Once you have uploaded all the data, you will be able to generate features for the model, to do that run
+Once you have uploaded all the data, you will be able to generate features for the model, to do that run:
 
 `python -m blight_risk_prediction.features.featurebot`
+
+See [blight_risk_prediction/](blight_risk_prediction/) folder for more details on how to generate features.
  
 ##Modeling
 
