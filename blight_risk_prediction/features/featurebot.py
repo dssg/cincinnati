@@ -19,27 +19,19 @@ FeatureToGenerate = namedtuple("FeatureToGenerate",
                                ["table", "generator_function"])
 
 # list all feature-sets that should be generated
-# features_to_generate = [FeatureToGenerate("tax", tax.make_tax_features),
-#                         FeatureToGenerate("crime", crime.make_crime_features),
-#                         FeatureToGenerate("named_entities",
-#                                           ner.make_owner_features),
-#                         FeatureToGenerate("house_type",
-#                                           parcel.make_house_type_features),
-#                         FeatureToGenerate("parc_area",
-#                                           parcel.make_size_of_prop),
-#                         FeatureToGenerate("parc_year",
-#                                           parcel.make_year_built),
-#                         FeatureToGenerate("census_2010",
-#                                           census.make_census_features)]
+features_to_generate = [FeatureToGenerate("tax", tax.make_tax_features),
+                         FeatureToGenerate("crime", crime.make_crime_features),
+                         FeatureToGenerate("named_entities",
+                                           ner.make_owner_features),
+                         FeatureToGenerate("house_type",
+                                           parcel.make_house_type_features),
+                         FeatureToGenerate("parc_area",
+                                           parcel.make_size_of_prop),
+                         FeatureToGenerate("parc_year",
+                                           parcel.make_year_built),
+                         FeatureToGenerate("census_2010",
+                                           census.make_census_features)]
 
-
-#features_to_generate = [FeatureToGenerate("tax", tax.make_tax_features)]
-#features_to_generate = [FeatureToGenerate("crime", crime.make_crime_features)]
-#features_to_generate = [FeatureToGenerate("named_entities", ner.make_owner_features)]
-#features_to_generate = [FeatureToGenerate("house_type", parcel.make_house_type_features)]
-#features_to_generate = [FeatureToGenerate("parc_area", parcel.make_size_of_prop)]
-#features_to_generate = [FeatureToGenerate("parc_year", parcel.make_year_built)]
-features_to_generate = [FeatureToGenerate("census_2010", census.make_census_features)]
 
 class SchemaMissing():
     def __init__(self, schema_name):

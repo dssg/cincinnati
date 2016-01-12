@@ -57,4 +57,4 @@ python "$CODE_FOLDER/census_api_util_download.py"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/map_parcels_to_tracts_geocode.sql"  
 
 #Create features
-#python "$CODE_FOLDER/census_features.py"
+python "$CODE_FOLDER/census_features.py"
