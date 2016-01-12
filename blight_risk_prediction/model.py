@@ -15,7 +15,7 @@ from sklearn import linear_model, preprocessing, svm, ensemble
 
 from blight_risk_prediction import dataset, evaluation
 
-from python_ds_tools import config
+from python_ds_tools import config as cfg
 
 """
 Purpose: train a binary classifier to identify those homes that are likely
@@ -210,7 +210,7 @@ def main():
 
     # config
     if len(sys.argv) <= 1:
-        config_file = config.load("default.yaml")
+        config_file = os.path.join(os.environ["ROOT_FOLDER"], "default.yaml")
     else:
         config_file = sys.argv[1]
     config, config_raw = configure_model(config_file)
