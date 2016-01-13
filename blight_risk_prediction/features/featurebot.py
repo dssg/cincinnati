@@ -88,7 +88,7 @@ def generate_features():
         feature_data = feature.generator_function(con)
         feature_data = feature_data.reset_index()
         feature_data.to_sql(feature.table, engine, chunksize=50000,
-                            if_exists='fail', index=False, schema=schema)
+                            if_exists='replace', index=False, schema=schema)
         logging.debug("... table has {} rows".format(len(feature_data)))
 
 
@@ -135,7 +135,7 @@ def generate_features_for_fake_inspection(inspection_date):
         feature_data = feature.generator_function(con)
         feature_data = feature_data.reset_index()
         feature_data.to_sql(feature.table, engine, chunksize=50000,
-                            if_exists='fail', index=False, schema=schema)
+                            if_exists='replace', index=False, schema=schema)
         logging.debug("... table has {} rows".format(len(feature_data)))
 
 
