@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+
+#This is the entry point for running the featurebot. The script
+#takes only one date parameter with the following format: %d%b%Y
+#e.g. 01Jul2015. The parameter is used to create features as if inspections
+#were on that date
+$DATE = $1
+
 #Read variables from config file
 DB_HOST=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.host)
 DB_USER=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.user)

@@ -16,15 +16,25 @@ mkdir -p $TMP_FOLDER
 #http://www.gdal.org/ogr2ogr.html
 ogr2ogr -f "PostgreSQL" PG:"host=$DB_HOST port=5432 dbname=$DB_NAME user=$DB_USER active_schema=shape_files" "$LOCAL_DATA_FOLDER/HamcoParcelData.gdb" -overwrite -progress --config PG_USE_COPY YES
 
-
+#Upload all parcels
 #Convert shapefiles to SQL and upload them to the database
-#This one is throwing and error
-#shp2pgsql  "$LOCAL_DATA_FOLDER/Parcelpoly_with_Bldinfo_Full.shp" > "$TMP_FOLDER/parcels_w_building_info_full.sql"
+#This one is throwing and error because Parcelpoly_with_Bldinfo_Full.shp is empty
+#this file is supposed to contain all parcels, but I cannot used it.
+#shp2pgsql -s 3735 "$LOCAL_DATA_FOLDER/Parcelpoly_with_Bldinfo_Full.shp" shape_files.hamilton_parcels > "$TMP_FOLDER/hamilton_parcels.sql"
 
-#This fails...
-#ogr2ogr -f "PostgreSQL" PG:"host=$DB_HOST port=5432 dbname=$DB_NAME user=$DB_USER active_schema=shape_files" "$LOCAL_DATA_FOLDER/Parcpoly_with_Bldinfo.shp" -overwrite -progress --config PG_USE_COPY YES
+#Temporary workaround to uploading all parcels
+#Since I couldn't upload Parcelpoly_with_Bldinfo_Full.shp because the file is empty
+#I'm going to use the parcpoly.shp file that I found in the summer data folder,
+#I don't know how this file was created cause it does not seem to be a raw data file
+shp2pgsql -s 3735 "$LOCAL_DATA_FOLDER/parcpoly.shp" shape_files.hamilton_parcels > "$TMP_FOLDER/hamilton_parcels.sql"
+#Drop table if exists
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS shape_files.hamilton_parcels;"  
+#Upload to the database
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/hamilton_parcels.sql"
 
-#Convert to pgsql, SRID is 3735
+#Upload parcels with building info
+#Convert shape files to PostgreSQL format
+#Set the SRID to 3735, name the table shape_files.parcels_w_building_info
 shp2pgsql -s 3735 "$LOCAL_DATA_FOLDER/Parcpoly_with_Bldinfo.shp" shape_files.parcels_w_building_info > "$TMP_FOLDER/parcels_w_building_info.sql"
 #Drop table if exists
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS shape_files.parcels_w_building_info;"  
