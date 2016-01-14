@@ -1,9 +1,6 @@
 FROM ubuntu:trusty
 MAINTAINER Eduardo Blancas Reyes
 
-#Run everything with bash instead of sh
-RUN rm /bin/sh && ln -s /bin/bash /bin/sh
-
 #Set a better PS1
 RUN echo 'export PS1="\[\e[0;31m\]\u\[\e[m\] \[\e[1;34m\]\w\[\e[m\] \[\e[0;31m\]$ \[\e[m\]\[\e[0;32m\]"' >> /root/.bashrc
 
@@ -70,20 +67,9 @@ COPY requirements.txt /tmp/
 RUN conda install --file /tmp/requirements.conda
 RUN pip install -r /tmp/requirements.txt
 
-#Install custom package on Python2.7
-COPY dstools/ /tmp/dstools
-WORKDIR /tmp/dstools
-RUN python setup.py install
-
-#THIS IS NOT WORKING
 #Install Python3 environment with some dependencies (this is required to run the NER code)
 #https://www.continuum.io/content/python-3-support-anaconda
-RUN conda create -n py3 python=3 pandas sqlalchemy pyyaml psycopg2
-#Install custom package on Python 3 env
-#RUN source activate py3
-#WORKDIR /tmp/dstools
-#RUN python setup.py install
-#RUN source deactivate
+RUN conda create -n py3 python=3 pandas sqlalchemy pyyaml psycopg2 dstools
 
 #Copy .pgpass
 COPY .pgpass /root/
