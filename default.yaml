@@ -106,7 +106,7 @@ features:
 
 # Model parameters
 #model: 'SVM'  # 'SVM', 'LogisticRegression', 'RandomForest', 'AdaBoost'
-model: 'RandomForest'
+model: 'sklearn.ensemble.RandomForestClassifier'
 
 ## Hyperparameters
 #parameters:  # ranges for RandomForest

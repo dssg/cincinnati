@@ -12,10 +12,10 @@ import copy
 from itertools import product
 import numpy as np
 from sklearn import linear_model, preprocessing, svm, ensemble
-
 from blight_risk_prediction import dataset, evaluation
 
 from dstools import config as cfg
+from grid_generator import grid_from_class
 
 """
 Purpose: train a binary classifier to identify those homes that are likely
@@ -219,20 +219,20 @@ def main():
     train, test, field_train, field_test = make_datasets(config)
 
     # get all combinations of parameters settings
-    parameter_names = sorted(config["parameters"])
-    parameter_values = [config["parameters"][p] for p in parameter_names]
-    combinations = product(*parameter_values)
+    #parameter_names = sorted(config["parameters"])
+    #parameter_values = [config["parameters"][p] for p in parameter_names]
+    #combinations = product(*parameter_values)
+
+    models = grid_from_class(config["model"])
 
     # run model for all of these
-    for model_settings in combinations:
+    for model in models:
         timestamp = datetime.datetime.now().isoformat()
-        model_settings = {name: value for name, value
-                          in zip(parameter_names, model_settings)}
+        #model_settings = {name: value for name, value
+        #                  in zip(parameter_names, model_settings)}
 
         # train
-        logger.info("Training {} with {}".format(config["model"],
-                    model_settings))
-        model = make_model(config["model"], model_settings)
+        logger.info("Training {}".format(model)
         model.fit(train.x, train.y)
 
         # predict
