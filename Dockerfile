@@ -4,6 +4,9 @@ MAINTAINER Eduardo Blancas Reyes
 #Run everything with bash instead of sh
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
+#Expose 4000 port, this is used for the evaluation webapp
+EXPOSE 4000
+
 #Set a better PS1
 RUN echo 'export PS1="\[\e[0;31m\]\u\[\e[m\] \[\e[1;34m\]\w\[\e[m\] \[\e[0;31m\]$ \[\e[m\]\[\e[0;32m\]"' >> /root/.bashrc
 
