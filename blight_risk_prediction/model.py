@@ -22,7 +22,6 @@ Purpose: train a binary classifier to identify those homes that are likely
 to have at least one violation.
 """
 
-mpl.use('Agg')
 logger = logging.getLogger(__name__)
 
 
@@ -34,13 +33,6 @@ def configure_model(config_file):
     logger.info("Reading config from {}".format(config_file))
     with open(config_file, 'r') as f:
         cfg = yaml.load(f)
-
-    # fill in values that might be missing
-    if 'output_dir' not in cfg:
-        cfg['output_dir'] = "./"
-
-    if 'predictions_dir' not in cfg:
-        cfg['predictons_dir'] = "./"
 
     if "start_date" not in cfg:
         cfg["start_date"] = '01Jan1970'

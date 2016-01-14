@@ -104,30 +104,8 @@ features:
 # Model selection          #
 ############################
 
-# Model parameters
-#model: 'SVM'  # 'SVM', 'LogisticRegression', 'RandomForest', 'AdaBoost'
+#See grid generator for supported models
 model: 'sklearn.ensemble.RandomForestClassifier'
-
-## Hyperparameters
-parameters:  # ranges for RandomForest
-    n_estimators:  [1, 10, 25, 50, 100]
-    depth: [3, 5, 10, 20]
-    max_features: [2, 4, 8, 16, "auto"]
-    criterion: ["gini", "entropy"]
-
-#parameters:  # single parameters for RandomForest
-#    n_estimators:  [100]
-#    depth: [10]
-
-#parameters:   #SVM
-#    C_reg: [100.0]  # C regularization parameter
-#    kernel: 'linear'  
-
-#parameters:   # logistic regression
-#    C_reg: [0.01, 0.1, 1.0, 10.0, 100.0]  # C regularization parameter
-
-#parameters: # adaboost
-#     learning_rate: [0.01, 0.1, 1, 10, 100]
 
 ############################
 # Output                   #
