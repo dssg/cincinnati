@@ -104,7 +104,7 @@ features:
 # Model selection          #
 ############################
 
-#See grid generator for supported models
+#See grid_values.py for supported models
 model: 'sklearn.ensemble.RandomForestClassifier'
 
 ############################
@@ -112,6 +112,4 @@ model: 'sklearn.ensemble.RandomForestClassifier'
 ############################
 
 #Note that directories are relative to $OUTPUT_FOLDER
-output_dir: 'results/'
 pkl_prefix: 'modelresult_'  # prefix model result with string
-predictions_dir: 'predictions/'

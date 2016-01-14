@@ -24,6 +24,10 @@ to have at least one violation.
 
 logger = logging.getLogger(__name__)
 
+#Name of the folder that will store rsults and predictions
+#This folders are relative to $OUTPUT_FOLDER
+results_dir = "results/"
+predictions_dir = "predictions/"
 
 class ConfigError():
     pass
@@ -195,7 +199,7 @@ def main():
         # pickle
         outfile = "{prefix}{timestamp}.pkl".format(prefix=config["pkl_prefix"],
                                                    timestamp=timestamp)
-        outfile = os.path.join(config["output_dir"], outfile)
+        outfile = os.path.join(results_dir, outfile)
         config_raw["parameters"] = model.get_params()
         pickle_config_results(outfile, config_raw, test,
                               predicted, feature_importances)
@@ -215,7 +219,7 @@ def main():
             parcels_with_probabilities = pd.Series(
                 fake_inspections_probs, index=index)
             parcels_with_probabilities.sort(ascending=False)
-            outfile = os.path.join(config["predictions_dir"],
+            outfile = os.path.join(predictions_dir,
                                    "{}.csv".format(timestamp))
             parcels_with_probabilities.to_csv(outfile)
 
