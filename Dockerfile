@@ -4,6 +4,9 @@ MAINTAINER Eduardo Blancas Reyes
 #Expose 4000 port, this is used for the evaluation webapp
 EXPOSE 4000
 
+#Run everything with bash instead of sh
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+
 #Set a better PS1
 RUN echo 'export PS1="\[\e[0;31m\]\u\[\e[m\] \[\e[1;34m\]\w\[\e[m\] \[\e[0;31m\]$ \[\e[m\]\[\e[0;32m\]"' >> /root/.bashrc
 
@@ -72,7 +75,9 @@ RUN pip install -r /tmp/requirements.txt
 
 #Install Python3 environment with some dependencies (this is required to run the NER code)
 #https://www.continuum.io/content/python-3-support-anaconda
-RUN conda create -n py3 python=3 pandas sqlalchemy pyyaml psycopg2 dstools
+RUN conda create -n py3 python=3 pandas sqlalchemy pyyaml psycopg2 pip
+RUN source activate py3
+RUN pip install dstools
 
 #Copy .pgpass
 COPY .pgpass /root/
