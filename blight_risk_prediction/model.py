@@ -116,43 +116,6 @@ def make_datasets(config):
 
     return train, test, field_train, field_test
 
-
-def make_model(model_name, parameters):
-
-    if model_name == 'RandomForest':
-        defaults = {"n_estimators": 10,
-                    "depth": None,
-                    "max_features": "auto",
-                    "criterion": "gini"}
-        parameters = {name: parameters.get(name, defaults.get(name))
-                      for name in defaults.keys()}
-        if parameters["depth"] == "None":
-            # None gets converted to string in yaml file
-            return ensemble.RandomForestClassifier(
-                n_estimators=parameters['n_estimators'],
-                max_features=parameters['max_features'],
-                criterion=parameters['criterion'])
-
-        return ensemble.RandomForestClassifier(
-            n_estimators=parameters['n_estimators'],
-            max_depth=parameters['depth'],
-            max_features=parameters['max_features'],
-            criterion=parameters['criterion'])
-
-    elif model_name == 'SVM':
-        return svm.SVC(C=parameters['C_reg'], kernel=parameters['kernel'])
-        # return svm.NuSVC(kernel=parameters['kernel'])
-
-    elif model_name == 'LogisticRegression':
-        return linear_model.LogisticRegression(C=parameters['C_reg'])
-
-    elif model_name == 'AdaBoost':
-        return ensemble.AdaBoostClassifier(
-            learning_rate=parameters['learning_rate'])
-    else:
-        raise ConfigError("Unsupported model {}".format(model_name))
-
-
 def output_evaluation_statistics(test, predictions):
 
     logger.info("Statistics with probability cutoff at 0.5")
@@ -217,19 +180,12 @@ def main():
 
     # datasets
     train, test, field_train, field_test = make_datasets(config)
-
-    # get all combinations of parameters settings
-    #parameter_names = sorted(config["parameters"])
-    #parameter_values = [config["parameters"][p] for p in parameter_names]
-    #combinations = product(*parameter_values)
-
+    # instantiate models with different sets of hyperparameters
     models = grid_from_class(config["model"])
 
-    # run model for all of these
+    # fit each model for all of these
     for model in models:
         timestamp = datetime.datetime.now().isoformat()
-        #model_settings = {name: value for name, value
-        #                  in zip(parameter_names, model_settings)}
 
         # train
         logger.info("Training {}".format(model))
@@ -255,7 +211,6 @@ def main():
         # generate blight probabilities for field test
         if config["prepare_field_test"]:
             logger.info("Predicting for all cincinnati parcels ")
-            model = make_model(config["model"], model_settings)
             model.fit(field_train.x, field_train.y)
 
             fake_inspections_probs = model.predict_proba(field_test.x)
