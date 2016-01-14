@@ -3,3 +3,5 @@ db:
   user: 'username'
   password: 'password'
   database: 'database_name'
+
+logger: 'YOUR-MONGODB-URI'
