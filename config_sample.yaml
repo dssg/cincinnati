@@ -4,4 +4,4 @@ db:
   password: 'password'
   database: 'database_name'
 
-logger: 'YOUR-MONGODB-URI'
+logger_uri: 'YOUR-MONGODB-URI'

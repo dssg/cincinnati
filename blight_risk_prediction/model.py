@@ -14,7 +14,8 @@ import numpy as np
 from sklearn import linear_model, preprocessing, svm, ensemble
 from blight_risk_prediction import dataset, evaluation
 
-from dstools import config as cfg
+from dstools import config.main as cfg_main
+from sklearn_evaluation.Logger import Logger
 from grid_generator import grid_from_class
 
 """
@@ -210,6 +211,11 @@ def main():
         config_raw["parameters"] = model.get_params()
         pickle_config_results(outfile, config_raw, test,
                               predicted, feature_importances)
+
+        #Log experiment
+        db_credentials = config_file['logger_uri']
+        logger = Logger(db_credentials, 'models', 'cincinnati')
+        logger.log_model(model)
 
         # generate blight probabilities for field test
         if config["prepare_field_test"]:
