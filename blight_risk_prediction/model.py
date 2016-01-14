@@ -232,7 +232,7 @@ def main():
         #                  in zip(parameter_names, model_settings)}
 
         # train
-        logger.info("Training {}".format(model)
+        logger.info("Training {}".format(model))
         model.fit(train.x, train.y)
 
         # predict
@@ -248,7 +248,7 @@ def main():
         outfile = "{prefix}{timestamp}.pkl".format(prefix=config["pkl_prefix"],
                                                    timestamp=timestamp)
         outfile = os.path.join(config["output_dir"], outfile)
-        config_raw["parameters"] = model_settings  # HACK
+        config_raw["parameters"] = model.get_params()
         pickle_config_results(outfile, config_raw, test,
                               predicted, feature_importances)
 
