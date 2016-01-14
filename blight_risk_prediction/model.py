@@ -29,6 +29,9 @@ logger = logging.getLogger(__name__)
 results_dir = "results/"
 predictions_dir = "predictions/"
 
+#Max cores to use if possible
+MAX_CORES = 4
+
 class ConfigError():
     pass
 
@@ -181,6 +184,10 @@ def main():
 
     # fit each model for all of these
     for model in models:
+        #Try to run in parallel if possible
+        if hasattr(model, 'n_jobs'):
+            model.set_params(n_jobs=MAX_CORES)
+
         timestamp = datetime.datetime.now().isoformat()
 
         # train
