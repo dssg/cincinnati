@@ -15,7 +15,7 @@ ALTER TABLE shape_files.cinc_zoning
 --select all parcels in Hamilton county that are within the Cincinnati city boundry
 CREATE TABLE shape_files.parcels_cincy as 
 (SELECT parcels.*
-FROM	shape_files.parcels_w_building_info as parcels,
+FROM	shape_files.hamilton_parcels as parcels,
 		shape_files.cinc_city_boundary as city_boundry
 WHERE ST_Within(parcels.geom, city_boundry.geom));
 

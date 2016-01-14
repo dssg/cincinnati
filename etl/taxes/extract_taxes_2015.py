@@ -4,8 +4,8 @@
 import pandas as pd
 import numpy as np
 from sqlalchemy import create_engine
-from python_ds_tools.config import main as config
-from python_ds_tools import data_folder
+from dstools.config import main as config
+from dstools import data_folder
 import tax_defs
 import os
 

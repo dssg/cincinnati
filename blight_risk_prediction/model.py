@@ -15,7 +15,7 @@ from sklearn import linear_model, preprocessing, svm, ensemble
 
 from blight_risk_prediction import dataset, evaluation
 
-from python_ds_tools import config as cfg
+from dstools import config as cfg
 
 """
 Purpose: train a binary classifier to identify those homes that are likely

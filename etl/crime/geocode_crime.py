@@ -5,9 +5,9 @@ from sqlalchemy import create_engine
 import pandas as pd
 import time
 import glob
-from python_ds_tools.config import main as config
+from dstools.config import main as config
 from geocode import census_batch_query
-from python_ds_tools import data_folder
+from dstools import data_folder
 import os
 
 def format_address_url(address):

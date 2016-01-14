@@ -1,9 +1,6 @@
 FROM ubuntu:trusty
 MAINTAINER Eduardo Blancas Reyes
 
-#Run everything with bash instead of sh
-RUN rm /bin/sh && ln -s /bin/bash /bin/sh
-
 #Expose 4000 port, this is used for the evaluation webapp
 EXPOSE 4000
 
@@ -73,20 +70,9 @@ COPY requirements.txt /tmp/
 RUN conda install --file /tmp/requirements.conda
 RUN pip install -r /tmp/requirements.txt
 
-#Install custom package on Python2.7
-COPY python_ds_tools/ /tmp/python_ds_tools
-WORKDIR /tmp/python_ds_tools
-RUN python setup.py install
-
-#THIS IS NOT WORKING
 #Install Python3 environment with some dependencies (this is required to run the NER code)
 #https://www.continuum.io/content/python-3-support-anaconda
-RUN conda create -n py3 python=3 pandas sqlalchemy pyyaml psycopg2
-#Install custom package on Python 3 env
-#RUN source activate py3
-#WORKDIR /tmp/python_ds_tools
-#RUN python setup.py install
-#RUN source deactivate
+RUN conda create -n py3 python=3 pandas sqlalchemy pyyaml psycopg2 dstools
 
 #Copy .pgpass
 COPY .pgpass /root/

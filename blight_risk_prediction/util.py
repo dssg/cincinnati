@@ -11,7 +11,7 @@ import datetime
 import config
 
 #Load yaml configuration file
-from python_ds_tools.config import main
+from dstools.config import main
 #Get values from configuration file
 user = main['db']['user']
 password = main['db']['password']

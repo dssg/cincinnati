@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import pandas as pd
 import datetime
 import logging
@@ -14,7 +13,7 @@ logger = logging.getLogger(__name__)
 # for every feature-set to generate, you need to register a function
 # that can generate a dataframe containing the
 # new features. you also need to set the database table in
-# which to store the feature
+# which to store the features
 FeatureToGenerate = namedtuple("FeatureToGenerate",
                                ["table", "generator_function"])
 
@@ -141,7 +140,7 @@ def generate_features_for_fake_inspection(inspection_date):
 
 if __name__ == '__main__':
     # to generate features for if an inspection happens at date d
-    # d = datetime.datetime.strptime("01Jul2015", '%d%b%Y')
+    #d = datetime.datetime.strptime("01Jul2015", '%d%b%Y')
     # generate_features_for_fake_inspection(d)
 
     # to generate features
