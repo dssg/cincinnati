@@ -71,8 +71,8 @@ RUN conda install --file /tmp/requirements.conda
 RUN pip install -r /tmp/requirements.txt
 
 #Install custom package on Python2.7
-COPY python_ds_tools/ /tmp/python_ds_tools
-WORKDIR /tmp/python_ds_tools
+COPY dstools/ /tmp/dstools
+WORKDIR /tmp/dstools
 RUN python setup.py install
 
 #THIS IS NOT WORKING
@@ -81,7 +81,7 @@ RUN python setup.py install
 RUN conda create -n py3 python=3 pandas sqlalchemy pyyaml psycopg2
 #Install custom package on Python 3 env
 #RUN source activate py3
-#WORKDIR /tmp/python_ds_tools
+#WORKDIR /tmp/dstools
 #RUN python setup.py install
 #RUN source deactivate
 

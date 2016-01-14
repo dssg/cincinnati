@@ -6,7 +6,7 @@
 from sqlalchemy import create_engine
 import pandas as pd
 
-from python_ds_tools.config import main as config
+from dstools.config import main as config
 
 
 user = config['db']['user']

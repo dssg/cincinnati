@@ -2,8 +2,8 @@ import os
 import pandas as pd
 import yaml
 import sys
-from python_ds_tools.config import main as config
-from python_ds_tools import data_folder
+from dstools.config import main as config
+from dstools import data_folder
 import numpy as np
 
 input_file = sys.argv[1]

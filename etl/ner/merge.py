@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from python_ds_tools import data_folder
+from dstools import data_folder
 
 #Move current directory do all I/O operations take place in the corresponding
 #Data folder
