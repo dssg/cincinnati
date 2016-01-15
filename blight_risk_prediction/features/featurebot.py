@@ -107,14 +107,14 @@ def generate_features_for_fake_inspection(inspection_date):
     if schema not in existing_feature_schemas():
         #raise SchemaMissing(schema)
         #Create schema here
-        user = config['db']['user']
-        password = config['db']['password']
-        host  = config['db']['host']
-        database  = config['db']['database']
-        uri = 'postgresql://{user}:{password}@{host}:5432/{database}'.format(user=user, password=password, host=host, database=database)
-        conn = psycopg2.connect(uri)
+        user = main_cfg['db']['user']
+        password = main_cfg['db']['password']
+        host  = main_cfg['db']['host']
+        database  = main_cfg['db']['database']
+        conn = psycopg2.connect(host=host, database=database, user=user, password=password)
         cur = conn.cursor()
         cur.execute("CREATE  SCHEMA %s;" % schema)
+        conn.commit()
         cur.close()
         conn.close()
         print 'Creating schema %s' % schema
