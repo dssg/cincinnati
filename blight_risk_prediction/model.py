@@ -163,6 +163,11 @@ def pickle_config_results(pkl_file, config, test, predictions,
                "test_predictions": predictions,
                "test_parcels": test.parcels}
 
+    #Log experiment
+    db_credentials = cfg_main['logger_uri']
+    mongo_logger = Logger(db_credentials, 'models', 'cincinnati')
+    mongo_logger.log_model(model)
+
     #Preppend output folder to pkl_file so results are stored there
     path_to_pkl = os.path.join(os.environ['OUTPUT_FOLDER'], pkl_file)
     with open(path_to_pkl, 'wb') as f:
@@ -211,11 +216,6 @@ def main():
         config_raw["parameters"] = model.get_params()
         pickle_config_results(outfile, config_raw, test,
                               predicted, feature_importances)
-
-        #Log experiment
-        db_credentials = cfg_main['logger_uri']
-        mongo_logger = Logger(db_credentials, 'models', 'cincinnati')
-        mongo_logger.log_model(model)
 
         # generate blight probabilities for field test
         if config["prepare_field_test"]:
