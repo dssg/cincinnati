@@ -161,7 +161,7 @@ def pickle_config_results(pkl_file, config, test, predictions,
     mongo_logger = Logger(db_credentials, 'models', 'cincinnati')
     #Sending model will log model name, parameters and datetime
     #Also log other important things by sending named parameters
-    mongo_logger.log_model(model, features=test.feature_names
+    mongo_logger.log_model(model, features=test.feature_names,
                                   feature_importances=feature_importances,
                                   config=config,
                                   test_labels=test.y,
