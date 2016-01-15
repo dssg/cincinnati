@@ -75,11 +75,11 @@ def generate_features():
     # this table has three columns: parcel_id, inspection_date, viol_outcome
     # inspection_date is the one given as a parameter and
     # is the same for all parcels
-    #logging.info("Generating inspections table")
-    #inspections = outcome.generate_labels()
-    #inspections.to_sql("parcels_inspections", engine, chunksize=50000,
-    #                   if_exists='fail', index=False, schema=schema)
-    #logging.debug("... table has {} rows".format(len(inspections)))
+    logging.info("Generating inspections table")
+    inspections = outcome.generate_labels()
+    inspections.to_sql("parcels_inspections", engine, chunksize=50000,
+                      if_exists='fail', index=False, schema=schema)
+    logging.debug("... table has {} rows".format(len(inspections)))
 
     # make features and store in database
     for feature in features_to_generate:
@@ -121,12 +121,12 @@ def generate_features_for_fake_inspection(inspection_date):
     # this table has two columns: parcel_id, inspection_date
     # inspection_date is the one give as a parameter and is the same
     # for all parcels
-    #logging.info("Generating inspections table")
-    #inspections = outcome.make_fake_inspections_all_parcels_cincy(
-    #    inspection_date)
-    #inspections.to_sql("parcels_inspections", engine, chunksize=50000,
-    #                   if_exists='fail', index=False, schema=schema)
-    #logging.debug("... table has {} rows".format(len(inspections)))
+    logging.info("Generating inspections table")
+    inspections = outcome.make_fake_inspections_all_parcels_cincy(
+       inspection_date)
+    inspections.to_sql("parcels_inspections", engine, chunksize=50000,
+                      if_exists='fail', index=False, schema=schema)
+    logging.debug("... table has {} rows".format(len(inspections)))
 
     # make features and store in database
     for feature in features_to_generate:
