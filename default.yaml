@@ -112,4 +112,6 @@ model: 'sklearn.ensemble.RandomForestClassifier'
 ############################
 
 #Note that directories are relative to $OUTPUT_FOLDER
+#This will be used if model.py has been configured to save results using PICKLE prepare_field_test
+#see model.py for details
 pkl_prefix: 'modelresult_'  # prefix model result with string

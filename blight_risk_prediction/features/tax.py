@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 
-
 def load_three_year_home_values(db_connection):
     taxes = ("SELECT inspections.parcel_id, inspections.inspection_date, "
              "year AS taxyear, "
