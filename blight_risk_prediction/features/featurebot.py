@@ -3,7 +3,7 @@ import pandas as pd
 import datetime
 import logging
 from collections import namedtuple
-
+import sys
 from blight_risk_prediction import util
 from blight_risk_prediction.features import (ner, parcel,
                                              outcome, tax, crime, census)
@@ -139,11 +139,14 @@ def generate_features_for_fake_inspection(inspection_date):
 
 
 if __name__ == '__main__':
-    # to generate features for if an inspection happens at date d
-    d = datetime.datetime.strptime("01Jul2015", '%d%b%Y')
-    generate_features_for_fake_inspection(d)
-
-    # to generate features
-    #generate_features()
-
-    pass
+    if len(sys.argv) == 2:
+        # to generate features for if an inspection happens at date d
+        d = datetime.datetime.strptime(sys.argv[1], '%d%b%Y')
+        print 'Generating features for %s' % d
+        generate_features_for_fake_inspection(d)
+    elif len(sys.argv) == 1:
+        print 'Generating features for all dates...'
+        # to generate features
+        generate_features()
+    else:
+        print 'This command accepts only one parameter'
