@@ -32,6 +32,11 @@ predictions_dir = "predictions/"
 
 #Max cores to use if possible
 MAX_CORES = 4
+#Two options for saving results: 1. save to mongodb, you
+#can use something like MongoChef to see results (to do that you need to
+#provided a mongo URI in the config.yaml file). 2. Pickle results (you can see
+#results with the webapp)
+HOW_TO_SAVE = 'MONGO' #or 'PICKLE'
 
 class ConfigError():
     pass
@@ -153,35 +158,35 @@ def get_feature_importances(model):
     return None
 
 
-def pickle_config_results(pkl_file, config, test, predictions,
+def save_results(pkl_file, config, test, predictions,
                           feature_importances, model):
+    if HOW_TO_SAVE == 'MONGO':
+        #Log experiment
+        db_credentials = cfg_main['logger_uri']
+        mongo_logger = Logger(db_credentials, 'models', 'cincinnati')
+        #Sending model will log model name, parameters and datetime
+        #Also log other important things by sending named parameters
+    
+        mongo_logger.log_model(model, features=list(test.feature_names),
+                                      feature_importances=list(feature_importances),
+                                      config=config,
+                                      test_labels=list(test.y),
+                                      test_predictions=list(predictions),
+                                      test_parcels=list(test.parcels))
+    elif HOW_TO_SAVE == 'PICKLE':
+        to_save = {"config": config,
+                   "features": test.feature_names,
+                   "feature_importances": feature_importances,
+                   "test_labels": test.y,
+                   "test_predictions": predictions,
+                   "test_parcels": test.parcels}
 
-    #Log experiment
-    db_credentials = cfg_main['logger_uri']
-    mongo_logger = Logger(db_credentials, 'models', 'cincinnati')
-    #Sending model will log model name, parameters and datetime
-    #Also log other important things by sending named parameters
-
-    mongo_logger.log_model(model, features=list(test.feature_names),
-                                  feature_importances=list(feature_importances),
-                                  config=config,
-                                  test_labels=list(test.y),
-                                  test_predictions=list(predictions),
-                                  test_parcels=list(test.parcels))
-
-    # to_save = {"config": config,
-    #            "features": test.feature_names,
-    #            "feature_importances": feature_importances,
-    #            "test_labels": test.y,
-    #            "test_predictions": predictions,
-    #            "test_parcels": test.parcels}
-
-
-    # #Preppend output folder to pkl_file so results are stored there
-    # path_to_pkl = os.path.join(os.environ['OUTPUT_FOLDER'], pkl_file)
-    # with open(path_to_pkl, 'wb') as f:
-    #     pickle.dump(to_save, f, protocol=pickle.HIGHEST_PROTOCOL)
-
+        #Preppend output folder to pkl_file so results are stored there
+        path_to_pkl = os.path.join(os.environ['OUTPUT_FOLDER'], pkl_file)
+        with open(path_to_pkl, 'wb') as f:
+            pickle.dump(to_save, f, protocol=pickle.HIGHEST_PROTOCOL)
+    else:
+        logger.info("Select MONGO or PICKLE for saving. Not saving results for now.")
 
 def main():
 
@@ -223,7 +228,7 @@ def main():
                                                    timestamp=timestamp)
         outfile = os.path.join(results_dir, outfile)
         config_raw["parameters"] = model.get_params()
-        pickle_config_results(outfile, config_raw, test,
+        save_results(outfile, config_raw, test,
                               predicted, feature_importances, model)
 
         # generate blight probabilities for field test
