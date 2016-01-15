@@ -154,19 +154,19 @@ def get_feature_importances(model):
 
 
 def pickle_config_results(pkl_file, config, test, predictions,
-                          feature_importances):
+                          feature_importances, model):
 
     #Log experiment
     db_credentials = cfg_main['logger_uri']
     mongo_logger = Logger(db_credentials, 'models', 'cincinnati')
     #Sending model will log model name, parameters and datetime
     #Also log other important things by sending named parameters
-    mongo_logger.log_model(model, features=test.feature_names,
-                                  feature_importances=feature_importances,
+    mongo_logger.log_model(model, features=list(test.feature_names),
+                                  feature_importances=list(feature_importances),
                                   config=config,
-                                  test_labels=test.y,
-                                  test_predictions=predictions,
-                                  test_parcels=test.parcels)
+                                  test_labels=list(test.y),
+                                  test_predictions=list(predictions),
+                                  test_parcels=list(test.parcels))
 
     # to_save = {"config": config,
     #            "features": test.feature_names,
@@ -223,7 +223,7 @@ def main():
         outfile = os.path.join(results_dir, outfile)
         config_raw["parameters"] = model.get_params()
         pickle_config_results(outfile, config_raw, test,
-                              predicted, feature_importances)
+                              predicted, feature_importances, model)
 
         # generate blight probabilities for field test
         if config["prepare_field_test"]:
