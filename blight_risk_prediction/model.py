@@ -41,7 +41,6 @@ HOW_TO_SAVE = 'MONGO' #or 'PICKLE'
 class ConfigError():
     pass
 
-
 def configure_model(config_file):
     logger.info("Reading config from {}".format(config_file))
     with open(config_file, 'r') as f:
@@ -122,9 +121,7 @@ def make_datasets(config):
     return train, test, field_train, field_test
 
 def output_evaluation_statistics(test, predictions):
-
     logger.info("Statistics with probability cutoff at 0.5")
-
     # binary predictions with some cutoff for these evaluations
     cutoff = 0.5
     predictions_binary = np.copy(predictions)

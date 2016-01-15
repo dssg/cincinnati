@@ -20,6 +20,15 @@ residential_only: True
 # Feature selection        #
 ############################
 
+#New syntax for feature selection
+features_:
+    #All colun on crime table
+    - crime.*
+    #single family column on house type
+    - house_type.single-family
+    #columns starting with rate in the census_2010 table
+    - census_2010.rate_*
+
 features:
     # Tax data
     tax_foreclosure: True

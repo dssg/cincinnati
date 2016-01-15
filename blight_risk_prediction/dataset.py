@@ -324,7 +324,6 @@ def group_features_by_loader(features):
 # Functions for compiling training and test datasets
 #####################################################
 
-
 class Dataset():
     def __init__(self, parcels, x, y, feature_names):
         self.parcels = parcels
@@ -408,7 +407,6 @@ def get_testing_dataset(features, start_date, end_date, only_residential):
 
     return get_dataset(schema, features, start_date, end_date,
                        only_residential)
-
 
 def get_field_testing_dataset(features, fake_inspection_date,
                               only_residential):
