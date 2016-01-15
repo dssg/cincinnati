@@ -4,6 +4,8 @@ import datetime
 import logging
 from collections import namedtuple
 import sys
+import psycopg2
+from dstools.config import main as main_cfg
 from blight_risk_prediction import util
 from blight_risk_prediction.features import (ner, parcel,
                                              outcome, tax, crime, census)
@@ -32,12 +34,12 @@ features_to_generate = [FeatureToGenerate("tax", tax.make_tax_features),
                                            census.make_census_features)]
 
 
-class SchemaMissing():
-    def __init__(self, schema_name):
-        self.schema_name = schema_name
+# class SchemaMissing():
+#     def __init__(self, schema_name):
+#         self.schema_name = schema_name
 
-    def __str__(self):
-        return "Schema {} does not exist".format(self.schema_name)
+#     def __str__(self):
+#         return "Schema {} does not exist".format(self.schema_name)
 
 
 def existing_feature_schemas():
@@ -97,14 +99,27 @@ def generate_features_for_fake_inspection(inspection_date):
 
     The features and labels will be stored in schema "features_dayMonthYear"
     (according to the inspection date, e.g.
-    features_01Aug2015. This schema must exist in the database
-    before calling this function (for security reasons).
+    features_01Aug2015.
     :return:
     """
 
     schema = "features_{}".format(inspection_date.strftime('%d%b%Y')).lower()
     if schema not in existing_feature_schemas():
-        raise SchemaMissing(schema)
+        #raise SchemaMissing(schema)
+        #Create schema here
+        user = config['db']['user']
+        password = config['db']['password']
+        host  = config['db']['host']
+        database  = config['db']['database']
+        uri = 'postgresql://{user}:{password}@{host}:5432/{database}'.format(user=user, password=password, host=host, database=database)
+        conn = psycopg2.connect(uri)
+        cur = conn.cursor()
+        cur.execute("CREATE  SCHEMA %s;" % schema)
+        cur.close()
+        conn.close()
+        print 'Creating schema %s' % schema
+    else:
+        print 'Using existing schema'
 
     # use this engine for all data storing (somehow does not work
     # with the raw connection we create below)
