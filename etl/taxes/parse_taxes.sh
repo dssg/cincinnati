@@ -12,5 +12,6 @@ python "$ROOT_FOLDER/etl/taxes/parse_text_tax_file.py" taxinfo2012.txt 2012
 python "$ROOT_FOLDER/etl/taxes/parse_text_tax_file.py" taxinfo2013.txt 2013
 python "$ROOT_FOLDER/etl/taxes/parse_text_tax_file.py" taxinfo2014.txt 2014
 
-#File from 2015 is a CSV, we only need to append the header
-python "$ROOT_FOLDER/etl/taxes/add_header_csv_tax_file.py" Tax_Information2015.CSV 2015
+#File from 2015 is a CSV, we only need to append the header and parse column with only
+#one whitespace as NA
+python "$ROOT_FOLDER/etl/taxes/parse_csv_tax_file.py" Tax_Information2015.CSV 2015

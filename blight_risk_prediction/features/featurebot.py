@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import pandas as pd
 import datetime
 import logging
@@ -14,23 +13,23 @@ logger = logging.getLogger(__name__)
 # for every feature-set to generate, you need to register a function
 # that can generate a dataframe containing the
 # new features. you also need to set the database table in
-# which to store the feature
+# which to store the features
 FeatureToGenerate = namedtuple("FeatureToGenerate",
                                ["table", "generator_function"])
 
 # list all feature-sets that should be generated
 features_to_generate = [FeatureToGenerate("tax", tax.make_tax_features),
-                        FeatureToGenerate("crime", crime.make_crime_features),
-                        FeatureToGenerate("named_entities",
-                                          ner.make_owner_features),
-                        FeatureToGenerate("house_type",
-                                          parcel.make_house_type_features),
-                        FeatureToGenerate("parc_area",
-                                          parcel.make_size_of_prop),
-                        FeatureToGenerate("parc_year",
-                                          parcel.make_year_built),
-                        FeatureToGenerate("census_2010",
-                                          census.make_census_features)]
+                         FeatureToGenerate("crime", crime.make_crime_features),
+                         FeatureToGenerate("named_entities",
+                                           ner.make_owner_features),
+                         FeatureToGenerate("house_type",
+                                           parcel.make_house_type_features),
+                         FeatureToGenerate("parc_area",
+                                           parcel.make_size_of_prop),
+                         FeatureToGenerate("parc_year",
+                                           parcel.make_year_built),
+                         FeatureToGenerate("census_2010",
+                                           census.make_census_features)]
 
 
 class SchemaMissing():
@@ -79,7 +78,7 @@ def generate_features():
     logging.info("Generating inspections table")
     inspections = outcome.generate_labels()
     inspections.to_sql("parcels_inspections", engine, chunksize=50000,
-                       if_exists='fail', index=False, schema=schema)
+                      if_exists='fail', index=False, schema=schema)
     logging.debug("... table has {} rows".format(len(inspections)))
 
     # make features and store in database
@@ -88,7 +87,7 @@ def generate_features():
         feature_data = feature.generator_function(con)
         feature_data = feature_data.reset_index()
         feature_data.to_sql(feature.table, engine, chunksize=50000,
-                            if_exists='fail', index=False, schema=schema)
+                            if_exists='replace', index=False, schema=schema)
         logging.debug("... table has {} rows".format(len(feature_data)))
 
 
@@ -124,9 +123,9 @@ def generate_features_for_fake_inspection(inspection_date):
     # for all parcels
     logging.info("Generating inspections table")
     inspections = outcome.make_fake_inspections_all_parcels_cincy(
-        inspection_date)
+       inspection_date)
     inspections.to_sql("parcels_inspections", engine, chunksize=50000,
-                       if_exists='fail', index=False, schema=schema)
+                      if_exists='fail', index=False, schema=schema)
     logging.debug("... table has {} rows".format(len(inspections)))
 
     # make features and store in database
@@ -135,16 +134,16 @@ def generate_features_for_fake_inspection(inspection_date):
         feature_data = feature.generator_function(con)
         feature_data = feature_data.reset_index()
         feature_data.to_sql(feature.table, engine, chunksize=50000,
-                            if_exists='fail', index=False, schema=schema)
+                            if_exists='replace', index=False, schema=schema)
         logging.debug("... table has {} rows".format(len(feature_data)))
 
 
 if __name__ == '__main__':
     # to generate features for if an inspection happens at date d
-    # d = datetime.datetime.strptime("01Jul2015", '%d%b%Y')
+    #d = datetime.datetime.strptime("01Jul2015", '%d%b%Y')
     # generate_features_for_fake_inspection(d)
 
     # to generate features
-    # generate_features()
+    generate_features()
 
     pass

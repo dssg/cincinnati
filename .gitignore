@@ -1,7 +1,11 @@
 #### project-local gitignores
 .ipynb_checkpoints
 environment.sh
+
+#The following files must be submitted by the user since they are not included
+#in the repo
 config.yaml
+.pgpass
 
 #### github defaults below
 
@@ -69,3 +73,13 @@ target/
 .ipynb_checkpoints/
 
 blight_risk_prediction/architecture.png
+#### joe made this: https://goel.io/joe
+
+#####=== Vim ===#####
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*~
+

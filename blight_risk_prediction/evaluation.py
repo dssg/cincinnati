@@ -8,9 +8,9 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import os
 
 logger = logging.getLogger(__name__)
-
 
 def plot_feature_importances(feature_names, feature_importances, filename):
     importances = list(zip(feature_names, list(feature_importances)))
@@ -108,4 +108,7 @@ def plot_precision_at_varying_percent(test_labels, test_predictions):
     cutoffs, precisions = zip(*cutoffs_and_precisions)
     plt.plot(percent_range, precisions)
     plt.plot(percent_range, cutoffs)
-    plt.savefig("precision_at.png")
+
+    #Save file in output folder
+    path_to_fig = os.path.join(os.environ['OUTPUT_FOLDER'], 'precision_at.png')
+    plt.savefig(path_to_fig)

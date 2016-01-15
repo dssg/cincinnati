@@ -20,8 +20,6 @@
 
 -- #################
 
-DROP VIEW inspections_views.events;
-
 CREATE VIEW inspections_views.events
 AS (
 SELECT number_key, comp_type, date_a AS date, 'Reported' AS event
@@ -117,7 +115,7 @@ WHERE comp_type = 'CBHHAZ_R' AND date_d IS NOT NULL
 
 CREATE VIEW inspections_views.number_key2parcel_no
 AS
-   (SELECT par.number_key, trim(par.parcel_no)
+   (SELECT par.number_key, trim(par.parcel_no) AS parcel_no
     FROM inspections_raw.t_dssg_apd_par AS par
     JOIN
       (SELECT number_key, count(distinct(parcel_no))
@@ -135,13 +133,5 @@ CREATE VIEW inspections_views.events_parcel_id AS
     events.comp_type,
     events.date,
     events.event
-   FROM inspections_views.events events
-   JOIN inspections_views.number_key2parcel_no parcel ON events.number_key = parcel.number_key;
-
---add parcel id to timeline
-CREATE VIEW inspections_views.events_parcel_id as
-(SELECT parcel.parcel_no, events.number_key, events.comp_type, events.date, events.event
-FROM inspections_views.events AS events
-JOIN inspections_views.number_key2parcel_no AS parcel
-ON events.number_key = parcel.number_key);
-
+   FROM inspections_views.events AS events
+   JOIN inspections_views.number_key2parcel_no AS parcel ON events.number_key = parcel.number_key;

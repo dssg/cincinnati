@@ -19,9 +19,9 @@ def make_year_built(db_connection):
     A pandas dataframe, with one row per parcels and one column per feature.
     """
 
-    query = ("SELECT inspections.parcel_id, parcels.year_built"
-             "FROM features.parcels_inspections AS inspections"
-             "JOIN public.bld_info AS parcels"
+    query = ("SELECT inspections.parcel_id, parcels.year_built "
+             "FROM features.parcels_inspections AS inspections "
+             "JOIN public.bld_info AS parcels "
              "ON parcels.parcel_id = inspections.parcel_id")
 
     df = pd.read_sql(query, con=db_connection)

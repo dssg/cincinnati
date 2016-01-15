@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import matplotlib as mpl
+mpl.use('Agg')
 import pandas as pd
 import datetime
 import yaml
@@ -11,17 +12,31 @@ import copy
 from itertools import product
 import numpy as np
 from sklearn import linear_model, preprocessing, svm, ensemble
-
 from blight_risk_prediction import dataset, evaluation
+
+from dstools.config import main as cfg_main
+from sklearn_evaluation.Logger import Logger
+from grid_generator import grid_from_class
 
 """
 Purpose: train a binary classifier to identify those homes that are likely
 to have at least one violation.
 """
 
-mpl.use('Agg')
 logger = logging.getLogger(__name__)
 
+#Name of the folder that will store rsults and predictions
+#This folders are relative to $OUTPUT_FOLDER
+results_dir = "results/"
+predictions_dir = "predictions/"
+
+#Max cores to use if possible
+MAX_CORES = 4
+#Two options for saving results: 1. save to mongodb, you
+#can use something like MongoChef to see results (to do that you need to
+#provided a mongo URI in the config.yaml file). 2. Pickle results (you can see
+#results with the webapp)
+HOW_TO_SAVE = 'MONGO' #or 'PICKLE'
 
 class ConfigError():
     pass
@@ -31,13 +46,6 @@ def configure_model(config_file):
     logger.info("Reading config from {}".format(config_file))
     with open(config_file, 'r') as f:
         cfg = yaml.load(f)
-
-    # fill in values that might be missing
-    if 'output_dir' not in cfg:
-        cfg['output_dir'] = "./"
-
-    if 'predictions_dir' not in cfg:
-        cfg['predictons_dir'] = "./"
 
     if "start_date" not in cfg:
         cfg["start_date"] = '01Jan1970'
@@ -113,43 +121,6 @@ def make_datasets(config):
 
     return train, test, field_train, field_test
 
-
-def make_model(model_name, parameters):
-
-    if model_name == 'RandomForest':
-        defaults = {"n_estimators": 10,
-                    "depth": None,
-                    "max_features": "auto",
-                    "criterion": "gini"}
-        parameters = {name: parameters.get(name, defaults.get(name))
-                      for name in defaults.keys()}
-        if parameters["depth"] == "None":
-            # None gets converted to string in yaml file
-            return ensemble.RandomForestClassifier(
-                n_estimators=parameters['n_estimators'],
-                max_features=parameters['max_features'],
-                criterion=parameters['criterion'])
-
-        return ensemble.RandomForestClassifier(
-            n_estimators=parameters['n_estimators'],
-            max_depth=parameters['depth'],
-            max_features=parameters['max_features'],
-            criterion=parameters['criterion'])
-
-    elif model_name == 'SVM':
-        return svm.SVC(C=parameters['C_reg'], kernel=parameters['kernel'])
-        # return svm.NuSVC(kernel=parameters['kernel'])
-
-    elif model_name == 'LogisticRegression':
-        return linear_model.LogisticRegression(C=parameters['C_reg'])
-
-    elif model_name == 'AdaBoost':
-        return ensemble.AdaBoostClassifier(
-            learning_rate=parameters['learning_rate'])
-    else:
-        raise ConfigError("Unsupported model {}".format(model_name))
-
-
 def output_evaluation_statistics(test, predictions):
 
     logger.info("Statistics with probability cutoff at 0.5")
@@ -187,47 +158,60 @@ def get_feature_importances(model):
     return None
 
 
-def pickle_config_results(pkl_file, config, test, predictions,
-                          feature_importances):
+def save_results(pkl_file, config, test, predictions,
+                          feature_importances, model):
+    if HOW_TO_SAVE == 'MONGO':
+        #Log experiment
+        db_credentials = cfg_main['logger_uri']
+        mongo_logger = Logger(db_credentials, 'models', 'cincinnati')
+        #Sending model will log model name, parameters and datetime
+        #Also log other important things by sending named parameters
+    
+        mongo_logger.log_model(model, features=list(test.feature_names),
+                                      feature_importances=list(feature_importances),
+                                      config=config,
+                                      test_labels=list(test.y),
+                                      test_predictions=list(predictions),
+                                      test_parcels=list(test.parcels))
+    elif HOW_TO_SAVE == 'PICKLE':
+        to_save = {"config": config,
+                   "features": test.feature_names,
+                   "feature_importances": feature_importances,
+                   "test_labels": test.y,
+                   "test_predictions": predictions,
+                   "test_parcels": test.parcels}
 
-    to_save = {"config": config,
-               "features": test.feature_names,
-               "feature_importances": feature_importances,
-               "test_labels": test.y,
-               "test_predictions": predictions,
-               "test_parcels": test.parcels}
-
-    with open(pkl_file, 'wb') as f:
-        pickle.dump(to_save, f, protocol=pickle.HIGHEST_PROTOCOL)
-
+        #Preppend output folder to pkl_file so results are stored there
+        path_to_pkl = os.path.join(os.environ['OUTPUT_FOLDER'], pkl_file)
+        with open(path_to_pkl, 'wb') as f:
+            pickle.dump(to_save, f, protocol=pickle.HIGHEST_PROTOCOL)
+    else:
+        logger.info("Select MONGO or PICKLE for saving. Not saving results for now.")
 
 def main():
 
     # config
     if len(sys.argv) <= 1:
-        config_file = "default.yaml"
+        config_file = os.path.join(os.environ["ROOT_FOLDER"], "default.yaml")
     else:
         config_file = sys.argv[1]
     config, config_raw = configure_model(config_file)
 
     # datasets
     train, test, field_train, field_test = make_datasets(config)
+    # instantiate models with different sets of hyperparameters
+    models = grid_from_class(config["model"])
 
-    # get all combinations of parameters settings
-    parameter_names = sorted(config["parameters"])
-    parameter_values = [config["parameters"][p] for p in parameter_names]
-    combinations = product(*parameter_values)
+    # fit each model for all of these
+    for model in models:
+        #Try to run in parallel if possible
+        if hasattr(model, 'n_jobs'):
+            model.set_params(n_jobs=MAX_CORES)
 
-    # run model for all of these
-    for model_settings in combinations:
         timestamp = datetime.datetime.now().isoformat()
-        model_settings = {name: value for name, value
-                          in zip(parameter_names, model_settings)}
 
         # train
-        logger.info("Training {} with {}".format(config["model"],
-                    model_settings))
-        model = make_model(config["model"], model_settings)
+        logger.info("Training {}".format(model))
         model.fit(train.x, train.y)
 
         # predict
@@ -242,15 +226,14 @@ def main():
         # pickle
         outfile = "{prefix}{timestamp}.pkl".format(prefix=config["pkl_prefix"],
                                                    timestamp=timestamp)
-        outfile = os.path.join(config["output_dir"], outfile)
-        config_raw["parameters"] = model_settings  # HACK
-        pickle_config_results(outfile, config_raw, test,
-                              predicted, feature_importances)
+        outfile = os.path.join(results_dir, outfile)
+        config_raw["parameters"] = model.get_params()
+        save_results(outfile, config_raw, test,
+                              predicted, feature_importances, model)
 
         # generate blight probabilities for field test
         if config["prepare_field_test"]:
             logger.info("Predicting for all cincinnati parcels ")
-            model = make_model(config["model"], model_settings)
             model.fit(field_train.x, field_train.y)
 
             fake_inspections_probs = model.predict_proba(field_test.x)
@@ -263,7 +246,7 @@ def main():
             parcels_with_probabilities = pd.Series(
                 fake_inspections_probs, index=index)
             parcels_with_probabilities.sort(ascending=False)
-            outfile = os.path.join(config["predictions_dir"],
+            outfile = os.path.join(predictions_dir,
                                    "{}.csv".format(timestamp))
             parcels_with_probabilities.to_csv(outfile)
 

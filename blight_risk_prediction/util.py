@@ -11,7 +11,7 @@ import datetime
 import config
 
 #Load yaml configuration file
-from python_ds_tools.config import main
+from dstools.config import main
 #Get values from configuration file
 user = main['db']['user']
 password = main['db']['password']
@@ -45,11 +45,11 @@ def get_taxes(year, engine):
               '2013': 'taxes_2013', '2014': 'taxes_2014', '2015': 'taxes_2015'}
 
     if year != '2015':
-        query = 'SELECT "PARCEL_ID", "MKT_TOTAL_VAL", "ANNUAL_TAXES", ' +
-            '"ZIPCODE" FROM public.' + tax_db[year] + ' LIMIT 400000'
+        query = ('SELECT "PARCEL_ID", "MKT_TOTAL_VAL", "ANNUAL_TAXES", ' +
+            '"ZIPCODE" FROM public.' + tax_db[year] + ' LIMIT 400000')
     else:
-        query = 'SELECT "PARCEL", "MKT_TOTAL_VAL", "ANNUAL_TAXES", ' +
-            '"LOC_ZIP" FROM public.' + tax_db[year] + ' LIMIT 400000'
+        query = ('SELECT "PARCEL", "MKT_TOTAL_VAL", "ANNUAL_TAXES", ' +
+            '"LOC_ZIP" FROM public.' + tax_db[year] + ' LIMIT 400000')
     df = pd.read_sql_query(query, con=engine)
     return df
 

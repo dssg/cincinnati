@@ -10,7 +10,7 @@ validation_window: '1Year'  # Or '1Month'
 
 # Generate full parcel predictions for Cincinnati
 # Turn on after model validation/evaluation is complete
-prepare_field_test: True
+prepare_field_test: False
 inspection_date: '01Aug2015'
 
 # only use residential parcels
@@ -104,35 +104,14 @@ features:
 # Model selection          #
 ############################
 
-# Model parameters
-#model: 'SVM'  # 'SVM', 'LogisticRegression', 'RandomForest', 'AdaBoost'
-model: 'RandomForest'
-
-## Hyperparameters
-#parameters:  # ranges for RandomForest
-#    n_estimators:  [1, 10, 25, 50, 100]
-#    depth: [3, 5, 10, 20]
-#    max_features: [2, 4, 8, 16, "auto"]
-#    criterion: ["gini", "entropy"]
-
-parameters:  # single parameters for RandomForest
-    n_estimators:  [100]
-    depth: [10]
-
-#parameters:   #SVM
-#    C_reg: [100.0]  # C regularization parameter
-#    kernel: 'linear'  
-
-#parameters:   # logistic regression
-#    C_reg: [0.01, 0.1, 1.0, 10.0, 100.0]  # C regularization parameter
-
-#parameters: # adaboost
-#     learning_rate: [0.01, 0.1, 1, 10, 100]
+#See grid_values.py for supported models
+model: 'sklearn.ensemble.RandomForestClassifier'
 
 ############################
 # Output                   #
 ############################
 
-output_dir: 'results/'
+#Note that directories are relative to $OUTPUT_FOLDER
+#This will be used if model.py has been configured to save results using PICKLE prepare_field_test
+#see model.py for details
 pkl_prefix: 'modelresult_'  # prefix model result with string
-predictions_dir: 'predictions/'
