@@ -102,7 +102,7 @@ def generate_features_for_fake_inspection(inspection_date):
     :return:
     """
 
-    schema = "features_{}".format(inspection_date.strftime('%d%b%Y'))
+    schema = "features_{}".format(inspection_date.strftime('%d%b%Y')).lower()
     if schema not in existing_feature_schemas():
         raise SchemaMissing(schema)
 
@@ -140,10 +140,10 @@ def generate_features_for_fake_inspection(inspection_date):
 
 if __name__ == '__main__':
     # to generate features for if an inspection happens at date d
-    #d = datetime.datetime.strptime("01Jul2015", '%d%b%Y')
-    # generate_features_for_fake_inspection(d)
+    d = datetime.datetime.strptime("01Jul2015", '%d%b%Y')
+    generate_features_for_fake_inspection(d)
 
     # to generate features
-    generate_features()
+    #generate_features()
 
     pass
