@@ -26,9 +26,6 @@ to have at least one violation.
 
 logger = logging.getLogger(__name__)
 
-#Name of the folder that will store rsults and predictions
-#This folders are relative to $OUTPUT_FOLDER
-results_dir = "results/"
 predictions_dir = "predictions/"
 
 #Max cores to use if possible
@@ -206,7 +203,7 @@ def save_results(pkl_file, config, test, predictions,
                    "test_parcels": test.parcels}
 
         #Preppend output folder to pkl_file so results are stored there
-        path_to_pkl = os.path.join(os.environ['OUTPUT_FOLDER'], pkl_file)
+        path_to_pkl = os.path.join(os.environ['OUTPUT_FOLDER'], "pickled_results", pkl_file)
         with open(path_to_pkl, 'wb') as f:
             pickle.dump(to_save, f, protocol=pickle.HIGHEST_PROTOCOL)
     else:
@@ -250,7 +247,6 @@ def main():
         # pickle
         outfile = "{prefix}{timestamp}.pkl".format(prefix=config["pkl_prefix"],
                                                    timestamp=timestamp)
-        outfile = os.path.join(results_dir, outfile)
         config_raw["parameters"] = model.get_params()
         save_results(outfile, config_raw, test,
                               predicted, feature_importances, model)

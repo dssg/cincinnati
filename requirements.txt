@@ -32,4 +32,4 @@ Werkzeug==0.11.3
 wheel==0.26.0
 xlrd==0.9.4
 xlsx2csv==0.7.2
-sklearn-evaluation==0.1
+sklearn-evaluation==0.11

@@ -116,32 +116,27 @@ See [blight_risk_prediction/](blight_risk_prediction/) folder for more details o
  
 ##Modeling
 
-###Create output directories
+###Logging model results
 
-    mkdir results
-    mkdir predictions
-    
-###Configure the model
+Each time you run a model, the pipeline will store the results. There are two ways to do this (to change, modify the `HOW_TO_SAVE` variable in `blight_risk_prediction/model.py`):
 
-    edit default.yaml (options are documented in default.yaml)
-    
+1. Log to a MongoDB database
+2. Pickle results and save them to disk
+
+If you decide to use MongoDB ([mongolab](https://mongolab.com) provides a free instance that you can use), some results will be saved in a collection,
+make sure you provide a valid mongo URI in the config.yaml file. However, for performance reasons, predictions will be stored as csv files in `$OUTPUT_FOLDER/predictions`. Make sure that folder exists in your `$OUTPUT_FOLDER`.
+
+If you prefer to pickle results, .pkl files will be stored in `$OUTPUT_FOLDER/pickled_results`. Those files can be visualized using the webapp that the summer team developed.
+
+###Configure the model to train
+
+Before training a model, efit the `default.yaml` configuration file to select which model to train and features to include. Documentation is on the file.
+
 ###Run the model
 
+To run a model using the `default.yaml` configuration file:
+
     python -m blight_risk_prediction.model
-   
-###Run the webapp
-
-    python run_webapp.py
-
-### Output
-
-Each model run produces a pickle file which contains:
-
-* the full list of parcels predicted to have violations
-* the configuration file used to generate that model
-* feature importances
-
-These output files include a timestamp in their filename such that they will not be accidentally overwritten. These files can be used with the evaluation web application in `evaluation`. 
 
 ## Repository layout
 
