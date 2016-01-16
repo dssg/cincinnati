@@ -184,8 +184,12 @@ def save_results(pkl_file, config, test, predictions,
                                       feature_importances=list(feature_importances),
                                       config=config)
         #Dump test_labels, test_predictions and test_parcels to a csv file
-        dump = test[['parcels', 'y']]
-        dump = dump.join(predictions)
+	parcel_id = [record[0] for record in test.parcels]
+	inspection_date = [record[1] for record in test.parcels]
+        dump = pd.DataFrame({'parcel_id': parcel_id,
+			     'inspection_date': inspection_date,
+			     'viol_outcome': test.y,
+			     'prediction': predictions})
         dump.to_csv(os.path.join(os.environ['OUTPUT_FOLDER'], "preds.csv"))
     elif HOW_TO_SAVE == 'PICKLE':
         to_save = {"config": config,
