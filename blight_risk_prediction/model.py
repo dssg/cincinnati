@@ -91,6 +91,9 @@ def make_datasets(config):
     #Flatten list
     features = [item for sublist in features for item in sublist]
 
+    #Selected features
+    #print 'Selected features based on yaml file %s' % features
+
     only_residential = config["residential_only"]
 
     train = dataset.get_training_dataset(
