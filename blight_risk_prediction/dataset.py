@@ -325,10 +325,10 @@ def group_features_by_loader(features):
 #####################################################
 
 #List table and columns for current schema
-def tables_and_columns_for_current_schema(self):
+def tables_and_columns_for_current_schema(schema):
     query = ("SELECT table_name, column_name FROM information_schema.columns"
            "WHERE table_schema='%(schema)s';")
-    r = pd.read_sql(query, con=self.con, params={"start_date": self.schema})
+    r = pd.read_sql(query, con=self.con, params={"schema": schema})
     return r
 
 class Dataset():
@@ -344,7 +344,7 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
     end_date = end_date.strftime('%Y-%m-%d')
     loader = FeatureLoader(schema, start_date, end_date)
 
-    print tables_and_columns_for_current_schema()
+    print tables_and_columns_for_current_schema(schema)
 
     # make sure that all features to be loaded actually exist
     for feature in features:
