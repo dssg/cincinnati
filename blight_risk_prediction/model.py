@@ -12,7 +12,7 @@ import copy
 from itertools import product
 import numpy as np
 from sklearn import linear_model, preprocessing, svm, ensemble
-from blight_risk_prediction import dataset, evaluation
+from blight_risk_prediction import dataset, evaluation, util
 
 from dstools.config import main as cfg_main
 from sklearn_evaluation.Logger import Logger
@@ -62,6 +62,16 @@ def configure_model(config_file):
 
     return cfg, copy.deepcopy(cfg)
 
+#Parse feature pattern - based on a string with the format table.column, table.%, table.col_%
+#find all columns matching
+def parse_feature_patter(pattern):
+    table, column_pattern = pattern.split('.')
+    engine = util.get_engine()
+    query = ("SELECT column_name FROM information_schema.columns "
+             "WHERE table_schema='features' AND table_name=%(table)s AND "
+             "column_name LIKE %(column_pattern)s;")
+    cols = pd.read_sql(query, engine, params={"table": table, "column_pattern": column_pattern}).column_name
+    return list(cols)
 
 def make_datasets(config):
 
@@ -76,8 +86,10 @@ def make_datasets(config):
         raise ConfigError("Unsupported validation window: {}".format(
                           config["validation_window"]))
 
-    features = [feat for feat, include in config["features"].items()
-                if include]
+    #Parse features
+    features = [parse_feature_patter(feature) for feature in config["features"]]
+    #Flatten list
+    features = [item for sublist in features for item in sublist]
 
     only_residential = config["residential_only"]
 

@@ -76,7 +76,6 @@ class FeatureLoader():
 
     def load_feature_group(self, name_of_loading_method, features_to_load):
         loading_method = getattr(self, 'load_%s' % name_of_loading_method)
-        #loading_method = getattr(self, name_of_loading_method)
         return loading_method(features_to_load)
 
     def load_house_type(self, features_to_load):
@@ -278,6 +277,7 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
     # for all features and inspections
     dataset = inspections
 
+    #Group features to load them in a single query to the table than contains each group
     tuples = list(tables_and_columns.itertuples(index=False))
     groups = itertools.groupby(tuples, lambda x:x[0])
     grouped_features = []
@@ -286,7 +286,7 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
       grouped_features.append((key, values))
 
     for loading_method, feature_group in grouped_features:
-        feature_df = loader.load_feature_group(loading_method, feature_group))
+        feature_df = loader.load_feature_group(loading_method, feature_group)
         dataset = dataset.join(feature_df, how='left')
         # dataset = dataset.dropna(subset=['viol_outcome'])
 
