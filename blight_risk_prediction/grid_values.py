@@ -22,7 +22,7 @@ big_grid = {
     }
 }
 
-small_grid = {
+medium_grid = {
     "sklearn.ensemble.RandomForestClassifier": {
         'n_estimators': [1,10,100],
         'max_depth': [10,50,100],
@@ -42,6 +42,28 @@ small_grid = {
     
     "sklearn.svm.SVC": {
         'C': [0.001,0.01,0.1,1,10],
+        'kernel': ['linear']
+    }
+}
+
+small_grid = {
+    "sklearn.ensemble.RandomForestClassifier": {
+        'n_estimators': [10, 100],
+        'max_features': ['sqrt','log2'],
+    },
+
+    "sklearn.ensemble.AdaBoostClassifier": {
+        'algorithm': ['SAMME', 'SAMME.R'],
+        'n_estimators': [10,100]
+    },
+    
+    "sklearn.linear_model.LogisticRegression": {
+        'penalty': ['l1','l2'],
+        'C': [0.01,0.1,1]
+    },
+    
+    "sklearn.svm.SVC": {
+        'C': [0.01,0.1,1,10],
         'kernel': ['linear']
     }
 }

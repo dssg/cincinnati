@@ -20,7 +20,7 @@ residential_only: True
 # Feature selection        #
 ############################
 
-#List features to use, follow syntax table.column where column
+#List features to use, follow the syntax table.column where column
 #is used in a LIKE statement
 #http://www.postgresql.org/docs/current/static/functions-matching.html
 features:
