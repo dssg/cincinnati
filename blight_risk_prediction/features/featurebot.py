@@ -33,6 +33,13 @@ features_to_generate = [FeatureToGenerate("tax", tax.make_tax_features),
                          FeatureToGenerate("census_2010",
                                            census.make_census_features)]
 
+class SchemaMissing():
+    def __init__(self, schema_name):
+        self.schema_name = schema_name
+
+    def __str__(self):
+        return "Schema {} does not exist".format(self.schema_name)
+
 def existing_feature_schemas():
     engine = util.get_engine()
     schemas = "SELECT schema_name AS schema FROM information_schema.schemata"

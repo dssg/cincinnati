@@ -324,6 +324,13 @@ def group_features_by_loader(features):
 # Functions for compiling training and test datasets
 #####################################################
 
+#List table and columns for current schema
+def tables_and_columns_for_current_schema(self):
+    query = ("SELECT table_name, column_name FROM information_schema.columns"
+           "WHERE table_schema='%(schema)s';")
+    r = pd.read_sql(query, con=self.con, params={"start_date": self.schema})
+    return r
+
 class Dataset():
     def __init__(self, parcels, x, y, feature_names):
         self.parcels = parcels
@@ -336,6 +343,8 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
     start_date = start_date.strftime('%Y-%m-%d')
     end_date = end_date.strftime('%Y-%m-%d')
     loader = FeatureLoader(schema, start_date, end_date)
+
+    print tables_and_columns_for_current_schema()
 
     # make sure that all features to be loaded actually exist
     for feature in features:
