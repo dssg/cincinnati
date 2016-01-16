@@ -2,7 +2,7 @@
 import os
 import pdb
 import datetime
-from itertools import groupby
+import itertools
 from collections import namedtuple
 import logging
 import numpy as np
@@ -121,7 +121,7 @@ class FeatureLoader():
         self.start_date = start_date
         self.end_date = end_date
 
-    def load_labels(self, only_residential):
+    def load_parcels_inspections(self, only_residential):
         logger.debug("Loading labels for [{}, {}]".format(self.start_date,
                      self.end_date))
         if only_residential:
@@ -148,10 +148,11 @@ class FeatureLoader():
         return labels
 
     def load_feature_group(self, name_of_loading_method, features_to_load):
-        loading_method = getattr(self, name_of_loading_method)
+        loading_method = getattr(self, 'load_%s' % name_of_loading_method)
+        #loading_method = getattr(self, name_of_loading_method)
         return loading_method(features_to_load)
 
-    def load_home_use_features(self, features_to_load):
+    def load_house_type(self, features_to_load):
         logger.debug("Loading home use features for [{}, {}]".format(
             self.start_date, self.end_date))
 
@@ -175,7 +176,7 @@ class FeatureLoader():
                                                        len(features.columns)))
         return features
 
-    def load_owner_features(self, features_to_load):
+    def load_named_entities(self, features_to_load):
         logger.debug("Loading owner features for [{}, {}]".format(
             self.start_date, self.end_date))
         query = ("SELECT feature.* "
@@ -189,7 +190,7 @@ class FeatureLoader():
                                                        len(features.columns)))
         return features
 
-    def load_parcel_areas(self, features_to_load):
+    def load_parc_area(self, features_to_load):
         logger.debug("Loading parcel areas for [{}, {}]".format(
             self.start_date, self.end_date))
         query = ("SELECT feature.*, labels.inspection_date "
@@ -205,7 +206,7 @@ class FeatureLoader():
                                                        len(features.columns)))
         return features
 
-    def load_year_built(self, features_to_load):
+    def load_parc_year(self, features_to_load):
         logger.debug("Loading years built for [{}, {}]".format(
             self.start_date, self.end_date))
         query = ("SELECT labels.parcel_id, feature.year_built::integer, "
@@ -250,7 +251,7 @@ class FeatureLoader():
                                                        len(features.columns)))
         return features
 
-    def load_tax_features(self, features_to_load):
+    def load_tax(self, features_to_load):
         logger.debug("Loading tax features for [{}, {})".format(
             self.start_date, self.end_date))
         query = ("SELECT feature.* "
@@ -264,7 +265,7 @@ class FeatureLoader():
                                                        len(features.columns)))
         return features
 
-    def load_census_features(self, features_to_load):
+    def load_census_2010(self, features_to_load):
         logger.debug("Loading census features for [{}, {})".format(
             self.start_date, self.end_date))
         query = ("SELECT feature.*, labels.inspection_date "
@@ -351,17 +352,41 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
     for feature in features:
         if feature not in columns:
             raise UnknownFeatureError(feature)
-    features = group_features_by_loader(features)
+
+    #Subselect based on columns selected by the user
+    tables_and_columns = tables_and_columns[tables_and_columns.column_name.isin(features)]
 
     # load inspections
-    inspections = loader.load_labels(only_residential)
+    inspections = loader.load_parcels_inspections(only_residential)
 
     # load each group of features and merge into a full dataset
     # merging makes sure we have the same index and sorting
     # for all features and inspections
     dataset = inspections
-    for loading_method, feature_group in features:
+
+    tuples = list(tables_and_columns.itertuples(index=False))
+    groups = itertools.groupby(tuples, lambda x:x[0])
+    grouped_features = []
+    for key, tuples in groups:
+      values = [x[1] for x in tuples]
+      grouped_features.append((key, values))
+
+    # print '*'*100
+    # for loading_method, feature_group in grouped_features:
+    #   print loading_method, feature_group
+    # print '*'*100
+    # for loading_method, feature_group in group_features_by_loader(features):
+    #   print loading_method, feature_group
+    # print '*'*100
+
+    for loading_method, feature_group in grouped_features:
+    #for loading_method, feature_group in group_features_by_loader(features):
+        #print 'Loading %s with %s' % (feature_group, loading_method)
         feature_df = loader.load_feature_group(loading_method, feature_group)
+        #print dataset.head(1)
+        #print '***'
+        #print feature_df.head(1)
+        #dataset = dataset.join(feature_df, on='parcel_id')
         dataset = dataset.join(feature_df, how='left')
         # dataset = dataset.dropna(subset=['viol_outcome'])
 
