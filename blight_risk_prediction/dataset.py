@@ -13,84 +13,11 @@ from blight_risk_prediction.features.featurebot import \
     existing_feature_schemas, SchemaMissing
 import config
 
-
 logger = logging.getLogger(__name__)
-
-
-# !!!!!!!!!!!! put all known features here !!!!!!!!!!!!!!!!!!!
-feature_loaders = {"home_use": "load_home_use_features",
-                   "owner_ner": "load_owner_features",
-                   "crime_rate_past_year": "load_crime_features",
-                   "tax_foreclosure": "load_tax_features",
-                   "mean_impr_value": "load_tax_features",
-                   "mean_land_value": "load_tax_features",
-                   "mean_market_value": "load_tax_features",
-                   "change_impr_value": "load_tax_features",
-                   "change_land_value": "load_tax_features",
-                   "change_market_value": "load_tax_features",
-                   "crime_rate_1yr": "load_crime_new_features",
-                   "crime_rate_3yr": "load_crime_new_features",
-                   "crime_rate_1yr_guns": "load_crime_new_features",
-                   "crime_rate_3yr_guns": "load_crime_new_features",
-                   "housing_density": "load_census_features",
-                   "population_density": "load_census_features",
-                   "rate_1_per_household": "load_census_features",
-                   "rate_2_per_household": "load_census_features",
-                   "rate_3_per_household": "load_census_features",
-                   "rate_4_per_household": "load_census_features",
-                   "rate_5_per_household": "load_census_features",
-                   "rate_6_per_household": "load_census_features",
-                   "rate_7_plus_per_household": "load_census_features",
-                   "rate_asian_householder": "load_census_features",
-                   "rate_asian_pop": "load_census_features",
-                   "rate_black_householder": "load_census_features",
-                   "rate_black_pop": "load_census_features",
-                   "rate_female_18_35": "load_census_features",
-                   "rate_female_35_50": "load_census_features",
-                   "rate_female_50_75": "load_census_features",
-                   "rate_female_under_18": "load_census_features",
-                   "rate_for_rent": "load_census_features",
-                   "rate_households": "load_census_features",
-                   "rate_male_18_35": "load_census_features",
-                   "rate_male_35_50": "load_census_features",
-                   "rate_male_50_75": "load_census_features",
-                   "rate_male_over_75": "load_census_features",
-                   "rate_male_under_18": "load_census_features",
-                   "rate_mortgage_or_loan": "load_census_features",
-                   "rate_native_householder": "load_census_features",
-                   "rate_native_pop": "load_census_features",
-                   "rate_occupied_units": "load_census_features",
-                   "rate_other_race_householder": "load_census_features",
-                   "rate_other_race_pop": "load_census_features",
-                   "rate_owner_occupied": "load_census_features",
-                   "rate_owner_occupied_asian": "load_census_features",
-                   "rate_owner_occupied_black": "load_census_features",
-                   "rate_owner_occupied_hispanic": "load_census_features",
-                   "rate_owner_occupied_native": "load_census_features",
-                   "rate_owner_occupied_no_children": "load_census_features",
-                   "rate_owner_occupied_other_race": "load_census_features",
-                   "rate_owner_occupied_w_children": "load_census_features",
-                   "rate_owner_occupied_white": "load_census_features",
-                   "rate_pop_occupied_units": "load_census_features",
-                   "rate_pop_over_18": "load_census_features",
-                   "rate_renter_occupied": "load_census_features",
-                   "rate_renter_occupied_asian": "load_census_features",
-                   "rate_renter_occupied_black": "load_census_features",
-                   "rate_renter_occupied_native": "load_census_features",
-                   "rate_renter_occupied_no_children": "load_census_features",
-                   "rate_renter_occupied_other": "load_census_features",
-                   "rate_renter_occupied_w_children": "load_census_features",
-                   "rate_renter_occupied_white": "load_census_features",
-                   "rate_vacant_units": "load_census_features",
-                   "rate_white_householder": "load_census_features",
-                   "rate_white_pop": "load_census_features",
-                   "area": "load_parcel_areas",
-                   "year_built": "load_year_built"}
 
 ############################################
 # Functions for loading labels and features
 ############################################
-
 
 class UnknownFeatureError(Exception):
     def __init__(self, feature):
@@ -307,19 +234,6 @@ class FeatureLoader():
         return feats
 
 
-def group_features_by_loader(features):
-    # group features by their loader function
-    # - ugly because pythons groupby does not work properly, huh?
-    # features = groupby(features, key=lambda feat: feature_loaders[feat])
-    # y no working?
-    features_grouped = []
-    for loader_to_group in set(feature_loaders.values()):
-        feats_this_loader = [feat for feat, loader in feature_loaders.items()
-                             if feat in features and loader == loader_to_group]
-        if len(feats_this_loader) > 0:
-            features_grouped.append((loader_to_group, feats_this_loader))
-    return features_grouped
-
 #####################################################
 # Functions for compiling training and test datasets
 #####################################################
@@ -371,22 +285,8 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
       values = [x[1] for x in tuples]
       grouped_features.append((key, values))
 
-    # print '*'*100
-    # for loading_method, feature_group in grouped_features:
-    #   print loading_method, feature_group
-    # print '*'*100
-    # for loading_method, feature_group in group_features_by_loader(features):
-    #   print loading_method, feature_group
-    # print '*'*100
-
     for loading_method, feature_group in grouped_features:
-    #for loading_method, feature_group in group_features_by_loader(features):
-        #print 'Loading %s with %s' % (feature_group, loading_method)
-        feature_df = loader.load_feature_group(loading_method, feature_group)
-        #print dataset.head(1)
-        #print '***'
-        #print feature_df.head(1)
-        #dataset = dataset.join(feature_df, on='parcel_id')
+        feature_df = loader.load_feature_group(loading_method, feature_group))
         dataset = dataset.join(feature_df, how='left')
         # dataset = dataset.dropna(subset=['viol_outcome'])
 
@@ -394,7 +294,6 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
     dataset = dataset.reset_index()
     dataset = dataset.reindex(np.random.permutation(dataset.index))
     dataset = dataset.set_index(["parcel_id", "inspection_date"])
-
 
     path_to_tax = os.path.join(os.environ['OUTPUT_FOLDER'], 'tax.csv')
     dataset["mean_market_value"].to_csv(path_to_tax)
