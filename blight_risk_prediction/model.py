@@ -36,6 +36,8 @@ MAX_CORES = 4
 #can use something like MongoChef to see results (to do that you need to
 #provided a mongo URI in the config.yaml file). 2. Pickle results (you can see
 #results with the webapp)
+#Important: even if you use MONGO, for performance reasons, some results will
+#still be saved as csv files in your $OUTPUT_FOLDER
 HOW_TO_SAVE = 'MONGO' #or 'PICKLE'
 
 class ConfigError():
@@ -178,13 +180,13 @@ def save_results(pkl_file, config, test, predictions,
         mongo_logger = Logger(db_credentials, 'models', 'cincinnati')
         #Sending model will log model name, parameters and datetime
         #Also log other important things by sending named parameters
-    
         mongo_logger.log_model(model, features=list(test.feature_names),
                                       feature_importances=list(feature_importances),
-                                      config=config,
-                                      test_labels=list(test.y),
-                                      test_predictions=list(predictions),
-                                      test_parcels=list(test.parcels))
+                                      config=config)
+        #Dump test_labels, test_predictions and test_parcels to a csv file
+        dump = test[['parcels', 'y']]
+        dump = dump.join(predictions)
+        dump.to_csv(os.path.join(os.environ['OUTPUT_FOLDER'], "preds.csv"))
     elif HOW_TO_SAVE == 'PICKLE':
         to_save = {"config": config,
                    "features": test.feature_names,
