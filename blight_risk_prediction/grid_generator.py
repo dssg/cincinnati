@@ -2,9 +2,7 @@
 #sklearn
 import itertools
 from pydoc import locate
-from grid_values import small_grid
-
-_grid_values = small_grid
+import grid_values
 
 def _generate_grid(model_parameters):
     #Iterate over keys and values
@@ -22,8 +20,11 @@ def _generate_grid(model_parameters):
 def _tuples2dict(tuples):
     return dict((x, y) for x, y in tuples)
 
-
-def grid_from_class(class_name):
+def grid_from_class(class_name, size='small'):
+    try:
+        _grid_values = getattr(grid_values, size)
+    except:
+        print "Cannot get grid with size %s" % size
     #Get grid values for the given class
     values = _grid_values[class_name]
     #Generate cross product for all given values and return them as dicts

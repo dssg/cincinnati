@@ -1,4 +1,4 @@
-big_grid = {
+big = {
     "sklearn.ensemble.RandomForestClassifier": {
         'n_estimators': [1,10,100,1000,10000],
         'max_depth': [1,5,10,20,50,100],
@@ -22,7 +22,7 @@ big_grid = {
     }
 }
 
-medium_grid = {
+medium = {
     "sklearn.ensemble.RandomForestClassifier": {
         'n_estimators': [1,10,100],
         'max_depth': [10,50,100],
@@ -46,7 +46,7 @@ medium_grid = {
     }
 }
 
-small_grid = {
+small = {
     "sklearn.ensemble.RandomForestClassifier": {
         'n_estimators': [10, 100],
         'max_features': ['sqrt','log2'],
