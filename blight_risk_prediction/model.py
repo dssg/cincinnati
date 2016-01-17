@@ -197,7 +197,7 @@ def save_results(pkl_file, config, test, predictions,
 			     'inspection_date': inspection_date,
 			     'viol_outcome': test.y,
 			     'prediction': predictions})
-        dump.to_csv(os.path.join(os.environ['OUTPUT_FOLDER'], "predictions", str_local))
+        dump.to_csv(os.path.join(os.environ['OUTPUT_FOLDER'], "predictions", str_local+'.csv'))
     elif HOW_TO_SAVE == 'PICKLE':
         to_save = {"config": config,
                    "features": test.feature_names,
