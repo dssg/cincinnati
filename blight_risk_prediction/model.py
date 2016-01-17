@@ -177,8 +177,8 @@ def save_results(pkl_file, config, test, predictions,
         db_credentials = cfg_main['logger_uri']
         mongo_logger = Logger(db_credentials, 'models', 'cincinnati')
         #Compute some statistics to log
-        prec_at_1 = evaluation.precision_at_x_percent(test.y, predictions, x_percent=0.01)
-        prec_at_10 = evaluation.precision_at_x_percent(test.y, predictions, x_percent=0.1)
+        cutoff_at_1, prec_at_1 = evaluation.precision_at_x_percent(test.y, predictions, x_percent=0.01)
+        cutoff_at_10, prec_at_10 = evaluation.precision_at_x_percent(test.y, predictions, x_percent=0.1)
         #Sending model will log model name, parameters and datetime
         #Also log other important things by sending named parameters
 	    #logger returns the datetime (UTC) stored in the db to use it as a reference
@@ -190,11 +190,11 @@ def save_results(pkl_file, config, test, predictions,
 	   #Dump test_labels, test_predictions and test_parcels to a csv file
 	   parcel_id = [record[0] for record in test.parcels]
 	   inspection_date = [record[1] for record in test.parcels]
-        dump = pd.DataFrame({'parcel_id': parcel_id,
+       dump = pd.DataFrame({'parcel_id': parcel_id,
 			     'inspection_date': inspection_date,
 			     'viol_outcome': test.y,
 			     'prediction': predictions})
-        dump.to_csv(os.path.join(os.environ['OUTPUT_FOLDER'], "predictions", str_local+'.csv'))
+       dump.to_csv(os.path.join(os.environ['OUTPUT_FOLDER'], "predictions", str_local+'.csv'))
     elif HOW_TO_SAVE == 'PICKLE':
         to_save = {"config": config,
                    "features": test.feature_names,
