@@ -177,15 +177,17 @@ def save_results(pkl_file, config, test, predictions,
         db_credentials = cfg_main['logger_uri']
         mongo_logger = Logger(db_credentials, 'models', 'cincinnati')
         #Compute some statistics to log
-        prec_at_1 = evaluation.precision_at_x_percent(test.y, predictions, x_percent=0.01)
-        prec_at_10 = evaluation.precision_at_x_percent(test.y, predictions, x_percent=0.1)
+        cutoff_at_1, prec_at_1 = evaluation.precision_at_x_percent(test.y, predictions, x_percent=0.01)
+        cutoff_at_10, prec_at_10 = evaluation.precision_at_x_percent(test.y, predictions, x_percent=0.1)
         #Sending model will log model name, parameters and datetime
         #Also log other important things by sending named parameters
 	#logger returns the datetime (UTC) stored in the db to use it as a reference
         utc = mongo_logger.log_model(model, features=list(test.feature_names),
                                       feature_importances=list(feature_importances),
                                       config=config, prec_at_1=prec_at_1,
-                                      prec_at_10=prec_at_10)
+                                      prec_at_10=prec_at_10,
+				      cutoff_at_1=cutoff_at_1,
+				      cutoff_at_10=cutoff_at_10)
         #Convert UTC datetime to local datetime and format it as string
 	utc = utc.replace(tzinfo=tz.tzutc())
 	local = utc.astimezone(tz.tzlocal())
