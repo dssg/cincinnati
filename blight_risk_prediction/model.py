@@ -186,10 +186,7 @@ def save_results(pkl_file, config, test, predictions,
                                       feature_importances=list(feature_importances),
                                       config=config, prec_at_1=prec_at_1,
                                       prec_at_10=prec_at_10)
-        #Convert UTC datetime to local datetime and format it as string
-	   utc = utc.replace(tzinfo=tz.tzutc())
-	   local = utc.astimezone(tz.tzlocal())
-	   str_local = local.strftime("%Y-%m-%d_%H:%M:%S")
+	   str_local = utc.strftime("%Y-%m-%d_%H:%M:%S")
 	   #Dump test_labels, test_predictions and test_parcels to a csv file
 	   parcel_id = [record[0] for record in test.parcels]
 	   inspection_date = [record[1] for record in test.parcels]
