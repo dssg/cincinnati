@@ -34,7 +34,12 @@ features:
 
 #See grid_values.py for supported models
 #Use valid scikit-learn classes, provide the full path to the class
-model: 'sklearn.ensemble.RandomForestClassifier'
+models:
+  - 'sklearn.ensemble.RandomForestClassifier'
+
+#For each model you select, the pipeline will
+#train a bunch of models, see grid_values for more
+grid_size: 'small' #small, medium or big
 
 ############################
 # Output                   #

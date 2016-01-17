@@ -220,8 +220,14 @@ def main():
 
     # datasets
     train, test, field_train, field_test = make_datasets(config)
-    # instantiate models with different sets of hyperparameters
-    models = grid_from_class(config["model"])
+    #Get size of grids
+    grid_size = config["grid_size"]
+    #Get list of models selected
+    models_selected = config["models"]
+    #Get grid for each class
+    grids = [grid_from_class(m, size=grid_size) for m in models_selected]
+    #Flatten list
+    models = [a_grid for a_model_grid in grids for a_grid in a_model_grid]
 
     # fit each model for all of these
     for model in models:
