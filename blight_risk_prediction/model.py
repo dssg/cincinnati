@@ -183,7 +183,8 @@ def save_results(pkl_file, config, test, predictions,
         mongo_id = mongo_logger.log_model(model, features=list(test.feature_names),
                                       feature_importances=list(feature_importances),
                                       config=config, prec_at_1=prec_at_1,
-                                      prec_at_10=prec_at_10)
+                                      prec_at_10=prec_at_10, cutoff_at_1=cutoff_at_1,
+                                      cutoff_at_10=cutoff_at_10)
 	   #Dump test_labels, test_predictions and test_parcels to a csv file
 	   parcel_id = [record[0] for record in test.parcels]
 	   inspection_date = [record[1] for record in test.parcels]
