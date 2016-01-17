@@ -35,6 +35,7 @@ features:
 #See grid_values.py for supported models
 #Use valid scikit-learn classes, provide the full path to the class
 models:
+  - 'sklearn.ensemble.AdaBoostClassifier'
   - 'sklearn.ensemble.RandomForestClassifier'
 
 #For each model you select, the pipeline will
