@@ -128,6 +128,8 @@ make sure you provide a valid mongo URI in the config.yaml file. However, for pe
 
 If you prefer to pickle results, .pkl files will be stored in `$OUTPUT_FOLDER/pickled_results`. Those files can be visualized using the webapp that the summer team developed.
 
+The recommended way is to use MongoDB, since it's the most complete one.
+
 ###Configure the model to train
 
 Before training a model, efit the `default.yaml` configuration file to select which model to train and features to include. Documentation is on the file.

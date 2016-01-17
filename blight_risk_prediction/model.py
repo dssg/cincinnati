@@ -173,22 +173,26 @@ def get_feature_importances(model):
 def save_results(pkl_file, config, test, predictions,
                           feature_importances, model):
     if HOW_TO_SAVE == 'MONGO':
-        #Log experiment
+        #Instantiate logger
         db_credentials = cfg_main['logger_uri']
         mongo_logger = Logger(db_credentials, 'models', 'cincinnati')
+        #Compute some statistics to log
+        prec_at_1 = evaluation.precision_at_x_percent(test.y, predictions, x_percent=0.01)
+        prec_at_10 = evaluation.precision_at_x_percent(test.y, predictions, x_percent=0.1)
         #Sending model will log model name, parameters and datetime
         #Also log other important things by sending named parameters
-	#logger returns the datetime (UTC) stored in the db to use it as a reference
+	    #logger returns the datetime (UTC) stored in the db to use it as a reference
         utc = mongo_logger.log_model(model, features=list(test.feature_names),
                                       feature_importances=list(feature_importances),
-                                      config=config)
+                                      config=config, prec_at_1=prec_at_1,
+                                      prec_at_10=prec_at_10)
         #Convert UTC datetime to local datetime and format it as string
-	utc = utc.replace(tzinfo=tz.tzutc())
-	local = utc.astimezone(tz.tzlocal())
-	str_local = local.strftime("%Y-%m-%d_%H:%M:%S")
-	#Dump test_labels, test_predictions and test_parcels to a csv file
-	parcel_id = [record[0] for record in test.parcels]
-	inspection_date = [record[1] for record in test.parcels]
+	   utc = utc.replace(tzinfo=tz.tzutc())
+	   local = utc.astimezone(tz.tzlocal())
+	   str_local = local.strftime("%Y-%m-%d_%H:%M:%S")
+	   #Dump test_labels, test_predictions and test_parcels to a csv file
+	   parcel_id = [record[0] for record in test.parcels]
+	   inspection_date = [record[1] for record in test.parcels]
         dump = pd.DataFrame({'parcel_id': parcel_id,
 			     'inspection_date': inspection_date,
 			     'viol_outcome': test.y,
