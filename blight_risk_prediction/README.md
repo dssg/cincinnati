@@ -3,42 +3,17 @@
 This module contains code for creating features and training a model to predict the probability that a home will have a
 building code violation if inspected at some specific date. 
 
-# Run the model
+##Feature generation
 
-... see Readme file in parent directory
+To generate features using all data:
 
-# Create features from raw data
+`python -m blight_risk_prediction.features.featurebot`
 
-## Create features for each actual inspection in the data
+To generate features for if an inspection happens in July 01, 2015 (or any other date):
 
-* manually create schema `features` in the database
-* open `features/featurebot.py`. In the main function call
-     
-   
-     
-    generate_features()
-    
-* run 
+`python -m blight_risk_prediction.features.featurebot 20Jul2015`
 
- 
-    python -m blight_risk_prediction/features/featurebot.py
-
-## Create features as if inspection where on some date, e.g. July 1st 2015
-
-* manually create schema `features_01Jul2015` in the database
-* open `features/featurebot.py`. In the main function call
-     
-   
-     
-    d = datetime.datetime.strptime("01Jul2015", '%d%b%Y')
-    generate_features_for_fake_inspection(d)
-    
-* run 
-
- 
-    python -m blight_risk_prediction/features/featurebot.py
-
-# Adding a new feature
+##Adding new features
 
 Add features for `featurebot.py`:
 
@@ -48,5 +23,4 @@ Add features for `featurebot.py`:
 *  Add feature to the list of features to load when creating training and testing in `dataset.feature_loaders()`
    --> list all columns in feature table!
 *  Add a function to load feature in class `FeatureLoader().def load_<feature_name>_feature()`
-*  Add a string corresponding to the feature in the default YAML configuration file: list all column names!
 *  Start `featurebot` to populate the database with features.
