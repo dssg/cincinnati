@@ -28,6 +28,10 @@ logger = logging.getLogger(__name__)
 predictions_dir = "predictions/"
 
 parser = argparse.ArgumentParser()
+parser.add_argument("-c", "--path_to_config_file",
+                    help=("Path to the yaml configuration file. "
+                          "Defaults to the default.yaml in the $ROOT_FOLDER"),
+                    type=str, default=os.path.join(os.environ["ROOT_FOLDER"], "default.yaml"))
 #Two options for saving results: 1. save to mongodb, you
 #can use something like MongoChef to see results (to do that you need to
 #provided a mongo URI in the config.yaml file). 2. Pickle results (you can see
@@ -216,12 +220,7 @@ def save_results(pkl_file, config, test, predictions, feature_importances, model
         logger.info("Select mongo or pickle for saving. Not saving results for now.")
 
 def main():
-
-    # config
-    if len(sys.argv) <= 1:
-        config_file = os.path.join(os.environ["ROOT_FOLDER"], "default.yaml")
-    else:
-        config_file = sys.argv[1]
+    config_file = args.path_to_config_file
     config, config_raw = configure_model(config_file)
 
     # datasets
@@ -283,6 +282,8 @@ def main():
             parcels_with_probabilities.to_csv(outfile)
 
 if __name__ == '__main__':
-    print ('Starting modeling pipeline. Trying with %d max jobs and '
-        'logging using %s' % (args.n_jobs, args.how_to_save))
+    print ('Starting modeling pipeline, configuring models using %s '
+            'configuration file. Trying with %d max jobs and '
+            'logging using %s.' % (args.path_to_config_file, args.n_jobs, 
+                args.how_to_save))
     main()
