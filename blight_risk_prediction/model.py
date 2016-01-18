@@ -173,8 +173,10 @@ def save_results(pkl_file, config, test, predictions,
                           feature_importances, model):
     if HOW_TO_SAVE == 'MONGO':
         #Instantiate logger
-        db_credentials = cfg_main['logger_uri']
-        mongo_logger = Logger(db_credentials, 'models', 'cincinnati')
+        logger_uri = cfg_main['logger']['uri']
+        logger_db = cfg_main['logger']['db']
+        logger_collection = cfg_main['logger']['collection']
+        mongo_logger = Logger(logger_uri, logger_db, logger_collection)
         #Compute some statistics to log
         cutoff_at_1, prec_at_1 = evaluation.precision_at_x_percent(test.y, predictions, x_percent=0.01)
         cutoff_at_10, prec_at_10 = evaluation.precision_at_x_percent(test.y, predictions, x_percent=0.1)
