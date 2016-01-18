@@ -43,7 +43,7 @@ models:
 grid_size: 'small' #small, medium or big
 
 ############################
-# Output                   #
+# Experiment name          #
 ############################
 
 #The effecy of this will be different depending of which logger you are using
