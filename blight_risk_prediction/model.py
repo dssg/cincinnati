@@ -25,7 +25,7 @@ to have at least one violation.
 """
 
 logger = logging.getLogger(__name__)
-predictions_dir = "predictions/"
+field_test_dir = "field_test_predictions/"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--path_to_config_file",
@@ -277,7 +277,7 @@ def main():
             parcels_with_probabilities = pd.Series(
                 fake_inspections_probs, index=index)
             parcels_with_probabilities.sort(ascending=False)
-            outfile = os.path.join(predictions_dir,
+            outfile = os.path.join(field_test_dir,
                                    "{}.csv".format(timestamp))
             parcels_with_probabilities.to_csv(outfile)
 

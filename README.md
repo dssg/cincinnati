@@ -140,7 +140,11 @@ To run a model using the `default.yaml` configuration file:
 
     python -m blight_risk_prediction.model
 
-Run `python -m blight_risk_prediction.model` --help to see other options available.
+Run `python -m blight_risk_prediction.model --help`  to see other options available.
+
+###Preparing results for a field test
+
+If the `prepare_field_test` in the configuration file, predictions such test will be saved on `$OUTPUT_FOLDER/field_test_predictions`. Make sure that folder exists.
 
 ## Repository layout
 
