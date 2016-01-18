@@ -63,7 +63,7 @@ def configure_model(config_file):
 
 #Parse feature pattern - based on a string with the format table.column, table.%, table.col_%
 #find all columns matching
-def parse_feature_patter(pattern):
+def parse_feature_pattern(pattern):
     table, column_pattern = pattern.split('.')
     engine = util.get_engine()
     query = ("SELECT column_name FROM information_schema.columns "
@@ -86,7 +86,7 @@ def make_datasets(config):
                           config["validation_window"]))
 
     #Parse features
-    features = [parse_feature_patter(feature) for feature in config["features"]]
+    features = [parse_feature_pattern(feature) for feature in config["features"]]
     #Flatten list
     features = [item for sublist in features for item in sublist]
 
