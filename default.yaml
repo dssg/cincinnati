@@ -35,8 +35,8 @@ features:
 #See grid_values.py for supported models
 #Use valid scikit-learn classes, provide the full path to the class
 models:
-  - 'sklearn.ensemble.AdaBoostClassifier'
- # - 'sklearn.ensemble.RandomForestClassifier'
+ # - 'sklearn.ensemble.AdaBoostClassifier'
+  - 'sklearn.ensemble.RandomForestClassifier'
 
 #For each model you select, the pipeline will
 #train a bunch of models, see grid_values for more
@@ -50,4 +50,4 @@ grid_size: 'small' #small, medium or big
 #in both case is optional. If you are using mongo, this will just simpy add a new
 #key, this is useful for comments. If you are pickling results, this will be a prefix
 #in your pkl files
-experiment_name: 'some_experiment'
+experiment_name: 'models for testing evaluation notebook'
