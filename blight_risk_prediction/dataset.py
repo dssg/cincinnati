@@ -295,9 +295,6 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
     dataset = dataset.reindex(np.random.permutation(dataset.index))
     dataset = dataset.set_index(["parcel_id", "inspection_date"])
 
-    #path_to_tax = os.path.join(os.environ['OUTPUT_FOLDER'], 'tax.csv')
-    #dataset["mean_market_value"].to_csv(path_to_tax)
-
     # split up the dataset into features, labels, etc
     labels = dataset["viol_outcome"].values
     features = dataset.drop('viol_outcome', axis=1)

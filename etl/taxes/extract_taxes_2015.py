@@ -1,5 +1,3 @@
-#I THINK I CAN REMOVE THIS NOW
-
 # coding: utf-8
 import pandas as pd
 import numpy as np
@@ -33,6 +31,5 @@ df = pd.read_csv('Tax_Information2015.CSV', dtype=np.str, header=None, names=fix
 #    print fixed_names[i], df.iloc[100][i]
 
 df['PROPERTY_NUMBER'] = df['BOOK'] + df['PAGE'] + df['PARCEL'] + df['MLTOWN']
-#df['PROPERTY_NUMBER']
 df.to_sql('taxes_2015', engine, chunksize=50000)
 
