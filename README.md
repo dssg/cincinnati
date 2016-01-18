@@ -118,7 +118,7 @@ See [blight_risk_prediction/](blight_risk_prediction/) folder for more details o
 
 ###Logging model results
 
-Each time you run a model, the pipeline will store the results. There are two ways to do this (to change, modify the `HOW_TO_SAVE` variable in `blight_risk_prediction/model.py`):
+Each time you run a model, the pipeline will store the results. There are two ways to do this (to change, modify the `--how_to_save` parameter when running `model.py`:
 
 1. Log to a MongoDB database
 2. Pickle results and save them to disk
@@ -139,6 +139,8 @@ Before training a model, efit the `default.yaml` configuration file to select wh
 To run a model using the `default.yaml` configuration file:
 
     python -m blight_risk_prediction.model
+
+Run `python -m blight_risk_prediction.model` --help to see other options available.
 
 ## Repository layout
 
