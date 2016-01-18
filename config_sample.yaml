@@ -4,4 +4,7 @@ db:
   password: 'password'
   database: 'database_name'
 
-logger_uri: 'YOUR-MONGODB-URI'
+logger:
+  uri: 'mongodb://YOUR-MONGO-URI'
+  db: 'YOUR-MONGO-DB-NAME'
+  collection: 'YOUR-MONGO-DB-COLLECTION'

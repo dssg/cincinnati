@@ -118,7 +118,7 @@ See [blight_risk_prediction/](blight_risk_prediction/) folder for more details o
 
 ###Logging model results
 
-Each time you run a model, the pipeline will store the results. There are two ways to do this (to change, modify the `HOW_TO_SAVE` variable in `blight_risk_prediction/model.py`):
+Each time you run a model, the pipeline will store the results. There are two ways to do this (to change, modify the `--how_to_save` parameter when running `model.py`:
 
 1. Log to a MongoDB database
 2. Pickle results and save them to disk
@@ -139,6 +139,12 @@ Before training a model, efit the `default.yaml` configuration file to select wh
 To run a model using the `default.yaml` configuration file:
 
     python -m blight_risk_prediction.model
+
+Run `python -m blight_risk_prediction.model --help`  to see other options available.
+
+###Preparing results for a field test
+
+If the `prepare_field_test` in the configuration file, predictions such test will be saved on `$OUTPUT_FOLDER/field_test_predictions`. Make sure that folder exists.
 
 ## Repository layout
 

@@ -13,6 +13,7 @@ from itertools import product
 import numpy as np
 from sklearn import linear_model, preprocessing, svm, ensemble
 from blight_risk_prediction import dataset, evaluation, util
+import argparse
 
 from dstools.config import main as cfg_main
 from sklearn_evaluation.Logger import Logger
@@ -24,18 +25,27 @@ to have at least one violation.
 """
 
 logger = logging.getLogger(__name__)
+field_test_dir = "field_test_predictions/"
 
-predictions_dir = "predictions/"
-
-#Max cores to use if possible
-MAX_CORES = 4
+parser = argparse.ArgumentParser()
+parser.add_argument("-c", "--path_to_config_file",
+                    help=("Path to the yaml configuration file. "
+                          "Defaults to the default.yaml in the $ROOT_FOLDER"),
+                    type=str, default=os.path.join(os.environ["ROOT_FOLDER"], "default.yaml"))
 #Two options for saving results: 1. save to mongodb, you
 #can use something like MongoChef to see results (to do that you need to
 #provided a mongo URI in the config.yaml file). 2. Pickle results (you can see
 #results with the webapp)
 #Important: even if you use MONGO, for performance reasons, some results will
 #still be saved as csv files in your $OUTPUT_FOLDER
-HOW_TO_SAVE = 'MONGO' #or 'PICKLE'
+parser.add_argument("-n", "--n_jobs", type=int, default=-1,
+                        help=("n_jobs flag passed to scikit-learn models, "
+                              "fails silently if the model does not support "
+                              "such flag. Defaults to -1 (all jobs possible)"))
+parser.add_argument("-s", "--how_to_save", type=str, choices=['mongo', 'pickle'],
+                    help="Log results to MongoDB or pickle results. Defaults to mongo",
+                    default='mongo')
+args = parser.parse_args()
 
 class ConfigError():
     pass
@@ -63,7 +73,7 @@ def configure_model(config_file):
 
 #Parse feature pattern - based on a string with the format table.column, table.%, table.col_%
 #find all columns matching
-def parse_feature_patter(pattern):
+def parse_feature_pattern(pattern):
     table, column_pattern = pattern.split('.')
     engine = util.get_engine()
     query = ("SELECT column_name FROM information_schema.columns "
@@ -86,7 +96,7 @@ def make_datasets(config):
                           config["validation_window"]))
 
     #Parse features
-    features = [parse_feature_patter(feature) for feature in config["features"]]
+    features = [parse_feature_pattern(feature) for feature in config["features"]]
     #Flatten list
     features = [item for sublist in features for item in sublist]
 
@@ -169,31 +179,34 @@ def get_feature_importances(model):
     return None
 
 
-def save_results(pkl_file, config, test, predictions,
-                          feature_importances, model):
-    if HOW_TO_SAVE == 'MONGO':
+def save_results(pkl_file, config, test, predictions, feature_importances, model):
+    if args.how_to_save == 'mongo':
         #Instantiate logger
-        db_credentials = cfg_main['logger_uri']
-        mongo_logger = Logger(db_credentials, 'models', 'cincinnati')
+        logger_uri = cfg_main['logger']['uri']
+        logger_db = cfg_main['logger']['db']
+        logger_collection = cfg_main['logger']['collection']
+        mongo_logger = Logger(logger_uri, logger_db, logger_collection)
         #Compute some statistics to log
         cutoff_at_1, prec_at_1 = evaluation.precision_at_x_percent(test.y, predictions, x_percent=0.01)
         cutoff_at_10, prec_at_10 = evaluation.precision_at_x_percent(test.y, predictions, x_percent=0.1)
+        #Add the name of the experiment if available
+        experiment_name = config["experiment_name"] if config["experiment_name"] else None
         #Sending model will log model name, parameters and datetime
         #Also log other important things by sending named parameters
         mongo_id = mongo_logger.log_model(model, features=list(test.feature_names),
-                                      feature_importances=list(feature_importances),
-                                      config=config, prec_at_1=prec_at_1,
-                                      prec_at_10=prec_at_10, cutoff_at_1=cutoff_at_1,
-                                      cutoff_at_10=cutoff_at_10)
-	#Dump test_labels, test_predictions and test_parcels to a csv file
-	parcel_id = [record[0] for record in test.parcels]
-	inspection_date = [record[1] for record in test.parcels]
+            feature_importances=list(feature_importances),
+            config=config, prec_at_1=prec_at_1,
+            prec_at_10=prec_at_10, cutoff_at_1=cutoff_at_1,
+            cutoff_at_10=cutoff_at_10, experiment_name=experiment_name)
+        #Dump test_labels, test_predictions and test_parcels to a csv file
+        parcel_id = [record[0] for record in test.parcels]
+        inspection_date = [record[1] for record in test.parcels]
         dump = pd.DataFrame({'parcel_id': parcel_id,
-			     'inspection_date': inspection_date,
-			     'viol_outcome': test.y,
-			     'prediction': predictions})
+            'inspection_date': inspection_date,
+            'viol_outcome': test.y,
+            'prediction': predictions})
         dump.to_csv(os.path.join(os.environ['OUTPUT_FOLDER'], "predictions", mongo_id))
-    elif HOW_TO_SAVE == 'PICKLE':
+    elif args.how_to_save == 'pickle':
         to_save = {"config": config,
                    "features": test.feature_names,
                    "feature_importances": feature_importances,
@@ -206,15 +219,10 @@ def save_results(pkl_file, config, test, predictions,
         with open(path_to_pkl, 'wb') as f:
             pickle.dump(to_save, f, protocol=pickle.HIGHEST_PROTOCOL)
     else:
-        logger.info("Select MONGO or PICKLE for saving. Not saving results for now.")
+        logger.info("Select mongo or pickle for saving. Not saving results for now.")
 
 def main():
-
-    # config
-    if len(sys.argv) <= 1:
-        config_file = os.path.join(os.environ["ROOT_FOLDER"], "default.yaml")
-    else:
-        config_file = sys.argv[1]
+    config_file = args.path_to_config_file
     config, config_raw = configure_model(config_file)
 
     # datasets
@@ -232,7 +240,7 @@ def main():
     for model in models:
         #Try to run in parallel if possible
         if hasattr(model, 'n_jobs'):
-            model.set_params(n_jobs=MAX_CORES)
+            model.set_params(n_jobs=args.n_jobs)
 
         timestamp = datetime.datetime.now().isoformat()
 
@@ -250,7 +258,8 @@ def main():
         feature_importances = get_feature_importances(model)
 
         # pickle
-        outfile = "{prefix}{timestamp}.pkl".format(prefix=config["pkl_prefix"],
+        prefix = config["experiment_name"] if config["experiment_name"] else ''
+        outfile = "{prefix}{timestamp}.pkl".format(prefix=prefix,
                                                    timestamp=timestamp)
         config_raw["parameters"] = model.get_params()
         save_results(outfile, config_raw, test,
@@ -271,9 +280,13 @@ def main():
             parcels_with_probabilities = pd.Series(
                 fake_inspections_probs, index=index)
             parcels_with_probabilities.sort(ascending=False)
-            outfile = os.path.join(predictions_dir,
+            outfile = os.path.join(field_test_dir,
                                    "{}.csv".format(timestamp))
             parcels_with_probabilities.to_csv(outfile)
 
 if __name__ == '__main__':
+    print ('Starting modeling pipeline, configuring models using %s '
+            'configuration file. Trying with %d max jobs and '
+            'logging using %s.' % (args.path_to_config_file, args.n_jobs, 
+                args.how_to_save))
     main()
