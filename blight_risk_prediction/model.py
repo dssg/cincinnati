@@ -13,6 +13,7 @@ from itertools import product
 import numpy as np
 from sklearn import linear_model, preprocessing, svm, ensemble
 from blight_risk_prediction import dataset, evaluation, util
+import argparse
 
 from dstools.config import main as cfg_main
 from sklearn_evaluation.Logger import Logger
@@ -24,18 +25,23 @@ to have at least one violation.
 """
 
 logger = logging.getLogger(__name__)
-
 predictions_dir = "predictions/"
 
-#Max cores to use if possible
-MAX_CORES = 4
+parser = argparse.ArgumentParser()
 #Two options for saving results: 1. save to mongodb, you
 #can use something like MongoChef to see results (to do that you need to
 #provided a mongo URI in the config.yaml file). 2. Pickle results (you can see
 #results with the webapp)
 #Important: even if you use MONGO, for performance reasons, some results will
 #still be saved as csv files in your $OUTPUT_FOLDER
-HOW_TO_SAVE = 'MONGO' #or 'PICKLE'
+parser.add_argument("-n", "--n_jobs", type=int, default=-1,
+                        help=("n_jobs flag passed to scikit-learn models, "
+                              "fails silently if the model does not support "
+                              "such flag. Defaults to -1 (all jobs possible)"))
+parser.add_argument("-s", "--how_to_save", type=str, choices=['mongo', 'pickle'],
+                    help="Log results to MongoDB or pickle results. Defaults to mongo",
+                    default='mongo')
+args = parser.parse_args()
 
 class ConfigError():
     pass
@@ -169,9 +175,8 @@ def get_feature_importances(model):
     return None
 
 
-def save_results(pkl_file, config, test, predictions,
-                          feature_importances, model):
-    if HOW_TO_SAVE == 'MONGO':
+def save_results(pkl_file, config, test, predictions, feature_importances, model):
+    if args.how_to_save == 'mongo':
         #Instantiate logger
         logger_uri = cfg_main['logger']['uri']
         logger_db = cfg_main['logger']['db']
@@ -183,19 +188,19 @@ def save_results(pkl_file, config, test, predictions,
         #Sending model will log model name, parameters and datetime
         #Also log other important things by sending named parameters
         mongo_id = mongo_logger.log_model(model, features=list(test.feature_names),
-                                      feature_importances=list(feature_importances),
-                                      config=config, prec_at_1=prec_at_1,
-                                      prec_at_10=prec_at_10, cutoff_at_1=cutoff_at_1,
-                                      cutoff_at_10=cutoff_at_10)
-	   #Dump test_labels, test_predictions and test_parcels to a csv file
-	   parcel_id = [record[0] for record in test.parcels]
-	   inspection_date = [record[1] for record in test.parcels]
-       dump = pd.DataFrame({'parcel_id': parcel_id,
-			     'inspection_date': inspection_date,
-			     'viol_outcome': test.y,
-			     'prediction': predictions})
-       dump.to_csv(os.path.join(os.environ['OUTPUT_FOLDER'], "predictions", mongo_id))
-    elif HOW_TO_SAVE == 'PICKLE':
+            feature_importances=list(feature_importances),
+            config=config, prec_at_1=prec_at_1,
+            prec_at_10=prec_at_10, cutoff_at_1=cutoff_at_1,
+            cutoff_at_10=cutoff_at_10)
+        #Dump test_labels, test_predictions and test_parcels to a csv file
+        parcel_id = [record[0] for record in test.parcels]
+        inspection_date = [record[1] for record in test.parcels]
+        dump = pd.DataFrame({'parcel_id': parcel_id,
+            'inspection_date': inspection_date,
+            'viol_outcome': test.y,
+            'prediction': predictions})
+        dump.to_csv(os.path.join(os.environ['OUTPUT_FOLDER'], "predictions", mongo_id))
+    elif args.how_to_save == 'pickle':
         to_save = {"config": config,
                    "features": test.feature_names,
                    "feature_importances": feature_importances,
@@ -208,7 +213,7 @@ def save_results(pkl_file, config, test, predictions,
         with open(path_to_pkl, 'wb') as f:
             pickle.dump(to_save, f, protocol=pickle.HIGHEST_PROTOCOL)
     else:
-        logger.info("Select MONGO or PICKLE for saving. Not saving results for now.")
+        logger.info("Select mongo or pickle for saving. Not saving results for now.")
 
 def main():
 
@@ -234,7 +239,7 @@ def main():
     for model in models:
         #Try to run in parallel if possible
         if hasattr(model, 'n_jobs'):
-            model.set_params(n_jobs=MAX_CORES)
+            model.set_params(n_jobs=args.n_jobs)
 
         timestamp = datetime.datetime.now().isoformat()
 
@@ -278,4 +283,6 @@ def main():
             parcels_with_probabilities.to_csv(outfile)
 
 if __name__ == '__main__':
+    print ('Starting modeling pipeline. Trying with %d max jobs and '
+        'logging using %s' % (args.n_jobs, args.how_to_save))
     main()
