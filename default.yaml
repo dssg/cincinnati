@@ -46,7 +46,8 @@ grid_size: 'small' #small, medium or big
 # Output                   #
 ############################
 
-#Note that directories are relative to $OUTPUT_FOLDER
-#This will be used if model.py has been configured to save results using PICKLE prepare_field_test
-#see model.py for details
-pkl_prefix: 'modelresult_'  # prefix model result with string
+#The effecy of this will be different depending of which logger you are using
+#in both case is optional. If you are using mongo, this will just simpy add a new
+#key, this is useful for comments. If you are pickling results, this will be a prefix
+#in your pkl files
+experiment_name: 'some_experiment'

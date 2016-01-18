@@ -189,13 +189,15 @@ def save_results(pkl_file, config, test, predictions, feature_importances, model
         #Compute some statistics to log
         cutoff_at_1, prec_at_1 = evaluation.precision_at_x_percent(test.y, predictions, x_percent=0.01)
         cutoff_at_10, prec_at_10 = evaluation.precision_at_x_percent(test.y, predictions, x_percent=0.1)
+        #Add the name of the experiment if available
+        experiment_name = config["experiment_name"] if config["experiment_name"] else None
         #Sending model will log model name, parameters and datetime
         #Also log other important things by sending named parameters
         mongo_id = mongo_logger.log_model(model, features=list(test.feature_names),
             feature_importances=list(feature_importances),
             config=config, prec_at_1=prec_at_1,
             prec_at_10=prec_at_10, cutoff_at_1=cutoff_at_1,
-            cutoff_at_10=cutoff_at_10)
+            cutoff_at_10=cutoff_at_10, experiment_name=experiment_name)
         #Dump test_labels, test_predictions and test_parcels to a csv file
         parcel_id = [record[0] for record in test.parcels]
         inspection_date = [record[1] for record in test.parcels]
@@ -256,7 +258,8 @@ def main():
         feature_importances = get_feature_importances(model)
 
         # pickle
-        outfile = "{prefix}{timestamp}.pkl".format(prefix=config["pkl_prefix"],
+        prefix = config["experiment_name"] if config["experiment_name"] else ''
+        outfile = "{prefix}{timestamp}.pkl".format(prefix=prefix,
                                                    timestamp=timestamp)
         config_raw["parameters"] = model.get_params()
         save_results(outfile, config_raw, test,
