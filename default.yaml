@@ -36,7 +36,7 @@ features:
 #Use valid scikit-learn classes, provide the full path to the class
 models:
   - 'sklearn.ensemble.AdaBoostClassifier'
-  - 'sklearn.ensemble.RandomForestClassifier'
+ # - 'sklearn.ensemble.RandomForestClassifier'
 
 #For each model you select, the pipeline will
 #train a bunch of models, see grid_values for more
