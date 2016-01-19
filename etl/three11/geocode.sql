@@ -17,5 +17,7 @@ CREATE TABLE public.three11 AS(
 
 --Select all
 SELECT * FROM  geo_three11
-
 )
+
+--Create an index
+CREATE INDEX ON geo_three11 USING GIST (geom);
