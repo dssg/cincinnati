@@ -13,10 +13,11 @@ mkdir -p $TMP_FOLDER
 #Convert xls file
 ssconvert "$THREE11_DATA/od_cinc_311_service_reqs.xls" "$TMP_FOLDER/od_cinc_311_service_reqs.csv"
 
-#Missing steps: clean data and geocode
+#Clean dataset
+python "$ROOT_FOLDER/etl/three11/clean.py"
 
 #Generate CREATE TABLE statement
-csvsql -i postgresql --tables three11 --db-schema public -d ',' "$TMP_FOLDER/od_cinc_311_service_reqs.csv" > "$TMP_FOLDER/three11.sql"
+csvsql -i postgresql --tables three11 --db-schema public -d ',' "$TMP_FOLDER/three11_clean.csv" > "$TMP_FOLDER/three11.sql"
 #Drop table if exists
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS three11;"  
 #Create table

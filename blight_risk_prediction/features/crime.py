@@ -1,11 +1,8 @@
 from datetime import timedelta
 import logging
-
-
 import numpy as np
 import pandas as pd
 from blight_risk_prediction import util
-
 
 logger = logging.getLogger(__name__)
 
