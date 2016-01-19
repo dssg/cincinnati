@@ -4,7 +4,7 @@ import os
 
 path_to_data_folder = data_folder.for_file(__file__)
 
-os.chdir(path_to_data_folder)
+os.chdir(os.path.join(path_to_data_folder, 'tmp'))
 print 'Working in folder: %s' % path_to_data_folder
 
 #Load csv file

@@ -24,6 +24,6 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS three11;"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/three11.sql"  
 
 #Upload data to the database
-cat "$TMP_FOLDER/od_cinc_311_service_reqs.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.three11 FROM STDIN  WITH CSV HEADER DELIMITER ',';"
+cat "$TMP_FOLDER/three11_clean.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.three11 FROM STDIN  WITH CSV HEADER DELIMITER ',';"
 
 echo 'Done creating three11 table!'
