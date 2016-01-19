@@ -9,9 +9,13 @@ DROP TABLE IF EXISTS public.three11;
 --Create new table with the same name as the original one
 CREATE TABLE public.three11 AS(
 
-SELECT geo_three11.*
-FROM    geo_three11,
-        shape_files.cinc_city_boundary AS boundary
-WHERE ST_Within(geo_three11.geom, boundary.geom)
+--Select cincinnati only
+-- SELECT geo_three11.*
+-- FROM    geo_three11,
+--         shape_files.cinc_city_boundary AS boundary
+-- WHERE ST_Within(geo_three11.geom, boundary.geom)
+
+--Select all
+SELECT * FROM  geo_three11
 
 )
