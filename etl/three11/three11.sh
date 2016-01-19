@@ -26,4 +26,7 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/three11.sql"
 #Upload data to the database
 cat "$TMP_FOLDER/three11_clean.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.three11 FROM STDIN  WITH CSV HEADER DELIMITER ',';"
 
+#Geocode three11 dataset and subset only calls inside Cincinnati
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/geocode.sql"  
+
 echo 'Done creating three11 table!'
