@@ -5,7 +5,7 @@
 
 --Join the parcels and complains table with the inspections table
 --Generate one rows for each complain within X months on each inspection
-CREATE TABLE AS features.three11_for_inspections_1_month(
+CREATE TABLE features.three11_for_inspections_1_month AS (
     SELECT insp.parcel_id, insp.inspection_date, pnc.requested_datetime, pnc.dist_km, pnc.service_code, pnc.agency_responsible, insp.inspection_date -  pnc.requested_datetime AS diff
     FROM features.parcels_inspections AS insp --change this when you move it to featurebot
     JOIN parcels_three11_view AS pnc
