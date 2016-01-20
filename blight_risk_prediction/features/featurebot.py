@@ -139,6 +139,9 @@ def generate_features_for_fake_inspection(inspection_date):
     logging.debug("... table has {} rows".format(len(inspections)))
 
     # make features and store in database
+    # some features depend on timestamps, e.g. crime in the last year, 
+    # the temporal features take the timestamp from the parcels_inspections
+    # table in the same schema and compute features based on that date
     for feature in features_to_generate:
         logging.info("Generating {} features".format(feature.table))
         feature_data = feature.generator_function(con)
