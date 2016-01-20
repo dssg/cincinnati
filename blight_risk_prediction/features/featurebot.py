@@ -102,7 +102,6 @@ def generate_features_for_fake_inspection(inspection_date):
 
     schema = "features_{}".format(inspection_date.strftime('%d%b%Y')).lower()
     if schema not in existing_feature_schemas():
-        #raise SchemaMissing(schema)
         #Create schema here
         user = main_cfg['db']['user']
         password = main_cfg['db']['password']
@@ -134,8 +133,7 @@ def generate_features_for_fake_inspection(inspection_date):
     # inspection_date is the one give as a parameter and is the same
     # for all parcels
     logging.info("Generating inspections table")
-    inspections = outcome.make_fake_inspections_all_parcels_cincy(
-       inspection_date)
+    inspections = outcome.make_fake_inspections_all_parcels_cincy(inspection_date)
     inspections.to_sql("parcels_inspections", engine, chunksize=50000,
                       if_exists='fail', index=False, schema=schema)
     logging.debug("... table has {} rows".format(len(inspections)))
@@ -154,10 +152,10 @@ if __name__ == '__main__':
     if len(sys.argv) == 2:
         # to generate features for if an inspection happens at date d
         d = datetime.datetime.strptime(sys.argv[1], '%d%b%Y')
-        print 'Generating features for %s' % d
+        print 'Generating features for fake inspections in %s' % d
         generate_features_for_fake_inspection(d)
     elif len(sys.argv) == 1:
-        print 'Generating features for all dates...'
+        print 'Generating features for real inspecions'
         # to generate features
         generate_features()
     else:

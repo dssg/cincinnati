@@ -99,18 +99,23 @@ def make_datasets(config):
     features = [parse_feature_pattern(feature) for feature in config["features"]]
     #Flatten list
     features = [item for sublist in features for item in sublist]
-
     #Selected features
     #print 'Selected features based on yaml file %s' % features
 
     only_residential = config["residential_only"]
 
+    #Train set is built with a list of features, parsed from the configuration
+    #file. Data is obtained between start date and fake today.
+    #it is possible to select residential parels only
     train = dataset.get_training_dataset(
         features=features,
         start_date=start_date,
         end_date=fake_today,
         only_residential=only_residential)
 
+    #Test set is built in a similar way: list of features parsed from configuration
+    #file, but the start date is just where out trainin set finishes and the end date
+    #is the validation window. Residential flag also applies
     test = dataset.get_testing_dataset(
         features=features,
         start_date=fake_today,
@@ -257,7 +262,7 @@ def main():
         output_evaluation_statistics(test, predicted)
         feature_importances = get_feature_importances(model)
 
-        # pickle
+        # save results
         prefix = config["experiment_name"] if config["experiment_name"] else ''
         outfile = "{prefix}{timestamp}.pkl".format(prefix=prefix,
                                                    timestamp=timestamp)
