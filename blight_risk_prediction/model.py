@@ -99,18 +99,25 @@ def make_datasets(config):
     features = [parse_feature_pattern(feature) for feature in config["features"]]
     #Flatten list
     features = [item for sublist in features for item in sublist]
-
     #Selected features
     #print 'Selected features based on yaml file %s' % features
 
     only_residential = config["residential_only"]
 
+    #Train set is built with a list of features, parsed from the configuration
+    #file. Data is obtained between start date and fake today.
+    #it is possible to select residential parels only.
+    #Data is obtained from features schema
     train = dataset.get_training_dataset(
         features=features,
         start_date=start_date,
         end_date=fake_today,
         only_residential=only_residential)
 
+    #Test set is built in a similar way: list of features parsed from configuration
+    #file, but the start date is just where out trainin set finishes and the end date
+    #is the validation window. Residential flag also applies
+    #Data is obtained from features schema
     test = dataset.get_testing_dataset(
         features=features,
         start_date=fake_today,
@@ -127,12 +134,22 @@ def make_datasets(config):
     if config["prepare_field_test"]:
         inspection_date = datetime.datetime.strptime(config["inspection_date"],
                                                      '%d%b%Y')
+        #To make predictions for field testing we need to create a training datasets
+        #similar to the ones used for the experiments, the start date is the same
+        #as sppecified in the configuration file but the end date must be the inspection
+        #date.
+        #Data is obtained from features schema
         field_train = dataset.get_training_dataset(
             features=features,
             start_date=start_date,
             end_date=inspection_date,
             only_residential=only_residential)
-
+        #The test set is going to be used to predict in each parcel and then output
+        #results to a file that will be send to our partner. The dataset created using
+        #this function will use all parcels in cincinnati, but it will fake the inspection
+        #date for the desired date, and features will be generated according to such date
+        #Data is obtained from features_DATE schema, where DATE is the desired
+        #date of inspection
         field_test = dataset.get_field_testing_dataset(
             features=features,
             fake_inspection_date=inspection_date,
@@ -257,7 +274,7 @@ def main():
         output_evaluation_statistics(test, predicted)
         feature_importances = get_feature_importances(model)
 
-        # pickle
+        # save results
         prefix = config["experiment_name"] if config["experiment_name"] else ''
         outfile = "{prefix}{timestamp}.pkl".format(prefix=prefix,
                                                    timestamp=timestamp)
