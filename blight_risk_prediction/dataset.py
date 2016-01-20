@@ -342,7 +342,6 @@ def get_testing_dataset(features, start_date, end_date, only_residential):
 def get_field_testing_dataset(features, fake_inspection_date,
                               only_residential):
     """
-
     :param features: Which features to load
     :param fake_inspection_date: Date on which the inspection will take place
     :return:

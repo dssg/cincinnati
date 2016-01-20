@@ -106,7 +106,8 @@ def make_datasets(config):
 
     #Train set is built with a list of features, parsed from the configuration
     #file. Data is obtained between start date and fake today.
-    #it is possible to select residential parels only
+    #it is possible to select residential parels only.
+    #Data is obtained from features schema
     train = dataset.get_training_dataset(
         features=features,
         start_date=start_date,
@@ -116,6 +117,7 @@ def make_datasets(config):
     #Test set is built in a similar way: list of features parsed from configuration
     #file, but the start date is just where out trainin set finishes and the end date
     #is the validation window. Residential flag also applies
+    #Data is obtained from features schema
     test = dataset.get_testing_dataset(
         features=features,
         start_date=fake_today,
@@ -132,12 +134,21 @@ def make_datasets(config):
     if config["prepare_field_test"]:
         inspection_date = datetime.datetime.strptime(config["inspection_date"],
                                                      '%d%b%Y')
+        #To make predictions for field testing we need to create a training datasets
+        #similar to the ones used for the experiments, the start date is the same
+        #as sppecified in the configuration file but the end date must be the inspection
+        #date.
+        #Data is obtained from features schema
         field_train = dataset.get_training_dataset(
             features=features,
             start_date=start_date,
             end_date=inspection_date,
             only_residential=only_residential)
-
+        #The test set is going to be used to predict in each parcel and then output
+        #results to a file that will be send to our partner. The dataset created using
+        #this function will use all existing data up until the inspection date
+        #Data is obtained from features_DATE schema, where DATE is the desired
+        #date of inspection
         field_test = dataset.get_field_testing_dataset(
             features=features,
             fake_inspection_date=inspection_date,
