@@ -28,7 +28,9 @@ cat "$TMP_FOLDER/od_cinc_311_service_reqs.csv" | psql -h $DB_HOST -U $DB_USER -d
 
 #Geocode three11 dataset
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/geocode.sql"  
-#Match parcels to calls
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/parcels_to_three11.sql"  
 
-echo 'Done creating three11 table!'
+#Match parcels to calls
+echo 'Matching parcels to calls. This is going to take a while... (It took ~2 hours in the DSaPP server)'
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/parcels_to_three11.sql"
+
+echo 'Done creating public.three11 and parcels-to-311 table (public.parcels_to_three11)!'

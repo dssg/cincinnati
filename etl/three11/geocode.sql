@@ -1,6 +1,6 @@
 --Create temporary table with a geom field
 CREATE TEMP TABLE geo_three11 AS (
-    select *, ST_SetSRID(ST_MakePoint(x_coord, y_coord), 3735) AS geom from public.three11
+    SELECT *, ST_SetSRID(ST_MakePoint(x_coord, y_coord), 3735) AS geom from public.three11
 );
 
 --Drop original table
