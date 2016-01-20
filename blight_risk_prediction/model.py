@@ -146,7 +146,8 @@ def make_datasets(config):
             only_residential=only_residential)
         #The test set is going to be used to predict in each parcel and then output
         #results to a file that will be send to our partner. The dataset created using
-        #this function will use all existing data up until the inspection date
+        #this function will use all parcels in cincinnati, but it will fake the inspection
+        #date for the desired date, and features will be generated according to such date
         #Data is obtained from features_DATE schema, where DATE is the desired
         #date of inspection
         field_test = dataset.get_field_testing_dataset(
