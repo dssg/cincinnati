@@ -33,4 +33,9 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/geocode.sql
 echo 'Matching parcels to calls. This is going to take a while... (It took ~2 hours in the DSaPP server)'
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/parcels_to_three11.sql"
 
+#Finally, create a view to get all columns in the 311 dataset with their corresponding
+#computed distances
+echo 'Creating view to match parcels with 311 dataset columns'
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/three11_view.sql"
+
 echo 'Done creating public.three11 and parcels-to-311 table (public.parcels_to_three11)!'

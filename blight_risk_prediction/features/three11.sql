@@ -3,16 +3,6 @@
 --for each inspection by moving in two dimensions: date and distance.
 --e.g. building complains within 1 km in a 3 month window from inspection date
 
---Generate a table with the parcel, complain date, distance
---and some columns to generate features
-WITH parcels_and_complains AS (
-    SELECT p2t11.parcelid, t11.requested_datetime, p2t11.dist_km,
-       t11.service_code, t11.agency_responsible
-    FROM public.parcels_to_three11 AS p2t11
-    JOIN public.three11 AS t11
-    USING (service_request_id)
-)
-
 --Join the parcels and complains table with the inspections table
 --Generate one rows for each complain within X months on each inspection
 WITH complains_in_time_window(
