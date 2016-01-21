@@ -13,4 +13,3 @@ CREATE TABLE features.three11_for_inspections_1_month AS (
     AND (insp.inspection_date - '1 month'::interval) <= pnc.requested_datetime --complain date should be X months before insepction at most
     AND pnc.requested_datetime <= insp.inspection_date --and don't give me complains past the inspection date
 )
-
