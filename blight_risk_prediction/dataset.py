@@ -227,13 +227,11 @@ class FeatureLoader():
         logger.debug("GENERIC FUNCTION: Loading {} features for [{}, {})".format(table_name,
                                          self.start_date, self.end_date))
         #SQL query to load features
-        query = ("SELECT feature.*, labels.inspection_date "
-                 "FROM  %(table_name)s AS feature "
-                 "JOIN parcels_inspections AS labels "
-                 "ON feature.parcel_id = labels.parcel_id "
-                 "WHERE labels.inspection_date >= %(start_date)s "
-                 "AND labels.inspection_date <= %(end_date)s")
-        
+        query = ("SELECT feature.* "
+                 "FROM %(table_name)s AS feature "
+                 "WHERE feature.inspection_date >= %(start_date)s "
+                 "AND feature.inspection_date <= %(end_date)s")
+
         #Pass query and list of features to a function that returns the pandas
         #DataFrame
         features = self.__read_feature_from_db(query, features_to_load,

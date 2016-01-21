@@ -13,6 +13,7 @@ from itertools import product
 import numpy as np
 from sklearn import linear_model, preprocessing, svm, ensemble
 from blight_risk_prediction import dataset, evaluation, util
+from blight_risk_prediction.features import feature_parser
 import argparse
 
 from dstools.config import main as cfg_main
@@ -71,19 +72,6 @@ def configure_model(config_file):
 
     return cfg, copy.deepcopy(cfg)
 
-#Parse feature pattern - based on a string with the format table.column, table.%, table.col_%
-#find all columns matching
-def parse_feature_pattern(pattern):
-    table, column_pattern = pattern.split('.')
-    engine = util.get_engine()
-    query = ("SELECT table_name, column_name FROM information_schema.columns "
-             "WHERE table_schema='features' AND table_name=%(table)s AND "
-             "column_name LIKE %(column_pattern)s;")
-    cols = pd.read_sql(query, engine, params={"table": table, "column_pattern": column_pattern})
-    print 'Features to load:'
-    print cols
-    return list(cols.column_name)
-
 def make_datasets(config):
 
     start_date = datetime.datetime.strptime(config["start_date"], '%d%b%Y')
@@ -98,11 +86,8 @@ def make_datasets(config):
                           config["validation_window"]))
 
     #Parse each feature pattern (table_name.pattern) in the config file and
-    #return a list of features
-    features = [parse_feature_pattern(feature) for feature in config["features"]]
-    #Flatten list
-    features = [item for sublist in features for item in sublist]
-    #Selected features
+    #return a list with tuples of the form (table_name, feature_name)
+    features = [feature_parser.parse_feature_pattern_list(feature) for feature in config["features"]]
     #print 'Selected features based on yaml file %s' % features
 
     only_residential = config["residential_only"]
