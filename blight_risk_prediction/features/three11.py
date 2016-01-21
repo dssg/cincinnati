@@ -41,14 +41,14 @@ def make_three11_features(con):
     #calls within 3 kilometers. Use that view to now
     #match each inspection with calls that happened
     #X months before the inspection
-    create_three11_1_month_table()
+    #create_three11_1_month_table(con)
 
     #Use the recently created table to compute features.
     #Group rows by parcel_id and inspection_date
     #For now, just perform counts on the categorical variables
     #More complex features could combine the distance value
     #as well as interacting features
-    df = compute_frequency_features()
+    df = compute_frequency_features(con)
 
     return df
     
