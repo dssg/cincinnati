@@ -189,7 +189,7 @@ class FeatureLoader():
         return features
 
     def load_tax(self, features_to_load):
-        logger.debug("Loading tax features for [{}, {})".format(
+        logger.debug("load_tax: Loading tax features for [{}, {})".format(
             self.start_date, self.end_date))
         query = ("SELECT feature.* "
                  "FROM tax  AS feature "
@@ -224,7 +224,7 @@ class FeatureLoader():
             table name. Returns a pandas DataFrame with those features
         '''
         #Log table name and timestamps selected
-        logger.debug("Loading {} features for [{}, {})".format(table_name,
+        logger.debug("GENERIC FUNCTION: Loading {} features for [{}, {})".format(table_name,
                                          self.start_date, self.end_date))
         #SQL query to load features
         query = ("SELECT feature.*, labels.inspection_date "
@@ -323,6 +323,8 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
     for key, tuples in groups:
       values = [x[1] for x in tuples]
       grouped_features.append((key, values))
+
+    print 'Grouped features: %s' % grouped_features
 
     for table_name, feature_group in grouped_features:
         feature_df = loader.load_feature_group(table_name, feature_group)

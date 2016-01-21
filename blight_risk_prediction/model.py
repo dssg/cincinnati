@@ -76,11 +76,13 @@ def configure_model(config_file):
 def parse_feature_pattern(pattern):
     table, column_pattern = pattern.split('.')
     engine = util.get_engine()
-    query = ("SELECT column_name FROM information_schema.columns "
+    query = ("SELECT table_name, column_name FROM information_schema.columns "
              "WHERE table_schema='features' AND table_name=%(table)s AND "
              "column_name LIKE %(column_pattern)s;")
-    cols = pd.read_sql(query, engine, params={"table": table, "column_pattern": column_pattern}).column_name
-    return list(cols)
+    cols = pd.read_sql(query, engine, params={"table": table, "column_pattern": column_pattern})
+    print 'Features to load:'
+    print cols
+    return list(cols.column_name)
 
 def make_datasets(config):
 

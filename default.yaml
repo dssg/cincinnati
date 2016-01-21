@@ -25,8 +25,9 @@ residential_only: True
 #http://www.postgresql.org/docs/current/static/functions-matching.html
 features:
     #- crime.%
-    - house_type.single-family
-    - census_2010.rate_%
+    - three11.%
+    #- house_type.single-family
+    #- census_2010.rate_%
 
 ############################
 # Model selection          #
@@ -50,4 +51,4 @@ grid_size: 'small' #small, medium or big
 #in both case is optional. If you are using mongo, this will just simpy add a new
 #key, this is useful for comments. If you are pickling results, this will be a prefix
 #in your pkl files
-experiment_name: 'models for testing evaluation notebook'
+experiment_name: 'testing'
