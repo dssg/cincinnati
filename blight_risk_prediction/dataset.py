@@ -297,35 +297,40 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
     end_date = end_date.strftime('%Y-%m-%d')
     loader = FeatureLoader(schema, start_date, end_date)
 
+    #List all columns (with their respective table names) in the current schema
     tables_and_columns =  tables_and_columns_for_current_schema(schema)
+    #Create a list with all columns in all tables
     columns = list(tables_and_columns.column_name)
 
-    # make sure that all features to be loaded actually exist
+    #Check that the features to load certainly exist in the current schema
+    #if not, raise and exception
     for feature in features:
         if feature not in columns:
             raise UnknownFeatureError(feature)
 
-    #Subselect based on columns selected by the user
+    #Froom all table_name, column_name pair, only select based on the columns (features)
+    #in the features parameter
     tables_and_columns = tables_and_columns[tables_and_columns.column_name.isin(features)]
 
-    # load inspections
-    inspections = loader.load_parcels_inspections(only_residential)
-
-    # load each group of features and merge into a full dataset
-    # merging makes sure we have the same index and sorting
-    # for all features and inspections
-    dataset = inspections
-
-    #Group features to load them in a single query to the table than contains each group
+    #To avoid loading each feature one by one, group them based on the table
+    #they belong to
     tuples = list(tables_and_columns.itertuples(index=False))
     groups = itertools.groupby(tuples, lambda x:x[0])
     grouped_features = []
     for key, tuples in groups:
-      values = [x[1] for x in tuples]
-      grouped_features.append((key, values))
+        values = [x[1] for x in tuples]
+        grouped_features.append((key, values))
 
     print 'Grouped features: %s' % grouped_features
 
+    #Start loading each group and features and join them to a big dataframe,
+    #but first you need to load the inspections data (parcel_id, inspection_date
+    #and violation outcome).
+    dataset = loader.load_parcels_inspections(only_residential)
+
+    # load each group of features and merge into a full dataset
+    # merging makes sure we have the same index and sorting
+    # for all features and inspections
     for table_name, feature_group in grouped_features:
         feature_df = loader.load_feature_group(table_name, feature_group)
         dataset = dataset.join(feature_df, how='left')

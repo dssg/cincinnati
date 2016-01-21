@@ -97,7 +97,8 @@ def make_datasets(config):
         raise ConfigError("Unsupported validation window: {}".format(
                           config["validation_window"]))
 
-    #Parse features
+    #Parse each feature pattern (table_name.pattern) in the config file and
+    #return a list of features
     features = [parse_feature_pattern(feature) for feature in config["features"]]
     #Flatten list
     features = [item for sublist in features for item in sublist]
