@@ -298,10 +298,6 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
         if feature not in tables_and_columns:
             raise UnknownFeatureError(feature)
 
-    #From all table_name, column_name pair, only select based on the columns (features)
-    #in the features parameter
-    tables_and_columns = tables_and_columns[tables_and_columns.column_name.isin(features)]
-
     #To avoid loading each feature one by one, group them based on the table
     #they belong to
     groups = itertools.groupby(features, lambda x:x[0])
