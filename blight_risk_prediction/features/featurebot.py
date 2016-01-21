@@ -7,8 +7,8 @@ import sys
 import psycopg2
 from dstools.config import main as main_cfg
 from blight_risk_prediction import util
-from blight_risk_prediction.features import (ner, parcel,
-                                             outcome, tax, crime, census)
+from blight_risk_prediction.features import (ner, parcel, outcome, tax, crime,
+                                             census, three11)
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,11 @@ features_to_generate = [FeatureToGenerate("tax", tax.make_tax_features),
                          FeatureToGenerate("parc_year",
                                            parcel.make_year_built),
                          FeatureToGenerate("census_2010",
-                                           census.make_census_features)]
+                                           census.make_census_features),
+                         FeatureToGenerate("three11",
+                                           census.make_three11_features)]
+
+features_to_generate = [FeatureToGenerate("three11", census.make_three11_features)]
 
 class SchemaMissing():
     def __init__(self, schema_name):

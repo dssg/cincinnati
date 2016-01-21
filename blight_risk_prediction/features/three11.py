@@ -4,15 +4,6 @@ from sqlalchemy import create_engine
 
 engine = create_engine(uri)
 
-#Remove hardcoded schema
-df = pd.read_sql('SELECT * FROM features.three11_for_inspections_1_month', engine)
-
-#Group by parcel_id and inspection_date. Make columns with counts for service_code
-#and agency_responsible
-cross = pd.crosstab([df.parcel_id, df.inspection_date],
-                    [df.service_code, df.agency_responsible],
-                   margins=True)
-
 def create_three11_1_month_table(con):
     #Load template with SQL statement
     with open('three11_for_inspections_x_month.sql', 'r') as f:
@@ -20,6 +11,17 @@ def create_three11_1_month_table(con):
     #Run the code using the connection
     #this is going to take a while
     con.cursor().execute(sql_script)
+
+def compute_frequency_features(con):
+    #Remove hardcoded schema
+    df = pd.read_sql('SELECT * FROM three11_for_inspections_1_month', con)
+    #Group by parcel_id and inspection_date. Make columns with counts
+    #for some columns
+    cross = pd.crosstab([df.parcel_id, df.inspection_date],
+                        df.agency_responsible)
+    #Rename columns to avoid capital letters and spaces
+    cross.columns = cross.columns.map(lambda s: s.replace(' ', '_').lower())
+    return cross
 
 
 def make_three11_features(con):
@@ -39,9 +41,14 @@ def make_three11_features(con):
     #calls within 3 kilometers. Use that view to now
     #match each inspection with calls that happened
     #X months before the inspection
+    create_three11_1_month_table()
 
     #Use the recently created table to compute features.
     #Group rows by parcel_id and inspection_date
     #For now, just perform counts on the categorical variables
     #More complex features could combine the distance value
     #as well as interacting features
+    df = compute_frequency_features()
+
+    return df
+    

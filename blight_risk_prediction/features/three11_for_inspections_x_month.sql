@@ -12,7 +12,7 @@
 --Generate one rows for each complain within X months on each inspection
 CREATE TABLE three11_for_inspections_1_month AS (
     SELECT insp.parcel_id, insp.inspection_date, pnc.requested_datetime, pnc.dist_km, pnc.service_code, pnc.agency_responsible
-    FROM parcels_inspections AS insp --change this when you move it to featurebot
+    FROM parcels_inspections AS insp --don't make any assumption on which schema to use
     JOIN public.parcels_three11_view AS pnc
     ON insp.parcel_id=pnc.parcelid
     AND (insp.inspection_date - '1 month'::interval) <= pnc.requested_datetime --complain date should be X months before insepction at most
