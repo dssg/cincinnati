@@ -11,6 +11,7 @@ import pandas as pd
 from blight_risk_prediction import util
 from blight_risk_prediction.features.featurebot import \
     existing_feature_schemas, SchemaMissing
+from blight_risk_prediction.features.feature_parser import tables_and_columns_for_schema
 import config
 
 logger = logging.getLogger(__name__)
@@ -274,14 +275,6 @@ class FeatureLoader():
 # Functions for compiling training and test datasets
 #####################################################
 
-#List table and columns for current schema
-def tables_and_columns_for_current_schema(schema):
-    query = ("SELECT table_name, column_name FROM information_schema.columns "
-             "WHERE table_schema=%(schema)s;")
-    engine = util.get_engine()
-    r = pd.read_sql(query, engine, params={"schema": schema})
-    return r
-
 class Dataset():
     def __init__(self, parcels, x, y, feature_names):
         self.parcels = parcels
@@ -296,24 +289,22 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
     loader = FeatureLoader(schema, start_date, end_date)
 
     #List all columns (with their respective table names) in the current schema
-    tables_and_columns =  tables_and_columns_for_current_schema(schema)
-    #Create a list with all columns in all tables
-    columns = list(tables_and_columns.column_name)
+    tables_and_columns =  tables_and_columns_for_schema(schema)
 
-    #Check that the features to load certainly exist in the current schema
-    #if not, raise and exception
+    #the features parameters is a list of tuples of the form (table_name, column_name)
+    #check that every tuple actually exists in the selected schema, if not,
+    #raise and exception
     for feature in features:
-        if feature not in columns:
+        if feature not in tables_and_columns:
             raise UnknownFeatureError(feature)
 
-    #Froom all table_name, column_name pair, only select based on the columns (features)
+    #From all table_name, column_name pair, only select based on the columns (features)
     #in the features parameter
     tables_and_columns = tables_and_columns[tables_and_columns.column_name.isin(features)]
 
     #To avoid loading each feature one by one, group them based on the table
     #they belong to
-    tuples = list(tables_and_columns.itertuples(index=False))
-    groups = itertools.groupby(tuples, lambda x:x[0])
+    groups = itertools.groupby(features, lambda x:x[0])
     grouped_features = []
     for key, tuples in groups:
         values = [x[1] for x in tuples]
