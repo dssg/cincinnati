@@ -74,8 +74,19 @@ class FeatureLoader():
         logger.debug("... {} rows".format(len(labels)))
         return labels
 
-    def load_feature_group(self, name_of_loading_method, features_to_load):
-        loading_method = getattr(self, 'load_%s' % name_of_loading_method)
+    def load_feature_group(self, table_name, features_to_load):
+        #By convention, the method to load features from table_name
+        #is load_table_name
+        loading_method_name = 'load_%s' % table_name
+
+        #If method does not exist, use generic loading method
+        try:
+            loading_method = getattr(self, loading_method_name)
+        except Exception, e:
+            logger.debug("%s does not exist. Using generic method".format(loading_method_name))
+            loading_method = self.load_features_from_table
+
+        #Execute loading method and send a list of features to load
         return loading_method(features_to_load)
 
     def load_house_type(self, features_to_load):
@@ -206,12 +217,40 @@ class FeatureLoader():
         logger.debug("... {} rows, {} features".format(len(features),
                                                        len(features.columns)))
         return features
+    
+    def load_features_from_table(self, features_to_load, table_name):
+        '''
+            Generic feature loaders. Gets a list of features to load and a
+            table name. Returns a pandas DataFrame with those features
+        '''
+        #Log table name and timestamps selected
+        logger.debug("Loading {} features for [{}, {})".format(table_name,
+                                         self.start_date, self.end_date))
+        #SQL query to load features
+        query = ("SELECT feature.*, labels.inspection_date "
+                 "FROM  %(table_name)s AS feature "
+                 "JOIN parcels_inspections AS labels "
+                 "ON feature.parcel_id = labels.parcel_id "
+                 "WHERE labels.inspection_date >= %(start_date)s "
+                 "AND labels.inspection_date <= %(end_date)s")
+        
+        #Pass query and list of features to a function that returns the pandas
+        #DataFrame
+        features = self.__read_feature_from_db(query, features_to_load,
+                                               drop_duplicates=True, table_name=table_name)
+
+        #Log how many rows were loaded
+        logger.debug("... {} rows, {} features".format(len(features),
+                                                       len(features.columns)))
+        #Return DataFrame
+        return features
 
     def __read_feature_from_db(self, query, features_to_load,
-                               drop_duplicates=True):
+                               drop_duplicates=True, table_name=None):
         features = pd.read_sql(query, con=self.con,
                                params={"start_date": self.start_date,
-                                       "end_date": self.end_date})
+                                       "end_date": self.end_date,
+                                       "table_name": table_name})
 
         if drop_duplicates:
             features = features.drop_duplicates(subset=["parcel_id",
@@ -285,8 +324,8 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
       values = [x[1] for x in tuples]
       grouped_features.append((key, values))
 
-    for loading_method, feature_group in grouped_features:
-        feature_df = loader.load_feature_group(loading_method, feature_group)
+    for table_name, feature_group in grouped_features:
+        feature_df = loader.load_feature_group(table_name, feature_group)
         dataset = dataset.join(feature_df, how='left')
         # dataset = dataset.dropna(subset=['viol_outcome'])
 
