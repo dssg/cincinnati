@@ -87,7 +87,7 @@ def make_datasets(config):
 
     #Parse each feature pattern (table_name.pattern) in the config file and
     #return a list with tuples of the form (table_name, feature_name)
-    features = [feature_parser.parse_feature_pattern_list(feature) for feature in config["features"]]
+    features = feature_parser.parse_feature_pattern_list(config["features"])
     #print 'Selected features based on yaml file %s' % features
 
     only_residential = config["residential_only"]

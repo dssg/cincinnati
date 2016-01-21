@@ -11,6 +11,7 @@ def parse_feature_pattern(pattern):
     table.column, table.%, table.col_% find all columns matching
     Returns a tuple
     '''
+    #print 'Parsing pattern: %s' % pattern
     table, column_pattern = pattern.split('.')
     query = ("SELECT table_name, column_name FROM information_schema.columns "
              "WHERE table_schema='features' AND table_name=%s AND "
