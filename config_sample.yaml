@@ -1,8 +1,10 @@
 db:
+  dialect: 'postgresql'
   host: 'host.database.com'
   user: 'username'
   password: 'password'
   database: 'database_name'
+  port: 5432 #This is the default port for postgresql
 
 logger:
   uri: 'mongodb://YOUR-MONGO-URI'

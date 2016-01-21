@@ -14,5 +14,3 @@ CREATE TABLE features.three11_for_inspections_1_month AS (
     AND pnc.requested_datetime <= insp.inspection_date --and don't give me complains past the inspection date
 )
 
---Now count each time of complain for each pacelid and inspection date
---SELECT count(service_code) FROM complains_in_time_window GROUP BY service_code
