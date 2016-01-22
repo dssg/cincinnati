@@ -88,6 +88,10 @@ def generate_features():
     for feature in features_to_generate:
         logging.info("Generating {} features".format(feature.table))
         feature_data = feature.generator_function(con)
+        #Every generator function must have a column with parcel_id, 
+        #inspection_date and the correct number of rows as their
+        #corresponding parcels_inspections table in the schema being used
+        # TO DO: check that feature_data has the right shape and indexes
         feature_data.to_sql(feature.table, engine, chunksize=50000,
                             if_exists='replace', index=True, schema=schema)
         logging.debug("... table has {} rows".format(len(feature_data)))
