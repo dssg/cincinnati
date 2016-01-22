@@ -231,14 +231,15 @@ class FeatureLoader():
                                              self.start_date, self.end_date))
             #SQL query to load features
             query = ("SELECT feature.* "
-                     "FROM %s AS feature "
+                     "FROM %(table_name) AS feature "
                      "WHERE feature.inspection_date >= %(start_date)s "
-                     "AND feature.inspection_date <= %(end_date)s") % table_name
+                     "AND feature.inspection_date <= %(end_date)s")
     
             #Pass query and list of features to a function that returns the pandas
             #DataFrame
             features = self.__read_feature_from_db(query, features_to_load,
-                                                   drop_duplicates=True)
+                                                   drop_duplicates=True,
+                                                   table_name=table_name)
     
             #Log how many rows were loaded
             logger.debug("... {} rows, {} features".format(len(features),
@@ -249,10 +250,11 @@ class FeatureLoader():
         return load_features_from_table
     
     def __read_feature_from_db(self, query, features_to_load,
-                               drop_duplicates=True):
+                               drop_duplicates=True, table_name=None):
         features = pd.read_sql(query, con=self.con,
                                params={"start_date": self.start_date,
-                                       "end_date": self.end_date})
+                                       "end_date": self.end_date,
+                                       "table_name": table_name})
 
         if drop_duplicates:
             features = features.drop_duplicates(subset=["parcel_id",
