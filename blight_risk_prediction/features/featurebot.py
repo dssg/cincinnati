@@ -35,7 +35,7 @@ features_to_generate = [FeatureToGenerate("tax", tax.make_tax_features),
                          FeatureToGenerate("three11",
                                            three11.make_three11_features)]
 
-features_to_generate = [FeatureToGenerate("three11", three11.make_three11_features)]
+features_to_generate = [FeatureToGenerate("census_2010", census.make_census_features)]
 
 class SchemaMissing():
     def __init__(self, schema_name):
@@ -81,7 +81,7 @@ def generate_features():
     logging.info("Generating inspections table")
     inspections = outcome.generate_labels()
     inspections.to_sql("parcels_inspections", engine, chunksize=50000,
-                      if_exists='fail', index=False, schema=schema)
+                      if_exists='replace', index=False, schema=schema)
     logging.debug("... table has {} rows".format(len(inspections)))
 
     # make features and store in database
