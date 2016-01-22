@@ -13,7 +13,6 @@ def create_three11_1_month_table(con):
     con.cursor().execute(sql_script)
 
 def compute_frequency_features(con):
-    #Remove hardcoded schema
     df = pd.read_sql('SELECT * FROM three11_for_inspections_1_month', con)
     #Group by parcel_id and inspection_date. Make columns with counts
     #for some columns

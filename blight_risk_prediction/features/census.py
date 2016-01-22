@@ -25,5 +25,5 @@ def make_census_features(db_connection):
              "and census.block_group = parcels_spt.block_group;")
 
     df = pd.read_sql(query, con=db_connection)
-
+    df = df.set_index('parcel_id')
     return df
