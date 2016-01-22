@@ -201,7 +201,9 @@ class FeatureLoader():
                                                drop_duplicates=True)
         logger.debug("... {} rows, {} features".format(len(features),
                                                        len(features.columns)))
-        return features
+        #logger.debug('Loaded tax features head:\n%s\nType: %s' % (features.head(1), type(features)))
+	logger.debug('indexes:\n%s' % features.index.dtype)
+	return features
 
     def load_census_2010(self, features_to_load):
         logger.debug("Loading census features for [{}, {})".format(
@@ -257,7 +259,7 @@ class FeatureLoader():
                                params={"start_date": self.start_date,
                                        "end_date": self.end_date,
                                        "table_name": table_name})
-	    #logger.debug("Head is:\n%s\n Cols are: %s" % (features.head(3), list(features)))
+	#logger.debug("Head is:\n%s\n Cols are: %s" % (features.head(3), list(features)))
 
         if drop_duplicates:
             features = features.drop_duplicates(subset=["parcel_id",
@@ -266,16 +268,16 @@ class FeatureLoader():
         try:
             #Some features are costructed using both the parcel_id
             #and the inspection date
-	        logger.debug("Setting parcel_id and inspection_date as indexes")
+	    logger.debug("Setting parcel_id and inspection_date as indexes")
             features = features.set_index(["parcel_id", "inspection_date"])
         except Exception, e:
-	        logger.debug("Setting parcel_id as index")
+	    logger.debug("Setting parcel_id as index")
             #But some others only have parcel_id
             features = features.set_index("parcel_id")
 
-	    #Remove indexes from features to load
-	    if 'parcel_id' in features_to_load: features_to_load.remove('parcel_id')
-	    if 'inspection_date' in features_to_load: features_to_load.remove('inspection_date')
+	#Remove indexes from features to load
+	if 'parcel_id' in features_to_load: features_to_load.remove('parcel_id')
+	if 'inspection_date' in features_to_load: features_to_load.remove('inspection_date')
         #Since the query will load ALL COLUMNS, select only the ones listed by
         #the user
         features = features[features_to_load]
@@ -342,7 +344,8 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
     # for all features and inspections
     for table_name, feature_group in grouped_features:
         feature_df = loader.load_feature_group(table_name, feature_group)
-        dataset = dataset.join(feature_df, how='left')
+        logger.debug('Trying to join:\n%s\n with:\n%s\n' % (feature_df.reset_index().dtypes, dataset.reset_index().dtypes))
+	dataset = dataset.join(feature_df, how='left')
         # dataset = dataset.dropna(subset=['viol_outcome'])
 
     # randomize the ordering

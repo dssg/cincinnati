@@ -42,10 +42,10 @@ tables_list = reduce(lambda x,y: x+", "+y, tables)
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--date",
                     help=("To generate features for if an inspection happens"
-                          "at certain date. Follow %d%b%Y format"), type=str)
+                          "at certain date. e.g. 01Jul2015"), type=str)
 parser.add_argument("-f", "--features", type=str, default="all",
                         help=("Comma separated list of features to generate"
-                              "Possible values are %s. Defatuls to all, which"
+                              "Possible values are %s. Defaults to all, which "
                               "will generate all possible features" % tables_list))
 args = parser.parse_args()
 
@@ -93,7 +93,7 @@ def generate_features(features_to_generate):
     logging.info("Generating inspections table")
     inspections = outcome.generate_labels()
     inspections.to_sql("parcels_inspections", engine, chunksize=50000,
-                      if_exists='fail', index=False, schema=schema)
+                      if_exists='replace', index=False, schema=schema)
     logging.debug("... table has {} rows".format(len(inspections)))
 
     # make features and store in database
@@ -172,16 +172,24 @@ def generate_features_for_fake_inspection(features_to_generate, inspection_date)
 if __name__ == '__main__':
     #Based on user selection create an array with the features to generate
     #Based on user selection, select method to use
-    selected_tables = args.features.split(", ")
-    selected_features = filter(lambda x: x.table in selected_tables, existing_features)
-    print "Selected features: %s" % selected_features
+    if args.features == 'all':
+        selected_features = existing_features
+    else:
+        selected_tables = args.features.split(",")
+        selected_features = filter(lambda x: x.table in selected_tables, existing_features)
+    
+    if len(selected_features)==0:
+        print 'You did not select any features'
+        sys.exit()
+   
+    selected  = [t.table for t in selected_features]
+    selected = reduce(lambda x,y: x+", "+y, selected) 
+    print "Selected features: %s" % selected
 
     if args.date:
         # to generate features for if an inspection happens at date d
-        d = datetime.datetime.strptime(args.dates, '%d%b%Y')
-        print 'Generating features for fake inspections in %s' % d
+        d = datetime.datetime.strptime(args.date, '%d%b%Y')
         generate_features_for_fake_inspection(selected_features, d)
     else:
-        print 'Generating features for real inspecions'
         # to generate features
         generate_features(selected_features)
