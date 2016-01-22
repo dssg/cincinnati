@@ -45,7 +45,7 @@ parser.add_argument("-d", "--date",
                           "at certain date. e.g. 01Jul2015"), type=str)
 parser.add_argument("-f", "--features", type=str, default="all",
                         help=("Comma separated list of features to generate"
-                              "Possible values are %s. Defatuls to all, which"
+                              "Possible values are %s. Defaults to all, which "
                               "will generate all possible features" % tables_list))
 args = parser.parse_args()
 
@@ -172,16 +172,24 @@ def generate_features_for_fake_inspection(features_to_generate, inspection_date)
 if __name__ == '__main__':
     #Based on user selection create an array with the features to generate
     #Based on user selection, select method to use
-    selected_tables = args.features.split(", ")
-    selected_features = filter(lambda x: x.table in selected_tables, existing_features)
-    print "Selected features: %s" % selected_features
+    if args.features == 'all':
+        selected_features = existing_features
+    else:
+        selected_tables = args.features.split(",")
+        selected_features = filter(lambda x: x.table in selected_tables, existing_features)
+    
+    if len(selected_features)==0:
+        print 'You did not select any features'
+        sys.exit()
+   
+    selected  = [t.table for t in selected_features]
+    selected = reduce(lambda x,y: x+", "+y, selected) 
+    print "Selected features: %s" % selected
 
     if args.date:
         # to generate features for if an inspection happens at date d
         d = datetime.datetime.strptime(args.date, '%d%b%Y')
-        print 'Generating features for fake inspections in %s' % d
         generate_features_for_fake_inspection(selected_features, d)
     else:
-        print 'Generating features for real inspecions'
         # to generate features
         generate_features(selected_features)
