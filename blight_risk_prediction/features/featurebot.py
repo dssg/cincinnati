@@ -9,6 +9,7 @@ from dstools.config import main as main_cfg
 from blight_risk_prediction import util
 from blight_risk_prediction.features import (ner, parcel, outcome, tax, crime,
                                              census, three11)
+import argparse
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +20,8 @@ logger = logging.getLogger(__name__)
 FeatureToGenerate = namedtuple("FeatureToGenerate",
                                ["table", "generator_function"])
 
-# list all feature-sets that should be generated
-features_to_generate = [FeatureToGenerate("tax", tax.make_tax_features),
+# list all existing feature-sets
+existing_features = [FeatureToGenerate("tax", tax.make_tax_features),
                          FeatureToGenerate("crime", crime.make_crime_features),
                          FeatureToGenerate("named_entities",
                                            ner.make_owner_features),
@@ -35,7 +36,18 @@ features_to_generate = [FeatureToGenerate("tax", tax.make_tax_features),
                          FeatureToGenerate("three11",
                                            three11.make_three11_features)]
 
-features_to_generate = [FeatureToGenerate("tax", tax.make_tax_features)]
+tables = [t.table for t in existing_features]
+tables_list = reduce(lambda x,y: x+", "+y, tables)
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-d", "--date",
+                    help=("To generate features for if an inspection happens"
+                          "at certain date. Follow %d%b%Y format"), type=str)
+parser.add_argument("-f", "--features", type=str, default="all",
+                        help=("Comma separated list of features to generate"
+                              "Possible values are %s. Defatuls to all, which"
+                              "will generate all possible features" % tables_list))
+args = parser.parse_args()
 
 class SchemaMissing():
     def __init__(self, schema_name):
@@ -51,7 +63,7 @@ def existing_feature_schemas():
     schemas = [s for s in schemas.values if s.startswith("features")]
     return schemas
 
-def generate_features():
+def generate_features(features_to_generate):
     """
     Generate labels and features for all inspections
     in the inspections database.
@@ -88,12 +100,16 @@ def generate_features():
     for feature in features_to_generate:
         logging.info("Generating {} features".format(feature.table))
         feature_data = feature.generator_function(con)
+        #Every generator function must have a column with parcel_id, 
+        #inspection_date and the correct number of rows as their
+        #corresponding parcels_inspections table in the schema being used
+        # TO DO: check that feature_data has the right shape and indexes
         feature_data.to_sql(feature.table, engine, chunksize=50000,
                             if_exists='replace', index=True, schema=schema)
         logging.debug("... table has {} rows".format(len(feature_data)))
 
 
-def generate_features_for_fake_inspection(inspection_date):
+def generate_features_for_fake_inspection(features_to_generate, inspection_date):
     """
     Generate fake inspections and features for some fake inspection_date
 
@@ -154,14 +170,18 @@ def generate_features_for_fake_inspection(inspection_date):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) == 2:
+    #Based on user selection create an array with the features to generate
+    #Based on user selection, select method to use
+    selected_tables = args.features.split(", ")
+    selected_features = filter(lambda x: x.table in selected_tables, existing_features)
+    print "Selected features: %s" % selected_features
+
+    if args.date:
         # to generate features for if an inspection happens at date d
-        d = datetime.datetime.strptime(sys.argv[1], '%d%b%Y')
+        d = datetime.datetime.strptime(args.date, '%d%b%Y')
         print 'Generating features for fake inspections in %s' % d
-        generate_features_for_fake_inspection(d)
-    elif len(sys.argv) == 1:
+        generate_features_for_fake_inspection(selected_features, d)
+    else:
         print 'Generating features for real inspecions'
         # to generate features
-        generate_features()
-    else:
-        print 'This command accepts only one parameter'
+        generate_features(selected_features)
