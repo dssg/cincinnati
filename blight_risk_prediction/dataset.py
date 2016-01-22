@@ -219,9 +219,9 @@ class FeatureLoader():
                                                        len(features.columns)))
         return features
 
-    def generate_loader_for_table(table_name):
-        def load_features_from_table(self, features_to_load):
-            table_name = table_name
+    def generate_loader_for_table(self, table):
+        def load_features_from_table(features_to_load):
+            table_name = table
             '''
                 Generic feature loaders. Gets a list of features to load and a
                 table name. Returns a pandas DataFrame with those features
@@ -231,14 +231,14 @@ class FeatureLoader():
                                              self.start_date, self.end_date))
             #SQL query to load features
             query = ("SELECT feature.* "
-                     "FROM %(table_name)s AS feature "
+                     "FROM %s AS feature "
                      "WHERE feature.inspection_date >= %(start_date)s "
-                     "AND feature.inspection_date <= %(end_date)s")
+                     "AND feature.inspection_date <= %(end_date)s") % table_name
     
             #Pass query and list of features to a function that returns the pandas
             #DataFrame
             features = self.__read_feature_from_db(query, features_to_load,
-                                                   drop_duplicates=True, table_name=table_name)
+                                                   drop_duplicates=True)
     
             #Log how many rows were loaded
             logger.debug("... {} rows, {} features".format(len(features),
@@ -249,11 +249,10 @@ class FeatureLoader():
         return load_features_from_table
     
     def __read_feature_from_db(self, query, features_to_load,
-                               drop_duplicates=True, table_name=None):
+                               drop_duplicates=True):
         features = pd.read_sql(query, con=self.con,
                                params={"start_date": self.start_date,
-                                       "end_date": self.end_date,
-                                       "table_name": table_name})
+                                       "end_date": self.end_date})
 
         if drop_duplicates:
             features = features.drop_duplicates(subset=["parcel_id",
