@@ -43,7 +43,7 @@ parser.add_argument("-n", "--n_jobs", type=int, default=-1,
                         help=("n_jobs flag passed to scikit-learn models, "
                               "fails silently if the model does not support "
                               "such flag. Defaults to -1 (all jobs possible)"))
-parser.add_argument("-s", "--how_to_save", type=str, choices=['mongo', 'pickle'],
+parser.add_argument("-s", "--how_to_save", type=str, choices=['mongo', 'pickle', 'none'],
                     help="Log results to MongoDB or pickle results. Defaults to mongo",
                     default='mongo')
 args = parser.parse_args()
@@ -223,8 +223,8 @@ def save_results(pkl_file, config, test, predictions, feature_importances, model
         path_to_pkl = os.path.join(os.environ['OUTPUT_FOLDER'], "pickled_results", pkl_file)
         with open(path_to_pkl, 'wb') as f:
             pickle.dump(to_save, f, protocol=pickle.HIGHEST_PROTOCOL)
-    else:
-        logger.info("Select mongo or pickle for saving. Not saving results for now.")
+    elif args.how_to_save == 'none':
+        logger.info("You selected to not log results. Skipping logging...")
 
 def main():
     config_file = args.path_to_config_file
