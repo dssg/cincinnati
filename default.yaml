@@ -4,7 +4,7 @@
 ##################################################################
 
 # Temporal stuff
-#start_date: '01Jan2008'    #train only on inspections after this date
+start_date: '01Jan2012'    #train only on inspections after this date
 fake_today: '01Apr2014'
 validation_window: '1Year'  # Or '1Month'
 
@@ -25,9 +25,9 @@ residential_only: True
 #http://www.postgresql.org/docs/current/static/functions-matching.html
 features:
     #- crime.%
-    - three11.%
-    #- house_type.single-family
-    #- census_2010.rate_%
+    #- three11.%
+    #- house_type.%
+    - census_2010.rate_%
 
 ############################
 # Model selection          #
