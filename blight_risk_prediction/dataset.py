@@ -230,8 +230,8 @@ class FeatureLoader():
             logger.debug("GENERIC FUNCTION: Loading {} features for [{}, {})".format(table_name,
                                              self.start_date, self.end_date))
             #SQL query to load features
-	    #CONCATENATING LIKE THIS IS REALLY REALLY BAD, THIS IS JUST A TMP FIX
-	    #I NEED TO REFACTOR THE WHOLE FILE
+	        #CONCATENATING LIKE THIS IS REALLY REALLY BAD, THIS IS JUST A TMP FIX
+	        #I NEED TO REFACTOR THE WHOLE FILE
             query = ("SELECT feature.* "
                      "FROM "+table_name+"  AS feature "
                      "WHERE feature.inspection_date >= %(start_date)s "
@@ -262,7 +262,18 @@ class FeatureLoader():
             features = features.drop_duplicates(subset=["parcel_id",
                                                         "inspection_date"])
 
-        features = features.set_index(["parcel_id", "inspection_date"])
+        try:
+            #Some features are costructed using both the parcel_id
+            #and the inspection date
+            features = features.set_index(["parcel_id", "inspection_date"])
+            features.remove("parcel_id")
+            features.remove("inspection_date")
+        except Exception, e:
+            #But some others only have parcel_id
+            features = features.set_index(["parcel_id"])
+            features.remove("parcel_id")
+        #Since the query will load ALL COLUMNS, select only the ones listed by
+        #the user
         features = features[features_to_load]
 
         return features
