@@ -266,12 +266,12 @@ class FeatureLoader():
             #Some features are costructed using both the parcel_id
             #and the inspection date
             features = features.set_index(["parcel_id", "inspection_date"])
-            features.remove("parcel_id")
-            features.remove("inspection_date")
+            features_to_load.remove("parcel_id")
+            features_to_load.remove("inspection_date")
         except Exception, e:
             #But some others only have parcel_id
             features = features.set_index(["parcel_id"])
-            features.remove("parcel_id")
+            features_to_load.remove("parcel_id")
         #Since the query will load ALL COLUMNS, select only the ones listed by
         #the user
         features = features[features_to_load]
