@@ -42,7 +42,7 @@ tables_list = reduce(lambda x,y: x+", "+y, tables)
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--date",
                     help=("To generate features for if an inspection happens"
-                          "at certain date. Follow %d%b%Y format"), type=str)
+                          "at certain date. e.g. 01Jul2015"), type=str)
 parser.add_argument("-f", "--features", type=str, default="all",
                         help=("Comma separated list of features to generate"
                               "Possible values are %s. Defatuls to all, which"
