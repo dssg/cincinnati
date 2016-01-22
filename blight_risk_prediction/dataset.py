@@ -85,7 +85,7 @@ class FeatureLoader():
             loading_method = getattr(self, loading_method_name)
         except Exception, e:
             logger.debug("%s does not exist. Using generic method".format(loading_method_name))
-            loading_method = self.load_features_from_table
+            loading_method = self.generate_loader_for_table(table_name)
 
         #Execute loading method and send a list of features to load
         return loading_method(features_to_load)
@@ -218,32 +218,36 @@ class FeatureLoader():
         logger.debug("... {} rows, {} features".format(len(features),
                                                        len(features.columns)))
         return features
+
+    def generate_loader_for_table(table_name):
+        def load_features_from_table(self, features_to_load):
+            table_name = table_name
+            '''
+                Generic feature loaders. Gets a list of features to load and a
+                table name. Returns a pandas DataFrame with those features
+            '''
+            #Log table name and timestamps selected
+            logger.debug("GENERIC FUNCTION: Loading {} features for [{}, {})".format(table_name,
+                                             self.start_date, self.end_date))
+            #SQL query to load features
+            query = ("SELECT feature.* "
+                     "FROM %(table_name)s AS feature "
+                     "WHERE feature.inspection_date >= %(start_date)s "
+                     "AND feature.inspection_date <= %(end_date)s")
     
-    def load_features_from_table(self, features_to_load, table_name):
-        '''
-            Generic feature loaders. Gets a list of features to load and a
-            table name. Returns a pandas DataFrame with those features
-        '''
-        #Log table name and timestamps selected
-        logger.debug("GENERIC FUNCTION: Loading {} features for [{}, {})".format(table_name,
-                                         self.start_date, self.end_date))
-        #SQL query to load features
-        query = ("SELECT feature.* "
-                 "FROM %(table_name)s AS feature "
-                 "WHERE feature.inspection_date >= %(start_date)s "
-                 "AND feature.inspection_date <= %(end_date)s")
+            #Pass query and list of features to a function that returns the pandas
+            #DataFrame
+            features = self.__read_feature_from_db(query, features_to_load,
+                                                   drop_duplicates=True, table_name=table_name)
+    
+            #Log how many rows were loaded
+            logger.debug("... {} rows, {} features".format(len(features),
+                                                           len(features.columns)))
+            #Return DataFrame
+            return features
 
-        #Pass query and list of features to a function that returns the pandas
-        #DataFrame
-        features = self.__read_feature_from_db(query, features_to_load,
-                                               drop_duplicates=True, table_name=table_name)
-
-        #Log how many rows were loaded
-        logger.debug("... {} rows, {} features".format(len(features),
-                                                       len(features.columns)))
-        #Return DataFrame
-        return features
-
+        return load_features_from_table
+    
     def __read_feature_from_db(self, query, features_to_load,
                                drop_duplicates=True, table_name=None):
         features = pd.read_sql(query, con=self.con,
