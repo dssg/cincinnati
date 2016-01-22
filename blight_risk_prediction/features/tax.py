@@ -146,5 +146,4 @@ def make_tax_features(db_connection):
     features.append(foreclosures["tax_foreclosure"])
 
     features = pd.concat(features, axis=1)
-    features = features.reset_index()
     return features
