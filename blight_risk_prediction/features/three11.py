@@ -22,7 +22,6 @@ def compute_frequency_features(con):
     cross.columns = cross.columns.map(lambda s: s.replace(' ', '_').lower())
     return cross
 
-
 def make_three11_features(con):
     """
     Make 311 calls features
@@ -48,6 +47,4 @@ def make_three11_features(con):
     #More complex features could combine the distance value
     #as well as interacting features
     df = compute_frequency_features(con)
-
     return df
-    

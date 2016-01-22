@@ -178,7 +178,7 @@ if __name__ == '__main__':
 
     if args.date:
         # to generate features for if an inspection happens at date d
-        d = datetime.datetime.strptime(args.date, '%d%b%Y')
+        d = datetime.datetime.strptime(args.dates, '%d%b%Y')
         print 'Generating features for fake inspections in %s' % d
         generate_features_for_fake_inspection(selected_features, d)
     else:
