@@ -35,7 +35,7 @@ features_to_generate = [FeatureToGenerate("tax", tax.make_tax_features),
                          FeatureToGenerate("three11",
                                            three11.make_three11_features)]
 
-features_to_generate = [FeatureToGenerate("census_2010", census.make_census_features)]
+features_to_generate = [FeatureToGenerate("tax", tax.make_tax_features)]
 
 class SchemaMissing():
     def __init__(self, schema_name):

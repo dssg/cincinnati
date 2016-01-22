@@ -26,7 +26,8 @@ residential_only: True
 features:
     #- crime.%
     #- three11.%
-    - house_type.single-family
+    - tax.%
+    #- house_type.single-family
     #- census_2010.rate_%
 
 ############################

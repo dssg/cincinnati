@@ -201,7 +201,9 @@ class FeatureLoader():
                                                drop_duplicates=True)
         logger.debug("... {} rows, {} features".format(len(features),
                                                        len(features.columns)))
-        return features
+        #logger.debug('Loaded tax features head:\n%s\nType: %s' % (features.head(1), type(features)))
+	logger.debug('indexes:\n%s' % features.index.dtype)
+	return features
 
     def load_census_2010(self, features_to_load):
         logger.debug("Loading census features for [{}, {})".format(
@@ -342,7 +344,8 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
     # for all features and inspections
     for table_name, feature_group in grouped_features:
         feature_df = loader.load_feature_group(table_name, feature_group)
-        dataset = dataset.join(feature_df, how='left')
+        logger.debug('Trying to join:\n%s\n with:\n%s\n' % (feature_df.reset_index().dtypes, dataset.reset_index().dtypes))
+	dataset = dataset.join(feature_df, how='left')
         # dataset = dataset.dropna(subset=['viol_outcome'])
 
     # randomize the ordering
