@@ -32,13 +32,21 @@ for TABLE_NAME in $TABLES; do
     #Step 1: Convert table in $DB_FILE to csv files
     echo "Converting table '$TABLE_NAME' to csv... Storing file on $PATH_TO_CSV_FILE"
     mdb-export -D '%Y-%m-%d %H:%M:%S' $DB_FILE "$TABLE_NAME" > $PATH_TO_CSV_FILE
-    #Step 2: Upload to postgres database
-    #Drop table if it already exists
-    psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS $FILENAME;"  
-    #Upload the csv file in the public schema
-    echo "Uploading $PATH_TO_CSV_FILE to the database..."
-    csvsql --db "postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:5432/$DB_NAME"  --insert --tables $FILENAME --db-schema public -d ',' $PATH_TO_CSV_FILE
-    echo "Done creating $FILENAME table!"
 done
 #Return IFS to its original value
 unset IFS
+
+#When we got the fire data, there was only one table. We are going to work
+#with that file
+#Step 2: clean the data
+python "$ROOT_FOLDER/etl/fire/clean.py"
+
+#Step 3: Upload to postgres database
+#generate CREATE TABLE statement
+csvsql -i postgresql --tables fire --db-schema public -d ',' "$TMP_FOLDER/fire.csv" > "$TMP_FOLDER/fire.sql"
+#Drop table if it already exists
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS fire;"
+#Upload the csv file in the public schema
+echo "Uploading fire data to the database..."
+cat "$TMP_FOLDER/fire.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.fire FROM STDIN  WITH CSV HEADER DELIMITER ',';"
+echo "Done creating fire table!"

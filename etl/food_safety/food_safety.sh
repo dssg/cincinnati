@@ -13,8 +13,6 @@ mkdir -p $TMP_FOLDER
 #Convert xls file
 ssconvert "$FOOD_SAFETY_DATA/od_cinc_food_safety.xls" "$TMP_FOLDER/od_cinc_food_safety.csv"
 
-#Missing steps: clean
-
 #Generate CREATE TABLE statement
 csvsql -i postgresql --tables food_safety --db-schema public -d ',' "$TMP_FOLDER/od_cinc_food_safety.csv" > "$TMP_FOLDER/food_safety.sql"
 #Drop table if exists
