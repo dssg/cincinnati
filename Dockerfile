@@ -35,6 +35,8 @@ RUN apt-get update
 
 #Install GDAL
 RUN apt-get install -y gdal-bin
+#Install development packages to make Geopandas work
+RUN apt-get install -y --force-yes libgdal-dev
 
 #Install PostGIS (to get shp2pgsql)
 RUN apt-get install -y postgis
