@@ -12,6 +12,8 @@ df = pd.read_csv("fire_1997_2014_CFS.csv")
 
 #Lowercase column names
 df.columns = df.columns.map(lambda s: s.lower().replace('#', ''))
+#signal column has some extra spaces
+df.signal = df.signal.map(lambda s: s.replace(' ', ''))
 
 #Save data frame
 df.to_csv('fire.csv', index=False)
