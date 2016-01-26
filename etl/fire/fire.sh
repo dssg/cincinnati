@@ -42,6 +42,7 @@ unset IFS
 python "$ROOT_FOLDER/etl/fire/clean.py"
 
 #Step 3: Geocode dataset
+echo 'Geocoding dataset, this may take a while...'
 python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/fire.csv" "$TMP_FOLDER/fire_geocoded.csv"
 
 #Step 4: Upload to postgres database

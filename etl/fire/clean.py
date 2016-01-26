@@ -17,6 +17,14 @@ df.signal = df.signal.map(lambda s: s.replace(' ', ''))
 #We are only using data starting from 2005
 indexes = [i.year >= 2005 for i in df.date]
 df = df[indexes]
+#Check how many rows have empty addresses
+print '{} rows with empty address, removing those.'.format(df.address.isnull().sum())
+#Remove rows without address
+df = df[df.address.notnull()]
+#Add necessary columns for the geocoding script
+df['city'] = 'CINCINNATI'
+df['state'] = 'OHIO'
+df['zip'] = ''
 
 #Save data frame
 df.to_csv('fire.csv', index=False)
