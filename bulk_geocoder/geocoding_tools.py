@@ -74,6 +74,7 @@ def geocode_dataframe(df):
     print '{} addresses geocoded'.format(n_geocoded)
     n_uniq_geocoded = (res.latitude != '').sum()
     print '{} unique addresses geocoded'.format(n_uniq_geocoded)
+    print '{0:.2%} unique addresses geocoded'.format(n_uniq_geocoded/n_uniq_addresses)
     print '{0:.2%} total addresses geocoded'.format(n_geocoded/n_addresses)
     return output
 
