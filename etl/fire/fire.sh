@@ -56,3 +56,10 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/fire.sql"
 echo "Uploading fire data to the database..."
 cat "$TMP_FOLDER/fire_geocoded.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.fire FROM STDIN  WITH CSV HEADER DELIMITER ',';"
 echo "Done creating fire table!"
+
+#Create geom column on the database
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/fire/create_geom.sql"  
+
+#Create a table to match every parcel with fire events
+#limit this to a radius of certain Km
+
