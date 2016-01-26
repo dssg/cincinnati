@@ -95,8 +95,8 @@ def geocode_list(l):
 
     #Create the request objects
     rs = (grequests.post(url, data=data, files={'addressFile': a_file}) for a_file in files_content)
-    #Make the calls, send 100 at a time
-    responses = grequests.map(rs, size=100)
+    #Make the calls, send in batches
+    responses = grequests.map(rs, size=50)
     #Get the content for each response
     contents = [r.content for r in responses]
     #Join responses
