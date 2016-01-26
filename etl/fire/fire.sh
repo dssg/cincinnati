@@ -41,7 +41,11 @@ unset IFS
 #Step 2: clean the data
 python "$ROOT_FOLDER/etl/fire/clean.py"
 
-#Step 3: Upload to postgres database
+#Step 3: Geocode dataset
+echo 'Geocoding dataset, this may take a while...'
+python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/fire.csv" "$TMP_FOLDER/fire_geocoded.csv"
+
+#Step 4: Upload to postgres database
 #generate CREATE TABLE statement
 csvsql -i postgresql --tables fire --db-schema public -d ',' "$TMP_FOLDER/fire.csv" > "$TMP_FOLDER/fire.sql"
 #Drop table if it already exists
