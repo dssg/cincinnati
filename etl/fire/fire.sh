@@ -43,16 +43,16 @@ python "$ROOT_FOLDER/etl/fire/clean.py"
 
 #Step 3: Geocode dataset
 echo 'Geocoding dataset, this may take a while...'
-python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/fire.csv" "$TMP_FOLDER/fire_geocoded.csv"
+python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/fire_sample.csv" "$TMP_FOLDER/fire_geocoded.csv"
 
 #Step 4: Upload to postgres database
 #generate CREATE TABLE statement
-csvsql -i postgresql --tables fire --db-schema public -d ',' "$TMP_FOLDER/fire.csv" > "$TMP_FOLDER/fire.sql"
+csvsql -i postgresql --tables fire --db-schema public -d ',' "$TMP_FOLDER/fire_geocoded.csv" > "$TMP_FOLDER/fire.sql"
 #Drop table if it already exists
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS fire;"
 #Create table
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/fire.sql"  
 #Upload the csv file in the public schema
 echo "Uploading fire data to the database..."
-cat "$TMP_FOLDER/fire.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.fire FROM STDIN  WITH CSV HEADER DELIMITER ',';"
+cat "$TMP_FOLDER/fire_geocoded.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.fire FROM STDIN  WITH CSV HEADER DELIMITER ',';"
 echo "Done creating fire table!"
