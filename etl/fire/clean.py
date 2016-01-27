@@ -15,6 +15,14 @@ df.columns = df.columns.map(lambda s: s.lower().replace('#', ''))
 indexes = [i.year >= 2005 for i in df.date]
 df = df[indexes]
 
+#Check how many rows have empty addresses
+print '{} rows with empty address, removing those.'.format(df.address.isnull().sum())
+#Remove rows without address
+df = df[df.address.notnull()]
+
+#Check for duplicates
+df.drop_duplicates(inplace=True)
+
 #Strip some columns
 #csvsql has a bug that is not producing the
 #correct length in the CREATE TABLE script
@@ -23,10 +31,6 @@ df.incident = df.incident.map(lambda s: s.strip())
 df.pc = df.pc.map(lambda s: str(s).strip())
 df.signal = df.signal.map(lambda s: s.strip())
 
-#Check how many rows have empty addresses
-print '{} rows with empty address, removing those.'.format(df.address.isnull().sum())
-#Remove rows without address
-df = df[df.address.notnull()]
 #Add necessary columns for the geocoding script
 df['city'] = 'CINCINNATI'
 df['state'] = 'OHIO'

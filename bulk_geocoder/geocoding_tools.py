@@ -76,6 +76,7 @@ def geocode_dataframe(df):
     print '{} addresses geocoded'.format(n_geocoded)
     n_uniq_geocoded = (res.latitude != '').sum()
     print '{} unique addresses geocoded'.format(n_uniq_geocoded)
+    print '{0:.2%} unique addresses geocoded'.format(n_uniq_geocoded/n_uniq_addresses)
     print '{0:.2%} total addresses geocoded'.format(n_geocoded/n_addresses)
     return output
 
@@ -101,6 +102,9 @@ def geocode_list(l):
     responses = grequests.map(rs, size=50)
     #Get the content for each response
     contents = [r.content for r in responses]
+    #Check that every response contains the proper number of lines
+    #and send again the requests that failed
+    
     #Join responses
     all_responses = reduce(lambda x,y: x+'\n'+y, contents)
     return all_responses

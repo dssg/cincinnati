@@ -56,3 +56,23 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/fire.sql"
 echo "Uploading fire data to the database..."
 cat "$TMP_FOLDER/fire_geocoded.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.fire FROM STDIN  WITH CSV HEADER DELIMITER ',';"
 echo "Done creating fire table!"
+
+#Create a unique id to identify each event
+#since Incident# is not a unique identifier
+echo 'Adding unique id'
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE fire ADD id SERIAL;"
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE fire ADD PRIMARY KEY (id);"
+
+#Create geom column on the database
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/fire/create_geom.sql"  
+
+#Create a table to match every parcel with fire events
+#limit this to a radius of certain Km
+#Match parcels to calls
+echo 'Matching parcels to calls. This is going to take a while...'
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/fire/parcels_to_fire.sql"
+
+#Create a view to include the matching table and the rest of the columns
+echo 'Creating view to match parcels with fire dataset columns'
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/fire/fire_view.sql"
+echo 'Done!'
