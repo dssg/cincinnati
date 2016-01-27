@@ -9,7 +9,7 @@ DROP TABLE IF EXISTS public.fire;
 --Create new table with the same name as the original one
 CREATE TABLE public.fire AS(
     SELECT * FROM  geo_fire
-)
+);
 
 --Create an index
 CREATE INDEX ON fire USING GIST (geom);

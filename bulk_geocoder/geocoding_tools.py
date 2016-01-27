@@ -100,6 +100,9 @@ def geocode_list(l):
     responses = grequests.map(rs, size=50)
     #Get the content for each response
     contents = [r.content for r in responses]
+    #Check that every response contains the proper number of lines
+    #and send again the requests that failed
+    
     #Join responses
     all_responses = reduce(lambda x,y: x+'\n'+y, contents)
     return all_responses

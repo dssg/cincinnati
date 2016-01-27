@@ -20,6 +20,9 @@ print '{} rows with empty address, removing those.'.format(df.address.isnull().s
 #Remove rows without address
 df = df[df.address.notnull()]
 
+#Check for duplicates
+df.drop_duplicates(inplace=True)
+
 #Strip some columns
 #csvsql has a bug that is not producing the
 #correct length in the CREATE TABLE script
