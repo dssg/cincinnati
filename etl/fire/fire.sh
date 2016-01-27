@@ -55,6 +55,12 @@ echo "Uploading fire data to the database..."
 cat "$TMP_FOLDER/fire.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.fire FROM STDIN  WITH CSV HEADER DELIMITER ',';"
 echo "Done creating fire table!"
 
+#Create a unique id to identify each event
+#since Incident# is not a unique identifier
+echo 'Adding unique id'
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE fire ADD id SERIAL;"
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE fire ADD PRIMARY KEY (id);"
+
 #####REFACTORING FROM HERE#######
 
 #Step 4: Geocoding addresses
@@ -63,12 +69,6 @@ python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/fire.csv" "$TMP_
 
 #Create geom column on the database
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/fire/create_geom.sql"  
-
-#Create a unique id to identify each event
-#since Incident# is not a unique identifier
-echo 'Adding unique id'
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE fire ADD id SERIAL;"
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE fire ADD PRIMARY KEY (id);"
 
 #Create a table to match every parcel with fire events
 #limit this to a radius of certain Km
