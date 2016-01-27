@@ -38,7 +38,9 @@ unset IFS
 
 #When we got the fire data, there was only one table. We are going to work
 #with that file
-#Step 2: clean the data
+#Step 2: clean the data, this script will also create
+#a file a list of unique addresses in the dataset
+echo 'Cleaning dataset, subsetting it to 2005-2014'
 python "$ROOT_FOLDER/etl/fire/clean.py"
 
 #Step 3: Geocode dataset
@@ -57,14 +59,14 @@ echo "Uploading fire data to the database..."
 cat "$TMP_FOLDER/fire_geocoded.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.fire FROM STDIN  WITH CSV HEADER DELIMITER ',';"
 echo "Done creating fire table!"
 
+#Create geom column on the database
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/fire/create_geom.sql"  
+
 #Create a unique id to identify each event
 #since Incident# is not a unique identifier
 echo 'Adding unique id'
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE fire ADD id SERIAL;"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE fire ADD PRIMARY KEY (id);"
-
-#Create geom column on the database
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/fire/create_geom.sql"  
 
 #Create a table to match every parcel with fire events
 #limit this to a radius of certain Km
