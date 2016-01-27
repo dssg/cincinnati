@@ -40,24 +40,26 @@ unset IFS
 #with that file
 #Step 2: clean the data, this script will also create
 #a file a list of unique addresses in the dataset
-echo 'Cleaning dataset, subsetting it to 2005-2014'
+echo 'Cleaning dataset, subsetting it to 2005-2014 and creating file with unique addresses'
 python "$ROOT_FOLDER/etl/fire/clean.py"
 
-#Step 3: Geocode dataset
-echo 'Geocoding dataset, this may take a while...'
-python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/fire.csv" "$TMP_FOLDER/fire_geocoded.csv"
-
-#Step 4: Upload to postgres database
+#Step 3: Upload to postgres database
 #generate CREATE TABLE statement
-csvsql -i postgresql --tables fire --db-schema public -d ',' "$TMP_FOLDER/fire_geocoded.csv" > "$TMP_FOLDER/fire.sql"
+csvsql -i postgresql --tables fire --db-schema public -d ',' "$TMP_FOLDER/fire.csv" > "$TMP_FOLDER/fire.sql"
 #Drop table if it already exists
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS fire;"
 #Create table
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/fire.sql"  
 #Upload the csv file in the public schema
 echo "Uploading fire data to the database..."
-cat "$TMP_FOLDER/fire_geocoded.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.fire FROM STDIN  WITH CSV HEADER DELIMITER ',';"
+cat "$TMP_FOLDER/fire.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.fire FROM STDIN  WITH CSV HEADER DELIMITER ',';"
 echo "Done creating fire table!"
+
+#####REFACTORING FROM HERE#######
+
+#Step 4: Geocoding addresses
+#echo 'Geocoding dataset, this may take a while...'
+python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/fire.csv" "$TMP_FOLDER/fire_geocoded.csv"
 
 #Create geom column on the database
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/fire/create_geom.sql"  
