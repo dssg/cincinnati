@@ -1,6 +1,6 @@
 --Create temporary table with a geom field
 CREATE TEMP TABLE geo_fire AS (
-    SELECT *, ST_SetSRID(ST_MakePoint(longitude, latitude),4326) AS geom from public.fire
+    SELECT *, ST_Transform(ST_SetSRID(ST_MakePoint(longitude, latitude),4326), 3735) AS geom from public.fire
 );
 
 --Drop original table
