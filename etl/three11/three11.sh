@@ -26,15 +26,4 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/three11.sql"
 #Upload data to the database
 cat "$TMP_FOLDER/three11_clean.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.three11 FROM STDIN  WITH CSV HEADER DELIMITER ',';"
 
-#Geocode three11 dataset
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/geocode.sql"  
-
-#Match parcels to calls
-echo 'Matching parcels to calls. This is going to take a while... (It took ~2 hours in the DSaPP server)'
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/parcels_to_three11.sql"
-#Finally, create a view to get all columns in the 311 dataset with their corresponding
-#computed distances
-echo 'Creating view to match parcels with 311 dataset columns'
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/three11_view.sql"
-
 echo 'Done!'
