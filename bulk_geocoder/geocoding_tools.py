@@ -52,8 +52,12 @@ def geocode_dataframe(df):
     columns = ['id', 'raw_input', 'match', 'exact', 'geocoded_address',
                'long_lat', 'col_6', 'col_7']
     res = pd.read_csv(f, names=columns)
+<<<<<<< HEAD
     #Debug save data from the census API
     res.to_csv('res.csv')
+=======
+    #res.set_index('id', inplace=True)
+>>>>>>> f75135c7235af655012f62e84fe384e02198116e
     #Split long_lat. If long_lat is nulls, function returns an empty
     #tuple
     long_lat = res.long_lat.map(lambda s: __split_long_lat_str(s))
@@ -66,9 +70,13 @@ def geocode_dataframe(df):
     #Keep only useful columns
     res = res[['address', 'geocoded_address', 'latitude', 'longitude']]
     #join the two dataframes
-    df.set_index('address', inplace=True)
-    res.set_index('address', inplace=True)
-    output = df.join(res, how='left')
+    #Now drop columns that could no be geocoded
+    res = res.loc[res.geocoded_address.notnull()]
+    #Now drop duplicates, it may be the case that slightly 
+    #different addresses turned out to be the same
+    res.drop_duplicates(inplace=True)
+    #Do a left join
+    output = df.merge(res, on='address', how='left')
     #Debug: check that the set of addresses in df is equal to the set in output
     #set(df.index)==set(output.index)
     #Print some results
@@ -104,10 +112,27 @@ def geocode_list(l):
     contents = [r.content for r in responses]
     #Check that every response contains the proper number of lines
     #and send again the requests that failed
-    
     #Join responses
     all_responses = reduce(lambda x,y: x+'\n'+y, contents)
     return all_responses
+
+def __parse_responses(response):
+    '''
+        Check the responses returned, return a list with
+        the ones that you got right and another one with those
+        that had errors
+    '''
+    valid = [r for r in responses if __content_is_valid(r.content)]
+
+def __content_is_valid(content):
+    '''
+        Parse the content of a response, return True if the content is valid
+        False otherwise
+    '''
+    if 'error' in content:
+        return False
+    else:
+        return True
 
 def __split_long_lat_str(lat_long):
     if type(lat_long)==str:
