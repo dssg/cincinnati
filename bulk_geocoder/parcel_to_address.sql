@@ -4,3 +4,5 @@ CREATE TABLE parcel2address (
     address_id integer REFERENCES address,
     dist_km real NOT NULL
 );
+
+CREATE INDEX ON parcel2address (parcel_id);
