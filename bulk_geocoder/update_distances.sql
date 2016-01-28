@@ -1,0 +1,2 @@
+--This script updates the distance from every parcel to every address in the
+--address table
