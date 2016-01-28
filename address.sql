@@ -1,7 +1,7 @@
 --This table is going to be used to store ALL different addresses
 --in the different datasets we have, this way we will significantly reduce
 --the number of distance computations
-CREATE TABLE public.address (
+CREATE TABLE address (
     --Create an unique id
     id SERIAL PRIMARY KEY,
     --address: number and street name
