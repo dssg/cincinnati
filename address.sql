@@ -19,3 +19,5 @@ CREATE TABLE public.address (
     --geometry
     geom geometry
 );
+
+CREATE INDEX ON address USING GIST (geom);
