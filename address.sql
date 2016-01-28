@@ -6,11 +6,11 @@ CREATE TABLE public.address (
     id SERIAL PRIMARY KEY,
     --address: number and street name
     address varchar(100) NOT NULL,
-    --geocoded addres, as returned from the census api
-    geocoded_address varchar(100),
     city varchar(30),
     state varchar(30),
     zip varchar(10),
+    --geocoded addres, as returned from the census api
+    geocoded_address varchar(100),
     latitude float8,
     longitude float8,
     --coordinates, make sure they are in the 3735 SRID

@@ -66,11 +66,11 @@ def geocode_dataframe(df):
     res = res[['address', 'geocoded_address', 'latitude', 'longitude']]
     #join the two dataframes
     #Now drop columns that could no be geocoded
-    res = res[res.geocoded_address.notnull()]
+    res = res.loc[res.geocoded_address.notnull()]
     #Now drop duplicates, it may be the case that slightly 
     #different addresses turned out to be the same
     res.drop_duplicates(inplace=True)
-    #Do a left joins
+    #Do a left join
     output = df.merge(res, on='address', how='left')
     #Debug: check that the set of addresses in df is equal to the set in output
     #set(df.index)==set(output.index)
