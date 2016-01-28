@@ -16,3 +16,11 @@ computed_distances AS (
 --Add computed addresses ids
 INSERT INTO parcel2address
     SELECT * FROM computed_distances;
+
+--Add ids
+--we need this since we cannot rely only on the ids in computed_distances
+--it may be the case that some events are close to zero parcels,
+--I don't think there are many (maybe the one outside cincinnati)
+--but this is a simple solution
+INSERT INTO already_computed_addresses
+    SELECT id AS address_id FROM pending_addresses;
