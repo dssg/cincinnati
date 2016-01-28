@@ -71,7 +71,7 @@ def geocode_dataframe(df):
     #different addresses turned out to be the same
     res.drop_duplicates(inplace=True)
     #Do a left joins
-    output = df.merge(res, how='left')
+    output = df.merge(res, on='address', how='left')
     #Debug: check that the set of addresses in df is equal to the set in output
     #set(df.index)==set(output.index)
     #Print some results
