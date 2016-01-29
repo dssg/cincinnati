@@ -20,4 +20,5 @@ CREATE TABLE address (
     geom geometry
 );
 
+CREATE INDEX ON address (id);
 CREATE INDEX ON address USING GIST (geom);
