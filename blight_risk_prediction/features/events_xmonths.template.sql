@@ -11,11 +11,11 @@ CREATE TABLE events_3months_$TABLE_NAME AS (
         p2a.dist_km,
         $TABLE_NAME.*
     FROM parcels_inspections AS insp
-    JOIN default.parcel2address AS p2a
+    JOIN public.parcel2address AS p2a
     USING (parcel_id)
-    JOIN default.address
+    JOIN public.address
     ON address_id=address.id
-    JOIN default.$TABLE_NAME
+    JOIN public.$TABLE_NAME
     ON address.address=$TABLE_NAME.address --THIS IS SLOW, maybe change for an ID or simply add index
     AND (insp.inspection_date - '3 month'::interval) <= $TABLE_NAME.date
     AND $TABLE_NAME.date <= insp.inspection_date
