@@ -23,8 +23,7 @@ def create_events_3months_table(con, schema, table_name, date_column):
         con.cursor().execute("SET SCHEMA '{}'".format(schema))
         print 'Failed to create 3 month table. {}'.format(e)
 
-def compute_frequency_features(con, table_name, ids=['parcel_id', 'inspection_date'],
-                               columns):
+def compute_frequency_features(con, table_name, columns, ids=['parcel_id', 'inspection_date']):
     ids = [ids] if type(ids)==str else ids
     columns = [columns] if type(columns)==str else columns
 
