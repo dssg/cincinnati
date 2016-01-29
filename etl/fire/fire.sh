@@ -60,6 +60,9 @@ echo "Done creating fire table!"
 echo 'Adding unique id'
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE fire ADD id SERIAL;"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE fire ADD PRIMARY KEY (id);"
+#Create index, this is going to speed up joins for feature generation
+#when lloking for events that happened shortly before an inspection
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE INDEX ON fire (date);"
 
 #Step 4: Geocoding addresses
 #echo 'Geocoding dataset, this may take a while...'

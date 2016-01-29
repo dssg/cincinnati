@@ -28,6 +28,10 @@ echo 'Done creating three11 table!'
 
 #ADD UNIQUE ID?
 
+#Create index, this is going to speed up joins for feature generation
+#when lloking for events that happened shortly before an inspection
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE INDEX ON three11 (requested_datetime);"
+
 #Geocoding
 python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/three11_addr.csv" "$TMP_FOLDER/three11_addr_geocoded.csv"
 #Upload unique addresses to the address table
