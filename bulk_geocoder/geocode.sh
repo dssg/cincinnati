@@ -16,7 +16,8 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/update_geoms.s
 #addresses nearby
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/parcel_to_address.sql"
 
-#This script computes the distance for each parcel in  parcels_cincy
+#This script computes the distance for each parcel in  parcels_cincy (Note that this includes ALL
+#parcels in the city)
 #with each row in address. Once finished, it saves the records, so the next
 #time only computes distances for the new addresses. Results are store in parcel2address
 #table

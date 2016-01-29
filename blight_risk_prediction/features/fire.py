@@ -10,13 +10,15 @@ path_to_template = os.path.join(os.environ['ROOT_FOLDER'],
                     'blight_risk_prediction',
                     'features',
                     'events_xmonths.template.sql')
+table_name = 'fire'
+date_column = 'date'
 
 def create_events_3months_table(con):
     #Load template with SQL statement
     with open(path_to_template, 'r') as f:
         sql_script = Template(f.read())
     #Replace values in template
-    sql_script = sql_script.substitute(TABLE_NAME='fire')
+    sql_script = sql_script.substitute(TABLE_NAME=table_name, DATE_COLUMN=date)
     #Run the code using the connection
     #this is going to take a while
     try:
@@ -26,7 +28,7 @@ def create_events_3months_table(con):
         print 'Failed to create 3 month table. {}'.format(e)
 
 def compute_frequency_features(con):
-    df = pd.read_sql('SELECT * FROM features.events_3months_fire', con)
+    df = pd.read_sql('SELECT * FROM events_3months_fire', con)
     #Group by parcel_id and inspection_date. Make columns with counts
     #for some columns
     cross = pd.crosstab([df.parcel_id, df.inspection_date],

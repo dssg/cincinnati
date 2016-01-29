@@ -49,7 +49,7 @@ def make_three11_features(con):
     """
     #parcels_three11_view contains data
     #to match each parcel with their corresponding 311
-    #calls within 3 kilometers. Use that view to now
+    #calls within 1 kilometer. Use that view to now
     #match each inspection with calls that happened
     #X months before the inspection
     create_events_3months_table(con)
