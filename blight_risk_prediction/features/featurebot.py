@@ -8,7 +8,7 @@ import psycopg2
 from dstools.config import main as main_cfg
 from blight_risk_prediction import util
 from blight_risk_prediction.features import (ner, parcel, outcome, tax, crime,
-                                             census, three11)
+                                             census, three11, fire)
 import argparse
 
 logger = logging.getLogger(__name__)
@@ -34,7 +34,9 @@ existing_features = [FeatureToGenerate("tax", tax.make_tax_features),
                          FeatureToGenerate("census_2010",
                                            census.make_census_features),
                          FeatureToGenerate("three11",
-                                           three11.make_three11_features)]
+                                           three11.make_three11_features),
+                         FeatureToGenerate("fire",
+                                           fire.make_fire_features)]
 
 tables = [t.table for t in existing_features]
 tables_list = reduce(lambda x,y: x+", "+y, tables)
