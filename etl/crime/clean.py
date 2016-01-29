@@ -5,9 +5,9 @@ import sys
 Do some basic data cleaning and conversion on our crime data
 """
 
-order = ['incident_number', 'date_reported', "offense_title", "location", "address", "weekday",
-         "rpt_area", "neighbourhood", "hour_from", "hour_to", "weapon", "ucr"]
-
+order = ['incident_number', 'date_reported', "offense_title", "location", "address",
+         "weekday", 'city', 'state', 'zip', "rpt_area", "neighbourhood",
+         "hour_from", "hour_to", "weapon", "ucr"]
 
 print (";".join(order))
 
