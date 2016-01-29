@@ -2,12 +2,18 @@ import pandas as pd
 from dstools.db import uri
 from sqlalchemy import create_engine
 from string import Template
+import os
 
 engine = create_engine(uri)
 
+path_to_template = os.path.join(os.environ['ROOT_FOLDER'],
+                    'blight_risk_prediction',
+                    'features',
+                    'events_xmonths.template.sql')
+
 def create_events_3months_table(con):
     #Load template with SQL statement
-    with open('events_xmonths.template.sql', 'r') as f:
+    with open(path_to_template, 'r') as f:
         sql_script = Template(f.read())
     #Replace values in template
     sql_script = sql_script.substitute(TABLE_NAME='fire')
