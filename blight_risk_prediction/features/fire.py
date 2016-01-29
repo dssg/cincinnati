@@ -22,6 +22,7 @@ def create_events_3months_table(con):
     try:
         con.cursor().execute(sql_script)
     except Exception, e:
+        con.rollback()
         print 'Failed to create 3 month table. {}'.format(e)
 
 def compute_frequency_features(con):
