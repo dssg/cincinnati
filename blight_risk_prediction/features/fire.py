@@ -54,7 +54,7 @@ def make_fire_features(con):
     #fail, you need to do a rollback, which will reset the previously set schema
     cur = con.cursor()
     cur.execute('SELECT current_schema;')
-    schema = cur.fetchone()
+    schema = cur.fetchone()[0]
 
     #Create table with events that happened before 3 months of inspection database
     #If table exists, send message and skip
