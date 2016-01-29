@@ -5,8 +5,8 @@ import sys
 Do some basic data cleaning and conversion on our crime data
 """
 
-order = ['incident_number', 'date_reported', "offense_title", "location", "address",
-         "weekday", 'city', 'state', 'zip', "rpt_area", "neighbourhood",
+order = ['incident_number', 'date_reported', "offense_title", "location", "weekday", 
+         "address", 'city', 'state', 'zip', "rpt_area", "neighbourhood",
          "hour_from", "hour_to", "weapon", "ucr"]
 
 print (";".join(order))
@@ -32,9 +32,11 @@ with open(file_path) as f:
         converted["date_reported"] = parse(raw[1]) #method from dateutil
         converted["offense_title"] = raw[2]
         converted["location"] = raw[3]
-        #Add name of the city and state so geocoding works
-        converted["address"] = raw[4]
         converted["weekday"] = raw[5]
+        converted["address"] = raw[4]
+        converted["city"] = 'CINCINNATI'
+        converted["state"] = 'OHIO'
+        converted["zip"] = ''
         converted["rpt_area"] = raw[6]
         converted["neighbourhood"] = raw[7]
         converted["hour_from"] = int(raw[8]) if len(raw[8]) > 0 else ''
