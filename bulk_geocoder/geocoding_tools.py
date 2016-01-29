@@ -45,8 +45,8 @@ def geocode_dataframe(df):
     #TO DO: Check that addresses do not contain commas
     #Geocode addresses using the batch census API
     census_results = geocode_list(addresses)
-    #census_results is the raw output, parse it using pandas
-    f = StringIO(census_results)
+    #Join each sting into a single one and create a file-like object
+    f = StringIO(reduce(lambda x,y: x+'\n'+y, census_results))
     #I don't see any documention about the
     #census output format, I'm guessing here
     columns = ['id', 'raw_input', 'match', 'exact', 'geocoded_address',
@@ -61,23 +61,24 @@ def geocode_dataframe(df):
     #using that original address
     #IMPORTANT: this step won't work if the original address contains commas
     res['address'] = res.raw_input.map(lambda s: s.split(',')[0])
-    #Keep only useful columns
-    res = res[['address', 'geocoded_address', 'latitude', 'longitude']]
     #join the two dataframes
-    #Now drop columns that could no be geocoded
+    #Now drop rows that could no be geocoded
     res = res.loc[res.geocoded_address.notnull()]
+    n_geocoded = len(res.index)
+    print '{} addresses geocoded'.format(n_geocoded)
     #Now drop duplicates, it may be the case that slightly 
     #different addresses turned out to be the same
-    res.drop_duplicates(inplace=True)
+    duplicates = res.duplicated(subset='geocoded_address')
+    print 'Found {} duplicates'.format(duplicates.sum())
+    res = res[~duplicates]
+
+    #Keep only useful columns
+    res = res[['address', 'geocoded_address', 'latitude', 'longitude']]
     #Do a left join
     output = df.merge(res, on='address', how='left')
     #Debug: check that the set of addresses in df is equal to the set in output
     #set(df.index)==set(output.index)
     #Print some results
-    n_geocoded = (output.latitude != '').sum()
-    print '{} addresses geocoded'.format(n_geocoded)
-    n_uniq_geocoded = (res.latitude != '').sum()
-    print '{} unique addresses geocoded'.format(n_uniq_geocoded)
     print '{0:.2%} unique addresses geocoded'.format(n_uniq_geocoded/n_uniq_addresses)
     print '{0:.2%} total addresses geocoded'.format(n_geocoded/n_addresses)
     return output
@@ -102,13 +103,15 @@ def geocode_list(l):
     rs = (grequests.post(url, data=data, files={'addressFile': a_file}) for a_file in files_content)
     #Make the calls, send in batches
     responses = grequests.map(rs, size=50)
-    #Get the content for each response
-    contents = [r.content for r in responses]
-    #Check that every response contains the proper number of lines
-    #and send again the requests that failed
-    #Join responses
-    all_responses = reduce(lambda x,y: x+'\n'+y, contents)
-    return all_responses
+    #Split responses in valid, not valid
+    valid, not_valid = __parse_responses(responses)
+    print 'Got {} responses, {} failed.'.format(len(responses), len(not_valid))
+
+    #Get the content for each response, remove  empty lines
+    contents = [__parse_content(r.content) for r in valid]
+    #Flatten list
+    contents = [element for sublist in contents for element in sublist]
+    return contents
 
 def __parse_responses(response):
     '''
@@ -117,6 +120,17 @@ def __parse_responses(response):
         that had errors
     '''
     valid = [r for r in responses if __content_is_valid(r.content)]
+    not_valid = [r for r in responses if not __content_is_valid(r.content)]
+    return valid, not_valid
+
+def __parse_content(content):
+    '''
+        Parses content received by the census API and returns
+        each entry as separated string in a list. Deletes empty strings
+    '''
+    lines = content.split('\n')
+    non_empty_lines = [line for line in lines if len(line)>0]
+    return non_empty_lines
 
 def __content_is_valid(content):
     '''

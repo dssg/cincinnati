@@ -5,9 +5,9 @@ import sys
 Do some basic data cleaning and conversion on our crime data
 """
 
-order = ['incident_number', 'date_reported', "offense_title", "location", "address", "weekday",
-         "rpt_area", "neighbourhood", "hour_from", "hour_to", "weapon", "ucr"]
-
+order = ['incident_number', 'date_reported', "offense_title", "location", "address",
+         "weekday", 'city', 'state', 'zip', "rpt_area", "neighbourhood",
+         "hour_from", "hour_to", "weapon", "ucr"]
 
 print (";".join(order))
 
@@ -33,7 +33,7 @@ with open(file_path) as f:
         converted["offense_title"] = raw[2]
         converted["location"] = raw[3]
         #Add name of the city and state so geocoding works
-        converted["address"] = raw[4]+' CINCINNATI, OH'
+        converted["address"] = raw[4]
         converted["weekday"] = raw[5]
         converted["rpt_area"] = raw[6]
         converted["neighbourhood"] = raw[7]

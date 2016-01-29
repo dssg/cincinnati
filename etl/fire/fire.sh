@@ -69,6 +69,4 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE INDEX ON fire (date);"
 python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/fire_addr.csv" "$TMP_FOLDER/fire_addr_geocoded.csv"
 #Upload unique addresses to the address table
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY address(address, city, state, zip, geocoded_address, latitude, longitude) FROM '$TMP_FOLDER/fire_addr_geocoded.csv' WITH CSV HEADER DELIMITER ',';"
-
-
 echo 'Done!'
