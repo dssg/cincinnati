@@ -1,7 +1,7 @@
 import pandas as pd
 from dstools.db import uri
 from sqlalchemy import create_engine
-from string import template
+from string import Template
 
 engine = create_engine(uri)
 
