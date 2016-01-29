@@ -77,15 +77,15 @@ def generate_features(features_to_generate):
     """
     schema = "features"
 
-    # use this engine for all data storing (somehow does
-    # not work with the raw connection we create below)
-    engine = util.get_engine()
-
-    # all querying is done using a raw connection. in this
+    # all querying is done using a the same connection. in this
     # connection set to use the relevant schema
     # this makes sure that we grab the "inspections_parcels"
     # table from the correct schema in all feature creators
-    con = engine.raw_connection()
+    db = main_cfg['db']
+    con = = psycopg2.connect(dbname=db['database'],
+                             host=db['host'],
+                             password=db['password'],
+                             user=db['user'])
     con.cursor().execute("SET SCHEMA '{}'".format(schema))
 
     #Print the current schema by reading it from the db
@@ -101,8 +101,8 @@ def generate_features(features_to_generate):
     logging.info("Generating inspections table")
     try:
         inspections = outcome.generate_labels()
-        inspections.to_sql("parcels_inspections", engine, chunksize=50000,
-                      if_exists='fail', index=False, schema=schema)
+        inspections.to_sql("parcels_inspections", con, chunksize=50000,
+                      if_exists='fail', index=False)
         logging.debug("... table has {} rows".format(len(inspections)))
     except Exception, e:
         print 'Failed to create inspections table. {}'.format(e)
@@ -115,8 +115,8 @@ def generate_features(features_to_generate):
         #inspection_date and the correct number of rows as their
         #corresponding parcels_inspections table in the schema being used
         # TO DO: check that feature_data has the right shape and indexes
-        feature_data.to_sql(feature.table, engine, chunksize=50000,
-                            if_exists='replace', index=True, schema=schema)
+        feature_data.to_sql(feature.table, con, chunksize=50000,
+                            if_exists='replace', index=True)
         logging.debug("... table has {} rows".format(len(feature_data)))
 
 
