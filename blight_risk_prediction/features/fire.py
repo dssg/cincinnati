@@ -13,7 +13,7 @@ path_to_template = os.path.join(os.environ['ROOT_FOLDER'],
 table_name = 'fire'
 date_column = 'date'
 
-def create_events_3months_table(con):
+def create_events_3months_table(con, schema):
     #Load template with SQL statement
     with open(path_to_template, 'r') as f:
         sql_script = Template(f.read())
@@ -21,14 +21,14 @@ def create_events_3months_table(con):
     sql_script = sql_script.substitute(TABLE_NAME=table_name, DATE_COLUMN=date_column)
     #Run the code using the connection
     #this is going to take a while
-    con.cursor().execute(sql_script)
+    try:
+        con.cursor().execute(sql_script)
+    except Exception, e:
+        con.rollback()
+        con.cursor().execute("SET SCHEMA '{}'".format(schema))
+        print 'Failed to create 3 month table. {}'.format(e)
 
-def compute_frequency_features(con):
-    cur = con.cursor()
-    cur.execute('SELECT current_schema;')
-    current_schema = cur.fetchone()
-    print 'FIRE ETL: Current schema is {}'.format(current_schema)
-
+def compute_frequency_features(con, schema):
     df = pd.read_sql('SELECT * FROM events_3months_fire', con)
     #Group by parcel_id and inspection_date. Make columns with counts
     #for some columns
@@ -50,14 +50,20 @@ def make_fire_features(con):
     Output:
     A pandas dataframe, with one row per inspection and one column per feature.
     """
+    #Save current schema, this is important because if some of the queries
+    #fail, you need to do a rollback, which will reset the previously set schema
+    cur = con.cursor()
+    cur.execute('SELECT current_schema;')
+    schema = cur.fetchone()
+
     #Create table with events that happened before 3 months of inspection database
-    #Create the table only if not exists
-    create_events_3months_table(con)
+    #If table exists, send message and skip
+    create_events_3months_table(con, schema)
 
     #Use the recently created table to compute features.
     #Group rows by parcel_id and inspection_date
     #For now, just perform counts on the categorical variables
     #More complex features could combine the distance value
     #as well as interacting features
-    df = compute_frequency_features(con)
+    df = compute_frequency_features(con, schema)
     return df
