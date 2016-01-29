@@ -22,19 +22,17 @@ csvsql -i postgresql --tables three11 --db-schema public -d ',' "$TMP_FOLDER/thr
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS three11;"  
 #Create table
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/three11.sql"  
-
 #Upload data to the database
 cat "$TMP_FOLDER/three11_clean.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.three11 FROM STDIN  WITH CSV HEADER DELIMITER ',';"
+echo 'Done creating three11 table!'
 
-#Geocode three11 dataset
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/geocode.sql"  
+#ADD UNIQUE ID?
 
-#Match parcels to calls
-echo 'Matching parcels to calls. This is going to take a while... (It took ~2 hours in the DSaPP server)'
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/parcels_to_three11.sql"
-#Finally, create a view to get all columns in the 311 dataset with their corresponding
-#computed distances
-echo 'Creating view to match parcels with 311 dataset columns'
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/three11_view.sql"
+#Create index, this is going to speed up joins for feature generation
+#when lloking for events that happened shortly before an inspection
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE INDEX ON three11 (requested_datetime);"
 
-echo 'Done!'
+#Geocoding
+python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/three11_addr.csv" "$TMP_FOLDER/three11_addr_geocoded.csv"
+#Upload unique addresses to the address table
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY address(address, city, state, zip, geocoded_address, latitude, longitude) FROM '$TMP_FOLDER/fire_addr_geocoded.csv' WITH CSV HEADER DELIMITER ',';"
