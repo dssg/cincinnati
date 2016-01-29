@@ -89,8 +89,9 @@ def generate_features(features_to_generate):
     con.cursor().execute("SET SCHEMA '{}'".format(schema))
 
     #Print the current schema by reading it from the db
-    con.cursor().execute('SELECT current_schema;')
-    cuurrent_schema = cur.fetchone()
+    cur = con.cursor()    
+    cur.execute('SELECT current_schema;')
+    current_schema = cur.fetchone()
     print 'Current schema is {}'.format(current_schema)
     
     # make a new table that contains one row for every parcel in Cincinnati
