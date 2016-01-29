@@ -93,10 +93,13 @@ def generate_features(features_to_generate):
     # inspection_date is the one given as a parameter and
     # is the same for all parcels
     logging.info("Generating inspections table")
-    inspections = outcome.generate_labels()
-    inspections.to_sql("parcels_inspections", engine, chunksize=50000,
-                      if_exists='replace', index=False, schema=schema)
-    logging.debug("... table has {} rows".format(len(inspections)))
+    try:
+        inspections = outcome.generate_labels()
+        inspections.to_sql("parcels_inspections", engine, chunksize=50000,
+                      if_exists='fail', index=False, schema=schema)
+        logging.debug("... table has {} rows".format(len(inspections)))
+    except Exception, e:
+        print 'Failed to create inspections table. {}'.format(e)
 
     # make features and store in database
     for feature in features_to_generate:
