@@ -77,15 +77,15 @@ def generate_features(features_to_generate):
     """
     schema = "features"
 
-    # all querying is done using a the same connection. in this
+    # use this engine for all data storing (somehow does
+    # not work with the raw connection we create below)
+    engine = util.get_engine()
+
+    # all querying is done using a raw connection. in this
     # connection set to use the relevant schema
     # this makes sure that we grab the "inspections_parcels"
     # table from the correct schema in all feature creators
-    db = main_cfg['db']
-    con = psycopg2.connect(dbname=db['database'],
-                             host=db['host'],
-                             password=db['password'],
-                             user=db['user'])
+    con = engine.raw_connection()
     con.cursor().execute("SET SCHEMA '{}'".format(schema))
 
     #Print the current schema by reading it from the db
@@ -101,8 +101,8 @@ def generate_features(features_to_generate):
     logging.info("Generating inspections table")
     try:
         inspections = outcome.generate_labels()
-        inspections.to_sql("parcels_inspections", con, chunksize=50000,
-                      if_exists='fail', index=False)
+        inspections.to_sql("parcels_inspections", engine, chunksize=50000,
+                      if_exists='fail', index=False, schema=schema)
         logging.debug("... table has {} rows".format(len(inspections)))
     except Exception, e:
         print 'Failed to create inspections table. {}'.format(e)
@@ -115,11 +115,9 @@ def generate_features(features_to_generate):
         #inspection_date and the correct number of rows as their
         #corresponding parcels_inspections table in the schema being used
         # TO DO: check that feature_data has the right shape and indexes
-        feature_data.to_sql(feature.table, con, chunksize=50000,
-                            if_exists='replace', index=True)
+        feature_data.to_sql(feature.table, engine, chunksize=50000,
+                            if_exists='replace', index=True, schema=schema)
         logging.debug("... table has {} rows".format(len(feature_data)))
-
-    con.close()
 
 
 def generate_features_for_fake_inspection(features_to_generate, inspection_date):
@@ -131,9 +129,15 @@ def generate_features_for_fake_inspection(features_to_generate, inspection_date)
     features_01Aug2015.
     :return:
     """
-    db = main_cfg['db']
-    con = psycopg2.connect(dbname=db['database'], host=db['host'],
-                           password=db['password'], user=db['user'])
+    # use this engine for all data storing (somehow does not work
+    # with the raw connection we create below)
+    engine = util.get_engine()
+
+    # all querying is done using a raw connection. in this
+    # connection set to use the relevant schema
+    # this makes sure that we grab the "inspections_parcels"
+    # table from the correct schema in all feature creators
+    con = engine.raw_connection()
 
     schema = "features_{}".format(inspection_date.strftime('%d%b%Y')).lower()
     if schema not in existing_feature_schemas():
@@ -146,10 +150,6 @@ def generate_features_for_fake_inspection(features_to_generate, inspection_date)
     else:
         print 'Using existing schema'
 
-    # all querying is done using the same connection. in this
-    # connection set to use the relevant schema
-    # this makes sure that we grab the "inspections_parcels"
-    # table from the correct schema in all feature creators
     con.cursor().execute("SET SCHEMA '{}'".format(schema))
 
     # make a new table that contains one row for every parcel in Cincinnati
@@ -158,8 +158,8 @@ def generate_features_for_fake_inspection(features_to_generate, inspection_date)
     # for all parcels
     logging.info("Generating inspections table")
     inspections = outcome.make_fake_inspections_all_parcels_cincy(inspection_date)
-    inspections.to_sql("parcels_inspections", con, chunksize=50000,
-                      if_exists='replace', index=False)
+    inspections.to_sql("parcels_inspections", engine, chunksize=50000,
+                      if_exists='replace', index=False, schema=schema)
     logging.debug("... table has {} rows".format(len(inspections)))
 
     # make features and store in database
@@ -169,11 +169,9 @@ def generate_features_for_fake_inspection(features_to_generate, inspection_date)
     for feature in features_to_generate:
         logging.info("Generating {} features".format(feature.table))
         feature_data = feature.generator_function(con)
-        feature_data.to_sql(feature.table, con, chunksize=50000,
-                            if_exists='replace', index=True)
+        feature_data.to_sql(feature.table, engine, chunksize=50000,
+                            if_exists='replace', index=True, schema=schema)
         logging.debug("... table has {} rows".format(len(feature_data)))
-
-    con.close()
 
 
 if __name__ == '__main__':
