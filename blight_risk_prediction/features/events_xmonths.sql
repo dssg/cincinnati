@@ -1,3 +1,9 @@
+--Join parcels in parcels_inspection (in whatever it is the current schema)
+--with addresses that are within 3Km
+--then filter those addreses for events within 1 month of
+--inspection date
+
+
 --Script for 311 feature generation
 --Given the temporal natural of complains, we are going to generate features
 --for each inspection by moving in two dimensions: date and distance.
@@ -10,11 +16,21 @@
 
 --Join the parcels and complains table with the inspections table
 --Generate one rows for each complain within X months on each inspection
-CREATE TABLE three11_for_inspections_1_month AS (
-    SELECT insp.parcel_id, insp.inspection_date, pnc.requested_datetime, pnc.dist_km, pnc.service_code, pnc.agency_responsible
-    FROM parcels_inspections AS insp --don't make any assumption on which schema to use
-    JOIN public.parcels_three11_view AS pnc
-    ON insp.parcel_id=pnc.parcelid
-    AND (insp.inspection_date - '1 month'::interval) <= pnc.requested_datetime --complain date should be X months before insepction at most
-    AND pnc.requested_datetime <= insp.inspection_date --and don't give me complains past the inspection date
-)
+
+
+CREATE TABLE events_3months_fire AS (
+    SELECT
+        insp.parcel_id, insp.inspection_date,
+        p2a.dist_km,
+        fire.*
+    FROM features.parcels_inspections AS insp
+    JOIN parcel2address AS p2a
+    USING (parcel_id) --match one
+    JOIN address
+    ON address_id=address.id
+    JOIN fire
+    ON address.address=fire.address --THIS IS SLOW, maybe change for an ID or simply add index
+    AND (insp.inspection_date - '3 month'::interval) <= fire.date
+    AND fire.date <= insp.inspection_date
+);
+

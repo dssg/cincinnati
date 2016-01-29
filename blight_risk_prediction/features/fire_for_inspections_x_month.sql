@@ -1,4 +1,0 @@
---Join parcels in parcels_inspection (in whatever it is the current schema)
---with addresses that are within 3Km
---then filter those addreses for events within 1 month of
---inspection date
