@@ -88,6 +88,11 @@ def generate_features(features_to_generate):
     con = engine.raw_connection()
     con.cursor().execute("SET SCHEMA '{}'".format(schema))
 
+    #Print the current schema by reading it from the db
+    con.cursor().execute('SELECT current_schema;')
+    cuurrent_schema = cur.fetchone()
+    print 'Current schema is {}'.format(current_schema)
+    
     # make a new table that contains one row for every parcel in Cincinnati
     # this table has three columns: parcel_id, inspection_date, viol_outcome
     # inspection_date is the one given as a parameter and

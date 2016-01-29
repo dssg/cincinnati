@@ -28,6 +28,10 @@ def create_events_3months_table(con):
         print 'Failed to create 3 month table. {}'.format(e)
 
 def compute_frequency_features(con):
+    con.cursor().execute('SELECT current_schema;')
+    cuurrent_schema = cur.fetchone()
+    print 'FIRE ETL: Current schema is {}'.format(current_schema)
+
     df = pd.read_sql('SELECT * FROM events_3months_fire', con)
     #Group by parcel_id and inspection_date. Make columns with counts
     #for some columns
