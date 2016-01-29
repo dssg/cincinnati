@@ -21,11 +21,7 @@ def create_events_3months_table(con):
     sql_script = sql_script.substitute(TABLE_NAME=table_name, DATE_COLUMN=date_column)
     #Run the code using the connection
     #this is going to take a while
-    try:
-        con.cursor().execute(sql_script)
-    except Exception, e:
-        con.rollback()
-        print 'Failed to create 3 month table. {}'.format(e)
+    con.cursor().execute(sql_script)
 
 def compute_frequency_features(con):
     cur = con.cursor()
@@ -55,7 +51,7 @@ def make_fire_features(con):
     A pandas dataframe, with one row per inspection and one column per feature.
     """
     #Create table with events that happened before 3 months of inspection database
-    #If table exists, send message and skip
+    #Create the table only if not exists
     create_events_3months_table(con)
 
     #Use the recently created table to compute features.

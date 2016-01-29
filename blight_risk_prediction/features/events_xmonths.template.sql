@@ -5,7 +5,7 @@
 --inspection date
 
 --This script is intended to be used as a template for various tables
-CREATE TABLE events_3months_$TABLE_NAME AS (
+CREATE TABLE IF NOT EXISTS events_3months_$TABLE_NAME AS (
     SELECT
         insp.parcel_id, insp.inspection_date,
         p2a.dist_km,
