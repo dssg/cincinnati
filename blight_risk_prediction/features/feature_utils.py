@@ -27,7 +27,7 @@ def compute_frequency_features(con, table_name, columns, ids=['parcel_id', 'insp
     ids = [ids] if type(ids)==str else ids
     columns = [columns] if type(columns)==str else columns
 
-    df = pd.read_sql('SELECT * FROM events_3months_{}}'.format(table_name), con)
+    df = pd.read_sql('SELECT * FROM events_3months_{}'.format(table_name), con)
     ids_series = [df[i] for i in ids]
     cols_series = [df[i] for i in columns]
     #Group by parcel_id and inspection_date. Make columns with counts
