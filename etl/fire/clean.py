@@ -17,7 +17,7 @@ df.columns = df.columns.map(lambda s: s.lower().replace('#', ''))
 #We are only using data starting from 2005
 indexes = [i.year >= 2005 for i in df.date]
 df = df[indexes]
-print 'Subset from 2005 to 2014 has {:,d} rows and {:,d} columns'.format(*df.shape)
+print 'Subset from 2005 has {:,d} rows and {:,d} columns'.format(*df.shape)
 
 #Check how many rows have empty addresses
 print '{:,d} rows with empty address, removing those'.format(df.address.isnull().sum())
