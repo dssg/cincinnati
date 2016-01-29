@@ -18,7 +18,7 @@ def create_events_3months_table(con):
     with open(path_to_template, 'r') as f:
         sql_script = Template(f.read())
     #Replace values in template
-    sql_script = sql_script.substitute(TABLE_NAME=table_name, DATE_COLUMN=date)
+    sql_script = sql_script.substitute(TABLE_NAME=table_name, DATE_COLUMN=date_column)
     #Run the code using the connection
     #this is going to take a while
     try:
