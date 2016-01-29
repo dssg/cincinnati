@@ -22,8 +22,13 @@ csvsql -i postgresql --tables three11 --db-schema public -d ',' "$TMP_FOLDER/thr
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS three11;"  
 #Create table
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/three11.sql"  
-
 #Upload data to the database
 cat "$TMP_FOLDER/three11_clean.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.three11 FROM STDIN  WITH CSV HEADER DELIMITER ',';"
+echo 'Done creating three11 table!'
 
-echo 'Done!'
+#ADD UNIQUE ID?
+
+#Geocoding
+python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/three11_addr.csv" "$TMP_FOLDER/three11_addr_geocoded.csv"
+#Upload unique addresses to the address table
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY address(address, city, state, zip, geocoded_address, latitude, longitude) FROM '$TMP_FOLDER/fire_addr_geocoded.csv' WITH CSV HEADER DELIMITER ',';"
