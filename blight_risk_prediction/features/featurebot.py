@@ -82,7 +82,7 @@ def generate_features(features_to_generate):
     # this makes sure that we grab the "inspections_parcels"
     # table from the correct schema in all feature creators
     db = main_cfg['db']
-    con = = psycopg2.connect(dbname=db['database'],
+    con = psycopg2.connect(dbname=db['database'],
                              host=db['host'],
                              password=db['password'],
                              user=db['user'])
@@ -119,6 +119,8 @@ def generate_features(features_to_generate):
                             if_exists='replace', index=True)
         logging.debug("... table has {} rows".format(len(feature_data)))
 
+    con.close()
+
 
 def generate_features_for_fake_inspection(features_to_generate, inspection_date):
     """
@@ -129,33 +131,25 @@ def generate_features_for_fake_inspection(features_to_generate, inspection_date)
     features_01Aug2015.
     :return:
     """
+    db = main_cfg['db']
+    con = psycopg2.connect(dbname=db['database'], host=db['host'],
+                           password=db['password'], user=db['user'])
 
     schema = "features_{}".format(inspection_date.strftime('%d%b%Y')).lower()
     if schema not in existing_feature_schemas():
         #Create schema here
-        user = main_cfg['db']['user']
-        password = main_cfg['db']['password']
-        host  = main_cfg['db']['host']
-        database  = main_cfg['db']['database']
-        conn = psycopg2.connect(host=host, database=database, user=user, password=password)
-        cur = conn.cursor()
+        cur = con.cursor()
         cur.execute("CREATE  SCHEMA %s;" % schema)
-        conn.commit()
+        con.commit()
         cur.close()
-        conn.close()
         print 'Creating schema %s' % schema
     else:
         print 'Using existing schema'
 
-    # use this engine for all data storing (somehow does not work
-    # with the raw connection we create below)
-    engine = util.get_engine()
-
-    # all querying is done using a raw connection. in this
+    # all querying is done using the same connection. in this
     # connection set to use the relevant schema
     # this makes sure that we grab the "inspections_parcels"
     # table from the correct schema in all feature creators
-    con = engine.raw_connection()
     con.cursor().execute("SET SCHEMA '{}'".format(schema))
 
     # make a new table that contains one row for every parcel in Cincinnati
@@ -164,8 +158,8 @@ def generate_features_for_fake_inspection(features_to_generate, inspection_date)
     # for all parcels
     logging.info("Generating inspections table")
     inspections = outcome.make_fake_inspections_all_parcels_cincy(inspection_date)
-    inspections.to_sql("parcels_inspections", engine, chunksize=50000,
-                      if_exists='replace', index=False, schema=schema)
+    inspections.to_sql("parcels_inspections", con, chunksize=50000,
+                      if_exists='replace', index=False)
     logging.debug("... table has {} rows".format(len(inspections)))
 
     # make features and store in database
@@ -175,9 +169,11 @@ def generate_features_for_fake_inspection(features_to_generate, inspection_date)
     for feature in features_to_generate:
         logging.info("Generating {} features".format(feature.table))
         feature_data = feature.generator_function(con)
-        feature_data.to_sql(feature.table, engine, chunksize=50000,
-                            if_exists='replace', index=True, schema=schema)
+        feature_data.to_sql(feature.table, con, chunksize=50000,
+                            if_exists='replace', index=True)
         logging.debug("... table has {} rows".format(len(feature_data)))
+
+    con.close()
 
 
 if __name__ == '__main__':
