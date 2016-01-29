@@ -52,12 +52,6 @@ def geocode_dataframe(df):
     columns = ['id', 'raw_input', 'match', 'exact', 'geocoded_address',
                'long_lat', 'col_6', 'col_7']
     res = pd.read_csv(f, names=columns)
-<<<<<<< HEAD
-    #Debug save data from the census API
-    res.to_csv('res.csv')
-=======
-    #res.set_index('id', inplace=True)
->>>>>>> f75135c7235af655012f62e84fe384e02198116e
     #Split long_lat. If long_lat is nulls, function returns an empty
     #tuple
     long_lat = res.long_lat.map(lambda s: __split_long_lat_str(s))

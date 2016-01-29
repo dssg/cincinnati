@@ -26,7 +26,7 @@ def create_events_3months_table(con):
         print 'Failed to create 3 month table. {}'.format(e)
 
 def compute_frequency_features(con):
-    df = pd.read_sql('SELECT * FROM events_3months_fire', con)
+    df = pd.read_sql('SELECT * FROM features.events_3months_fire', con)
     #Group by parcel_id and inspection_date. Make columns with counts
     #for some columns
     cross = pd.crosstab([df.parcel_id, df.inspection_date],
