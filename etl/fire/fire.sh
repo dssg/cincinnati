@@ -56,11 +56,15 @@ echo "Uploading fire data to the database..."
 cat "$TMP_FOLDER/fire_db.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.fire FROM STDIN  WITH CSV HEADER DELIMITER ',';"
 echo "Done creating fire table!"
 
-#Create a unique id to identify each event
-#since Incident# is not a unique identifier
-echo 'Adding unique id'
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE fire ADD id SERIAL;"
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE fire ADD PRIMARY KEY (id);"
 #Create index, this is going to speed up joins for feature generation
 #when looking for events that happened shortly before an inspection
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE INDEX ON fire (date);"
+
+#Create a unique id to identify each event
+#since Incident# is not a unique identifier
+#echo 'Adding unique id'
+#psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE fire ADD id SERIAL;"
+#psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE fire ADD PRIMARY KEY (id);"
+#Create index, this is going to speed up joins for feature generation
+#when looking for events that happened shortly before an inspection
+#psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE INDEX ON fire (date);"

@@ -25,15 +25,18 @@ python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/sales_clean.csv"
 #Process geocoded file
 python "$ROOT_FOLDER/bulk_geocoder/process_geocoded_csv.py" "$TMP_FOLDER/sales_geocoded.csv" "$TMP_FOLDER/sales_db.csv"
 
-
 #Generate CREATE TABLE statement
-csvsql -i postgresql --tables sales --db-schema public -d ',' "$TMP_FOLDER/sales.csv" > "$TMP_FOLDER/sales.sql"
+csvsql -i postgresql --tables sales --db-schema public -d ',' "$TMP_FOLDER/sales_db.csv" > "$TMP_FOLDER/sales.sql"
 #Drop table if exists
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS sales;"  
 #Create table
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/sales.sql"  
 
 #Upload data to the database
-cat "$TMP_FOLDER/sales.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.sales FROM STDIN  WITH CSV HEADER DELIMITER ',';"
+cat "$TMP_FOLDER/sales_db.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.sales FROM STDIN  WITH CSV HEADER DELIMITER ',';"
+
+#Create index, this is going to speed up joins for feature generation
+#when looking for events that happened shortly before an inspection
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE INDEX ON sales (datesale);"
 
 echo 'Done creating sales table!'

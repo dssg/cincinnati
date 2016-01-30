@@ -95,15 +95,16 @@ def geocode_list(l):
     geocoded = []
     try_again = True
 
+    #Request parameters
+    #http://stackoverflow.com/questions/25024087/mimic-curl-in-python
+    url = "http://geocoding.geo.census.gov/geocoder/locations/addressbatch"
+    data = {'benchmark': 'Public_AR_Census2010'}
+
     while try_again:
         #Split the list in chunks with max 1000 elements
         chunks = list(__make_chunks(l, 1000))
         #Combine each chunk so it only has one big string
         files_content = [reduce(lambda x,y: x+'\n'+y, chunk) for chunk in chunks]
-        #Request parameters
-        #http://stackoverflow.com/questions/25024087/mimic-curl-in-python
-        url = "http://geocoding.geo.census.gov/geocoder/locations/addressbatch"
-        data = {'benchmark': 'Public_AR_Census2010'}
         #Create the request objects
         rs = (grequests.post(url, data=data, files={'addressFile': a_file}) for a_file in files_content)
         #Make the calls, send in batches
