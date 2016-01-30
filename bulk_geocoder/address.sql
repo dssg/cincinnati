@@ -5,9 +5,8 @@ CREATE TABLE address (
     --Create an unique id
     id SERIAL PRIMARY KEY,
     --address: number and street name
-    address varchar(100) NOT NULL,
-    city varchar(30),
-    state varchar(30),
+    --this should be unique in the table
+    address varchar(100) NOT NULL UNIQUE,
     zip varchar(10),
     --geocoded addres, as returned from the census api
     geocoded_address varchar(100),

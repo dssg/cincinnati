@@ -41,19 +41,19 @@ python "$ROOT_FOLDER/etl/fire/clean.py"
 
 #echo 'Geocoding dataset, this may take a while...'
 python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/fire_clean.csv" "$TMP_FOLDER/fire_geocoded.csv"
-
-
-##REFACTOR
+#Process geocoded file
+python "$ROOT_FOLDER/bulk_geocoder/process_geocoded_csv.py" "$TMP_FOLDER/fire_geocoded.csv" "$TMP_FOLDER/fire_db.csv"
 
 #generate CREATE TABLE statement
-csvsql -i postgresql --tables fire --db-schema public -d ',' "$TMP_FOLDER/fire.csv" > "$TMP_FOLDER/fire.sql"
+csvsql -i postgresql --tables fire --db-schema public -d ',' "$TMP_FOLDER/fire_db.csv" > "$TMP_FOLDER/fire.sql"
 #Drop table if it already exists
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS fire;"
 #Create table
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/fire.sql"  
+
 #Upload the csv file in the public schema
 echo "Uploading fire data to the database..."
-cat "$TMP_FOLDER/fire.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.fire FROM STDIN  WITH CSV HEADER DELIMITER ',';"
+cat "$TMP_FOLDER/fire_db.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.fire FROM STDIN  WITH CSV HEADER DELIMITER ',';"
 echo "Done creating fire table!"
 
 #Create a unique id to identify each event
@@ -62,5 +62,5 @@ echo 'Adding unique id'
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE fire ADD id SERIAL;"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE fire ADD PRIMARY KEY (id);"
 #Create index, this is going to speed up joins for feature generation
-#when lloking for events that happened shortly before an inspection
+#when looking for events that happened shortly before an inspection
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE INDEX ON fire (date);"

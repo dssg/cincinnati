@@ -6,7 +6,12 @@ DB_HOST=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.host)
 DB_USER=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.user)
 DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
 
-echo 'Before you run these scripts, make sure you have the address and parcels_cincy tables'
+#Create address table
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/address.sql"
+
+#Load the events data and find unique addresses
+
+#Match addresses to events with a unique id
 
 #This script creates a geometric point in each address with latitude and longitude
 #with a NULL value in geom column

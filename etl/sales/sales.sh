@@ -19,6 +19,8 @@ python "$ROOT_FOLDER/etl/sales/transform.py" "$TMP_FOLDER/salesinfo.tsv" "$TMP_F
 
 #Clean dataset
 python "$ROOT_FOLDER/etl/sales/clean.py"
+#Process geocoded file
+python "$ROOT_FOLDER/bulk_geocoder/process_geocoded_csv.py" "$TMP_FOLDER/sales_geocoded.csv" "$TMP_FOLDER/sales_db.csv"
 
 echo 'Geocoding dataset, this may take a while...'
 python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/sales_clean.csv" "$TMP_FOLDER/sales_geocoded.csv"

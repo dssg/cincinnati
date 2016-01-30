@@ -51,4 +51,9 @@ cat "$TMP_FOLDER/crime_db.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\C
 #Create geocoded crime table
 #psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/crime/finish_crime.sql"
 
+#Create index, this is going to speed up joins for feature generation
+#when looking for events that happened shortly before an inspection
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE INDEX ON crime (date_reported);"
+
 echo 'Done creating crime table!'
+
