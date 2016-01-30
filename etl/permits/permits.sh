@@ -16,9 +16,6 @@ ssconvert "$PERMITS_DATA/od_cinc_building_permits.xls" "$TMP_FOLDER/od_cinc_buil
 #Clean data
 python "$ROOT_FOLDER/etl/permits/clean.py"
 
-#Geocode
-#python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py"  "$TMP_FOLDER/permits_clean.csv" "$TMP_FOLDER/permits_geocoded.csv"
-
 #Generate CREATE TABLE statement
 csvsql -i postgresql --tables permits --db-schema public -d ',' "$TMP_FOLDER/permits_clean.csv" > "$TMP_FOLDER/permits.sql"
 #Drop table if exists
@@ -29,4 +26,10 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/permits.sql"
 #Upload data to the database
 cat "$TMP_FOLDER/permits_clean.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.permits FROM STDIN  WITH CSV HEADER DELIMITER ',';"
 
+echo 'Almost done, creating indexes, unique id and geometry column...'
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/permits/process_table.sql"  
+
 echo 'Done creating permits table!'
+
+#Match parcels to events
+
