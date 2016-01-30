@@ -24,10 +24,10 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS three11;"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/three11.sql"  
 #Upload data to the database
 cat "$TMP_FOLDER/three11_clean.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.three11 FROM STDIN  WITH CSV HEADER DELIMITER ',';"
+
+echo 'Almost done, creating indexes, unique id and geometry column...'
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/process_table.sql"  
+
 echo 'Done creating three11 table!'
 
-#ADD UNIQUE ID?
-
-#Create index, this is going to speed up joins for feature generation
-#when lloking for events that happened shortly before an inspection
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE INDEX ON three11 (requested_datetime);"
+#Match parcels to events (add indexes on parcel_id and event_id)

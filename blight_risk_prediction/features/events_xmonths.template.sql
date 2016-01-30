@@ -16,7 +16,7 @@ CREATE TABLE events_3months_$TABLE_NAME AS (
     JOIN public.address
     ON address_id=address.id
     JOIN public.$TABLE_NAME
-    ON address.address=$TABLE_NAME.address --THIS IS SLOW, maybe change for an ID or simply add index
+    ON address.id=$TABLE_NAME.address_id
     AND (insp.inspection_date - '3 month'::interval) <= $TABLE_NAME.$DATE_COLUMN
     AND $TABLE_NAME.$DATE_COLUMN <= insp.inspection_date
 );

@@ -55,26 +55,9 @@ df.drop('last_table_update', axis=1, inplace=True)
 df.drop('updated_datetime', axis=1, inplace=True)
 df.drop('expected_datetime', axis=1, inplace=True)
 
-print 'Preparing unique addresses csv file...'
-
 #get number and street name form address
 df.address = df.address.map(lambda x: x.split(' - ')[0].replace(', CINC', ''))
-#Build address dataframe
-addr = pd.DataFrame({'address': df.address, 'zip': df.zipcode})
-
-#Get unique addresses
-#Check for duplicates
-duplicates = addr.duplicated()
-n_duplicates = duplicates.sum()
-print 'Found {:,d} duplicated addresses, dropping them'.format(n_duplicates)
-addr = addr[~duplicates]
-
-#Add necessary columns for the geocoding script
-addr['city'] = 'CINCINNATI'
-addr['state'] = 'OHIO'
-print 'Found {:,d} unique addresses. Saving on three11_addr.csv'.format(len(addr.index))
-addr.to_csv('three11_addr.csv', index=False)
 
 #Save data frame
-print 'Cleaned file has {:,d} rows and {:,d} columns. Saving on three11.csv'.format(*df.shape)
-df.to_csv('three11.csv', index=False)
+print 'Cleaned file has {:,d} rows and {:,d} columns. Saving on three11_clean.csv'.format(*df.shape)
+df.to_csv('three11_clean.csv', index=False)
