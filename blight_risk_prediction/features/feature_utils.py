@@ -4,7 +4,7 @@ import os
 #This file provides generic functions
 #to generate spatiotemporal features
 
-def create_inspections_address_xmonts_table(con, schema, table_name, date_column, n_months=3):
+def create_inspections_address_xmonths_table(con, schema, table_name, date_column, n_months=3):
     path_to_template = os.path.join(os.environ['ROOT_FOLDER'],
                     'blight_risk_prediction',
                     'features',
@@ -25,11 +25,11 @@ def create_inspections_address_xmonts_table(con, schema, table_name, date_column
         con.cursor().execute("SET SCHEMA '{}'".format(schema))
         print 'Failed to create {} month table. {}'.format(n_months, e)
 
-def compute_frequency_features(con, table_name, columns, ids=['parcel_id', 'inspection_date']):
+def compute_frequency_features_from_table(con, table_name, columns, ids=['parcel_id', 'inspection_date']):
     ids = [ids] if type(ids)==str else ids
     columns = [columns] if type(columns)==str else columns
 
-    df = pd.read_sql('SELECT * FROM events_3months_{}'.format(table_name), con)
+    df = pd.read_sql('SELECT * FROM {}'.format(table_name), con)
     ids_series = [df[i] for i in ids]
     cols_series = [df[i] for i in columns]
     #Group by parcel_id and inspection_date. Make columns with counts
