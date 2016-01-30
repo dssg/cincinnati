@@ -85,8 +85,8 @@ def geocode_dataframe(df):
     #Debug: check that the set of addresses in df is equal to the set in output
     #set(df.index)==set(output.index)
     #Print some results
-    #print '{0:.2%} unique addresses geocoded'.format(n_uniq_geocoded/n_uniq_addresses)
-    #print '{0:.2%} total addresses geocoded'.format(n_geocoded/n_addresses)
+    n_total_geocoded = output.address.notnull().sum()
+    print '{0:.2%} total addresses geocoded'.format(n_total_geocoded/n_addresses)
     return output
 
 def geocode_list(l):
@@ -103,7 +103,7 @@ def geocode_list(l):
     #Request parameters
     #http://stackoverflow.com/questions/25024087/mimic-curl-in-python
     url = "http://geocoding.geo.census.gov/geocoder/locations/addressbatch"
-    data = {'benchmark': 'Public_AR_Census2010'}
+    data = {'benchmark': '9'} #Public_AR_Census2010
 
     #Create the request objects
     rs = (grequests.post(url, data=data, files={'addressFile': a_file}) for a_file in files_content)
