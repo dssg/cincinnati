@@ -1,7 +1,7 @@
 from __future__ import division
 import grequests
-from StringIO import StringIO
 import pandas as pd
+import re
 
 class BadInputError(ValueError):
     '''Raise when the input Data Frame does not contain a appropiate input'''
@@ -16,10 +16,10 @@ def geocode_dataframe(df):
         Columns can be empty (except address)
     '''
     #Check that address column does not contain null or empty strings
-    bad_addresses = df.address.isnull().sum() + (df.address == '').sum()
-    if bad_addresses > 0:
-        e = BadInputError(message='address column cannot contain nulls or empty strings')
-        raise e
+    #bad_addresses = df.address.isnull().sum() + (df.address == '').sum()
+    #if bad_addresses > 0:
+    #    e = BadInputError(message='address column cannot contain nulls or empty strings')
+    #    raise e
 
     #Replace nulls with empty strings on city, state and zip
     #to 'nan' is not introduced in the census file input
@@ -30,6 +30,7 @@ def geocode_dataframe(df):
     #itertuples is faster than apply, at least in this case
     fn = lambda x: '{},{},{},{}'.format(x.address, x.city, x.state, x.zip)
     addresses = [fn(x) for x in df.itertuples()]
+    df['raw_input'] = addresses
     #Get unique addresses and cast to a list
     #This will potentially reduce the number of unique addresses
     n_addresses = len(addresses)
@@ -45,13 +46,11 @@ def geocode_dataframe(df):
     #TO DO: Check that addresses do not contain commas
     #Geocode addresses using the batch census API
     census_results = geocode_list(addresses)
-    #Join each sting into a single one and create a file-like object
-    f = StringIO(reduce(lambda x,y: x+'\n'+y, census_results))
     #I don't see any documention about the
     #census output format, I'm guessing here
-    columns = ['id', 'raw_input', 'match', 'exact', 'geocoded_address',
+    res = pd.DataFrame(census_results)
+    res.columns = ['id', 'raw_input', 'match', 'exact', 'geocoded_address',
                'long_lat', 'col_6', 'col_7']
-    res = pd.read_csv(f, names=columns)
     #Split long_lat. If long_lat is nulls, function returns an empty
     #tuple
     long_lat = res.long_lat.map(lambda s: __split_long_lat_str(s))
@@ -66,21 +65,28 @@ def geocode_dataframe(df):
     res = res.loc[res.geocoded_address.notnull()]
     n_geocoded = len(res.index)
     print '{} addresses geocoded'.format(n_geocoded)
-    #Now drop duplicates, it may be the case that slightly 
-    #different addresses turned out to be the same
-    duplicates = res.duplicated(subset='geocoded_address')
-    print 'Found {} duplicates'.format(duplicates.sum())
-    res = res[~duplicates]
-
     #Keep only useful columns
-    res = res[['address', 'geocoded_address', 'latitude', 'longitude']]
+    res = res[['raw_input', 'geocoded_address', 'latitude', 'longitude']]
+    #Split geocoded_address in their different elements
+    address_elements = res.geocoded_address.map(lambda s: s.split(','))
+    res[['address', 'city', 'state', 'zip']] = address_elements.apply(pd.Series)
+    res.drop('geocoded_address', axis=1, inplace=True)
+    #Ready to join, remove original columns
+    df.drop('address', axis=1, inplace=True)
+    df.drop('city', axis=1, inplace=True)
+    df.drop('state', axis=1, inplace=True)
+    df.drop('zip', axis=1, inplace=True)
+    #Census api adds some spaces, delete them to match
+    res.raw_input = res.raw_input.map(lambda x: x.replace(', ', ','))
     #Do a left join
-    output = df.merge(res, on='address', how='left')
+    output = df.merge(res, on='raw_input', how='left')
+    #Remove raw_input
+    output.drop('raw_input', axis=1, inplace=True)
     #Debug: check that the set of addresses in df is equal to the set in output
     #set(df.index)==set(output.index)
     #Print some results
-    print '{0:.2%} unique addresses geocoded'.format(n_uniq_geocoded/n_uniq_addresses)
-    print '{0:.2%} total addresses geocoded'.format(n_geocoded/n_addresses)
+    #print '{0:.2%} unique addresses geocoded'.format(n_uniq_geocoded/n_uniq_addresses)
+    #print '{0:.2%} total addresses geocoded'.format(n_geocoded/n_addresses)
     return output
 
 def geocode_list(l):
@@ -113,7 +119,7 @@ def geocode_list(l):
     contents = [element for sublist in contents for element in sublist]
     return contents
 
-def __parse_responses(response):
+def __parse_responses(responses):
     '''
         Check the responses returned, return a list with
         the ones that you got right and another one with those
@@ -129,8 +135,14 @@ def __parse_content(content):
         each entry as separated string in a list. Deletes empty strings
     '''
     lines = content.split('\n')
-    non_empty_lines = [line for line in lines if len(line)>0]
+    non_empty_lines = [__parse_elements(line) for line in lines if len(line)>0]
     return non_empty_lines
+
+def __parse_elements(line):
+    quoted = re.compile('"[^"]*"')
+    elements = quoted.findall(line)
+    elements = [e.replace('"', '').strip() for e in elements]
+    return elements
 
 def __content_is_valid(content):
     '''

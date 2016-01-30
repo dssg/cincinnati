@@ -32,6 +32,7 @@ xlsx2csv -d x09 -s 2 "$CRIME_CPD_FOLDER/CRIME 2013-2014.xlsx" > "$TMP_FOLDER/cri
 cat $TMP_FOLDER/crime_*.csv > "$TMP_FOLDER/2004-2014.csv"
 
 #Perform cleaning on the  CSV file
+#this way geocoding will work
 python "$ROOT_FOLDER/etl/crime/clean.py" "$TMP_FOLDER/2004-2014.csv" > "$TMP_FOLDER/2004-2014_cleaned.csv"
 
 #Use csvsql to create a SQL script with the CREATE TABLE statement
