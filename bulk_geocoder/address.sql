@@ -8,8 +8,6 @@ CREATE TABLE address (
     --this should be unique in the table
     address varchar(100) NOT NULL UNIQUE,
     zip varchar(10),
-    --geocoded addres, as returned from the census api
-    geocoded_address varchar(100),
     latitude float8,
     longitude float8,
     --coordinates, make sure they are in the 3735 SRID
