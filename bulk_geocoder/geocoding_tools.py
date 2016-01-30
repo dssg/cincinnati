@@ -68,7 +68,7 @@ def geocode_dataframe(df):
     #Keep only useful columns
     res = res[['raw_input', 'geocoded_address', 'latitude', 'longitude']]
     #Split geocoded_address in their different elements
-    address_elements = res.geocoded_address.map(lambda s: s.split(','))
+    address_elements = res.geocoded_address.map(lambda s: s.split(', '))
     res[['address', 'city', 'state', 'zip']] = address_elements.apply(pd.Series)
     #Census api adds some spaces, delete them to match
     res.raw_input = res.raw_input.map(lambda x: x.replace(', ', ','))

@@ -20,7 +20,7 @@ python "$ROOT_FOLDER/etl/sales/transform.py" "$TMP_FOLDER/salesinfo.tsv" "$TMP_F
 #Clean dataset
 python "$ROOT_FOLDER/etl/sales/clean.py"
 
-#echo 'Geocoding dataset, this may take a while...'
+echo 'Geocoding dataset, this may take a while...'
 python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/sales_clean.csv" "$TMP_FOLDER/sales_geocoded.csv"
 
 #Generate CREATE TABLE statement
