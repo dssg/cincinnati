@@ -9,7 +9,9 @@ DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
 #Create address table
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/address.sql"
 
-#Load the events data and find unique addresses
+#Join addresses in the different datasets and filter them
+#to get the unique ones
+python "$ROOT_FOLDER/bulk_geocoder/get_unique_addresses.py"
 
 #Match addresses to events with a unique id
 
