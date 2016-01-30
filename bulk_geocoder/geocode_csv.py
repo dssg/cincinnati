@@ -17,4 +17,4 @@ args = parser.parse_args()
 #Load data
 df = pd.read_csv(args.input, sep=args.separator)
 res = geocode_dataframe(df)
-res.to_csv(args.output)
+res.to_csv(args.output, index=False)

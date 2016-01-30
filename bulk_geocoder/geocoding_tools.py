@@ -70,22 +70,16 @@ def geocode_dataframe(df):
     #Split geocoded_address in their different elements
     address_elements = res.geocoded_address.map(lambda s: s.split(','))
     res[['address', 'city', 'state', 'zip']] = address_elements.apply(pd.Series)
-    res.drop('geocoded_address', axis=1, inplace=True)
-    #Ready to join, remove original columns
-    df.drop('address', axis=1, inplace=True)
-    df.drop('city', axis=1, inplace=True)
-    df.drop('state', axis=1, inplace=True)
-    df.drop('zip', axis=1, inplace=True)
     #Census api adds some spaces, delete them to match
     res.raw_input = res.raw_input.map(lambda x: x.replace(', ', ','))
     #Do a left join
-    output = df.merge(res, on='raw_input', how='left')
+    output = df.merge(res, on='raw_input', how='left', suffixes=('', '_census'))
     #Remove raw_input
     output.drop('raw_input', axis=1, inplace=True)
     #Debug: check that the set of addresses in df is equal to the set in output
     #set(df.index)==set(output.index)
     #Print some results
-    n_total_geocoded = output.address.notnull().sum()
+    n_total_geocoded = output.address_census.notnull().sum()
     print '{0:.2%} total addresses geocoded'.format(n_total_geocoded/n_addresses)
     return output
 
@@ -95,64 +89,66 @@ def geocode_list(l):
         Unique ID, Street address, City, State, ZIP
         Using http://geocoding.geo.census.gov/geocoder/Geocoding_Services_API.html
     '''
-    #Split the list in chunks with max 1000 elements
-    chunks = list(__make_chunks(l, 1000))
-    #Combine each chunk so it only has one big string
-    files_content = [reduce(lambda x,y: x+'\n'+y, chunk) for chunk in chunks]
+    #Get ids in the list
+    to_geocode = len(l)
+    remaining_ids = set([element.split(',')[0] for element in l])
+    geocoded = []
+    try_again = True
 
-    #Request parameters
-    #http://stackoverflow.com/questions/25024087/mimic-curl-in-python
-    url = "http://geocoding.geo.census.gov/geocoder/locations/addressbatch"
-    data = {'benchmark': '9'} #Public_AR_Census2010
+    while try_again:
+        #Split the list in chunks with max 1000 elements
+        chunks = list(__make_chunks(l, 1000))
+        #Combine each chunk so it only has one big string
+        files_content = [reduce(lambda x,y: x+'\n'+y, chunk) for chunk in chunks]
+        #Request parameters
+        #http://stackoverflow.com/questions/25024087/mimic-curl-in-python
+        url = "http://geocoding.geo.census.gov/geocoder/locations/addressbatch"
+        data = {'benchmark': 'Public_AR_Census2010'}
+        #Create the request objects
+        rs = (grequests.post(url, data=data, files={'addressFile': a_file}) for a_file in files_content)
+        #Make the calls, send in batches
+        responses = grequests.map(rs, size=50)
+        #Get the content for each response
+        contents = [r.content for r in responses]
+        #Parse each content received and return
+        #parse elements
+        valid = __parse_contents(contents)
+        print 'Geocoded {} out of {}. {} on this attempt.'.format(len(geocoded),
+                                                            to_geocode,
+                                                            len(valid))
+        #Add elements to the geocoded list
+        geocoded.extend(valid)
+        remaining_ids = remaining_ids - set([e[0] for e in valid])
+        l = [e for e in l if e.split(',')[0] in remaining_ids]   
+        #Try gain only if in this attempt, the api geocoded_address
+        #at least one
+        try_again = len(valid)>0
+        if not try_again:
+            print 'Couldnt geocode any on this attempt. Finishing...'
+    return geocoded
 
-    #Create the request objects
-    rs = (grequests.post(url, data=data, files={'addressFile': a_file}) for a_file in files_content)
-    #Make the calls, send in batches
-    responses = grequests.map(rs, size=50)
-    #Split responses in valid, not valid
-    valid, not_valid = __parse_responses(responses)
-    print 'Got {} responses, {} failed.'.format(len(responses), len(not_valid))
-
-    #Get the content for each response, remove  empty lines
-    contents = [__parse_content(r.content) for r in valid]
-    #Flatten list
-    contents = [element for sublist in contents for element in sublist]
-    return contents
-
-def __parse_responses(responses):
+def __parse_contents(contents):
     '''
         Check the responses returned, return a list with
         the ones that you got right and another one with those
         that had errors
     '''
-    valid = [r for r in responses if __content_is_valid(r.content)]
-    not_valid = [r for r in responses if not __content_is_valid(r.content)]
-    return valid, not_valid
+    #Split ever line in every content
+    lists_of_lines = [c.split('\n') for c in contents]
+    #Flatten list
+    lines = [item for sublist in lists_of_lines for item in sublist] 
+    #Remove empty lines
+    non_empty_lines = [line for line in lines if len(line)>0]
+    #Get lines that have Match
+    valid = [__parse_line(line) for line in non_empty_lines if 'Match' in line]
+    return valid
 
-def __parse_content(content):
-    '''
-        Parses content received by the census API and returns
-        each entry as separated string in a list. Deletes empty strings
-    '''
-    lines = content.split('\n')
-    non_empty_lines = [__parse_elements(line) for line in lines if len(line)>0]
-    return non_empty_lines
 
-def __parse_elements(line):
+def __parse_line(line):
     quoted = re.compile('"[^"]*"')
     elements = quoted.findall(line)
     elements = [e.replace('"', '').strip() for e in elements]
     return elements
-
-def __content_is_valid(content):
-    '''
-        Parse the content of a response, return True if the content is valid
-        False otherwise
-    '''
-    if 'error' in content:
-        return False
-    else:
-        return True
 
 def __split_long_lat_str(lat_long):
     if type(lat_long)==str:
