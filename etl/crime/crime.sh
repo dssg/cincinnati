@@ -35,9 +35,7 @@ cat $TMP_FOLDER/crime_*.csv > "$TMP_FOLDER/2004-2014.csv"
 python "$ROOT_FOLDER/etl/crime/clean.py" "$TMP_FOLDER/2004-2014.csv" > "$TMP_FOLDER/2004-2014_cleaned.csv"
 
 #Geocode
-python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" --separator ';' "$TMP_FOLDER/2004-2014_cleaned.csv" "$TMP_FOLDER/2004-2014_cleaned_geocoded.csv"
-
-##REFACTORING
+python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" --separator ';' "$TMP_FOLDER/2004-2014_cleaned.csv" "$TMP_FOLDER/crime_geocoded.csv"
 
 #Use csvsql to create a SQL script with the CREATE TABLE statement
 csvsql -i postgresql --tables crime --db-schema public "$TMP_FOLDER/2004-2014_cleaned.csv" > "$TMP_FOLDER/crime.sql"

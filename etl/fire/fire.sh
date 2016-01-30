@@ -36,14 +36,16 @@ done
 #Return IFS to its original value
 unset IFS
 
-#When we got the fire data, there was only one table. We are going to work
-#with that file
-#Step 2: clean the data, this script will also create
-#a file a list of unique addresses in the dataset
+#When we got the fire data, there was only one table. We are going to work with that file
 echo 'Cleaning dataset, subsetting it to 2005-2014 and creating file with unique addresses'
 python "$ROOT_FOLDER/etl/fire/clean.py"
 
-#Step 3: Upload to postgres database
+#echo 'Geocoding dataset, this may take a while...'
+python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/fire_clean.csv" "$TMP_FOLDER/fire_geocoded.csv"
+
+
+##REFACTOR
+
 #generate CREATE TABLE statement
 csvsql -i postgresql --tables fire --db-schema public -d ',' "$TMP_FOLDER/fire.csv" > "$TMP_FOLDER/fire.sql"
 #Drop table if it already exists
@@ -63,10 +65,3 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "ALTER TABLE fire ADD PRIMARY KEY (i
 #Create index, this is going to speed up joins for feature generation
 #when lloking for events that happened shortly before an inspection
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE INDEX ON fire (date);"
-
-#Step 4: Geocoding addresses
-#echo 'Geocoding dataset, this may take a while...'
-python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/fire_addr.csv" "$TMP_FOLDER/fire_addr_geocoded.csv"
-#Upload unique addresses to the address table
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY address(address, city, state, zip, geocoded_address, latitude, longitude) FROM '$TMP_FOLDER/fire_addr_geocoded.csv' WITH CSV HEADER DELIMITER ',';"
-echo 'Done!'

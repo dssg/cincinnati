@@ -40,18 +40,11 @@ df.pc = df.pc.map(lambda s: str(s).strip())
 df.signal = df.signal.map(lambda s: s.strip())
 df.address = df.address.map(lambda s: s.strip())
 
-#Get unique addresses
-unique_addresses = df.address.unique()
-print 'Found {:,d} unique addresses. Saving on fire_addr.csv'.format(len(unique_addresses))
-
-#Build address dataframe
-addr = pd.DataFrame({'address': unique_addresses})
 #Add necessary columns for the geocoding script
-addr['city'] = 'CINCINNATI'
-addr['state'] = 'OHIO'
-addr['zip'] = ''
-addr.to_csv('fire_addr.csv', index=False)
+df['city'] = 'CINCINNATI'
+df['state'] = 'OHIO'
+df['zip'] = ''
 
 #Save data frame
 print 'Cleaned file has {:,d} rows and {:,d} columns. Saving on fire.csv'.format(*df.shape)
-df.to_csv('fire.csv', index=False)
+df.to_csv('fire_clean.csv', index=False)
