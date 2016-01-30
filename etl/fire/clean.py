@@ -46,5 +46,5 @@ df['state'] = 'OHIO'
 df['zip'] = ''
 
 #Save data frame
-print 'Cleaned file has {:,d} rows and {:,d} columns. Saving on fire.csv'.format(*df.shape)
+print 'Cleaned file has {:,d} rows and {:,d} columns. Saving on fire_clean.csv'.format(*df.shape)
 df.to_csv('fire_clean.csv', index=False)

@@ -9,9 +9,16 @@ print 'Working in folder: %s' % path_to_data_folder
 
 #Load csv file
 df = pd.read_csv("od_cinc_building_permits.csv")
+print 'Raw file has {:,d} rows and {:,d} columns'.format(*df.shape)
 
 #Lowercase column names
 df.columns = df.columns.map(lambda s: s.lower())
+
+#Rename some columns
+df.rename(columns={'originaladdress1':'address',
+                     'originalcity':'city',
+                     'originalstate': 'state',
+                     'originalzip': 'zip'}, inplace=True)
 
 #Some columns have extra quotes
 df.companyname = df.companyname.map(lambda s: s.replace('"', ''), na_action='ignore')
@@ -19,4 +26,4 @@ df.pin = df.pin.map(lambda s: s.replace('"', ''), na_action='ignore')
 df.proposeduse = df.proposeduse.map(lambda s: s.replace('"', ''))
 
 #Save data frame
-df.to_csv('permits.csv', index=False)
+df.to_csv('permits_clean.csv', index=False)

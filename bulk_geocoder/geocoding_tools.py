@@ -113,11 +113,11 @@ def geocode_list(l):
         #Parse each content received and return
         #parse elements
         valid = __parse_contents(contents)
+        #Add elements to the geocoded list
+        geocoded.extend(valid)
         print 'Geocoded {} out of {}. {} on this attempt.'.format(len(geocoded),
                                                             to_geocode,
                                                             len(valid))
-        #Add elements to the geocoded list
-        geocoded.extend(valid)
         remaining_ids = remaining_ids - set([e[0] for e in valid])
         l = [e for e in l if e.split(',')[0] in remaining_ids]   
         #Try gain only if in this attempt, the api geocoded_address

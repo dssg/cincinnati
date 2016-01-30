@@ -37,7 +37,6 @@ done
 unset IFS
 
 #When we got the fire data, there was only one table. We are going to work with that file
-echo 'Cleaning dataset, subsetting it to 2005-2014 and creating file with unique addresses'
 python "$ROOT_FOLDER/etl/fire/clean.py"
 
 #echo 'Geocoding dataset, this may take a while...'
