@@ -10,9 +10,11 @@ parser.add_argument("input", help=("Input csv file to geocode. There should be "
                                    "Columns can be empty (except address)"),
                     type=str)
 parser.add_argument("output", help="Output geocoded csv file.", type=str)
+parser.add_argument("-sep", "--separator", help="separator in the file, defaults to ','",
+                    type=str, default=',')
 args = parser.parse_args()
 
 #Load data
-df = pd.read_csv(args.input)
+df = pd.read_csv(args.input, sep=args.separator)
 res = geocode_dataframe(df)
 res.to_csv(args.output)

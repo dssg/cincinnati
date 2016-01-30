@@ -35,6 +35,11 @@ cat $TMP_FOLDER/crime_*.csv > "$TMP_FOLDER/2004-2014.csv"
 #this way geocoding will work
 python "$ROOT_FOLDER/etl/crime/clean.py" "$TMP_FOLDER/2004-2014.csv" > "$TMP_FOLDER/2004-2014_cleaned.csv"
 
+#Geocode
+python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/2004-2014_cleaned.csv" "$TMP_FOLDER/2014_cleaned_geocoded.csv"
+
+##REFACTORING
+
 #Use csvsql to create a SQL script with the CREATE TABLE statement
 csvsql -i postgresql --tables crime --db-schema public -d ';' "$TMP_FOLDER/2004-2014_cleaned.csv" > "$TMP_FOLDER/crime.sql"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS crime;"  
@@ -44,6 +49,6 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/crime.sql"
 cat "$TMP_FOLDER/2004-2014_cleaned.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.crime FROM STDIN  WITH CSV HEADER DELIMITER ';';"
 
 #Create geocoded crime table
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/crime/finish_crime.sql"
+#psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/crime/finish_crime.sql"
 
 echo 'Done creating crime table!'
