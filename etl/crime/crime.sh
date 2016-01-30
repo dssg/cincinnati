@@ -37,13 +37,16 @@ python "$ROOT_FOLDER/etl/crime/clean.py" "$TMP_FOLDER/2004-2014.csv" > "$TMP_FOL
 #Geocode
 python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" --separator ';' "$TMP_FOLDER/2004-2014_cleaned.csv" "$TMP_FOLDER/crime_geocoded.csv"
 
+#Process geocoded file
+python "$ROOT_FOLDER/bulk_geocoder/process_geocoded_csv.py" "$TMP_FOLDER/crime_geocoded.csv" "$TMP_FOLDER/crime_db.csv"
+
 #Use csvsql to create a SQL script with the CREATE TABLE statement
-csvsql -i postgresql --tables crime --db-schema public "$TMP_FOLDER/2004-2014_cleaned.csv" > "$TMP_FOLDER/crime.sql"
+csvsql -i postgresql --tables crime --db-schema public "$TMP_FOLDER/crime_db.csv" > "$TMP_FOLDER/crime.sql"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS crime;"  
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/crime.sql"  
 
 #Import the data into the new create table
-cat "$TMP_FOLDER/2004-2014_cleaned.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.crime FROM STDIN  WITH CSV HEADER DELIMITER ',';"
+cat "$TMP_FOLDER/crime_db.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.crime FROM STDIN  WITH CSV HEADER DELIMITER ',';"
 
 #Create geocoded crime table
 #psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/crime/finish_crime.sql"

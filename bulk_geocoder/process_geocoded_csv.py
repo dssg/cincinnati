@@ -34,4 +34,4 @@ df.rename(columns={'zip_census':'zip',
                    'address_census':'address'},
                    inplace=True)
 
-df.to_csv(args.output)
+df.to_csv(args.output, index=False)
