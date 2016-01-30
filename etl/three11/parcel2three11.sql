@@ -4,7 +4,7 @@ CREATE TABLE parcel2three11 AS (
     FROM shape_files.parcels_cincy AS parcels
     JOIN three11
     ON ST_DWithin(parcels.geom, three11.geom, 3000) --meters
-)
+);
 
 CREATE INDEX ON parcel2three11 (parcel_id);
 CREATE INDEX ON parcel2three11 (three11_id);
