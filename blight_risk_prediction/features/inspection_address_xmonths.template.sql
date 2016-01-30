@@ -5,7 +5,7 @@
 --inspection date
 
 --This script is intended to be used as a template for various tables
-CREATE TABLE events_3months_$TABLE_NAME AS (
+CREATE TABLE events_$N_MONTHSmonths_$TABLE_NAME AS (
     SELECT
         insp.parcel_id, insp.inspection_date,
         p2a.dist_km,
@@ -17,7 +17,7 @@ CREATE TABLE events_3months_$TABLE_NAME AS (
     ON address_id=address.id
     JOIN public.$TABLE_NAME
     ON address.id=$TABLE_NAME.address_id
-    AND (insp.inspection_date - '3 month'::interval) <= $TABLE_NAME.$DATE_COLUMN
+    AND (insp.inspection_date - '$N_MONTHS month'::interval) <= $TABLE_NAME.$DATE_COLUMN
     AND $TABLE_NAME.$DATE_COLUMN <= insp.inspection_date
 );
 

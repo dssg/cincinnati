@@ -4,16 +4,18 @@ import os
 #This file provides generic functions
 #to generate spatiotemporal features
 
-def create_events_3months_table(con, schema, table_name, date_column):
+def create_inspections_address_xmonts_table(con, schema, table_name, date_column, n_months=3):
     path_to_template = os.path.join(os.environ['ROOT_FOLDER'],
                     'blight_risk_prediction',
                     'features',
-                    'events_xmonths.template.sql')
+                    'inspection_address_xmonths.template.sql')
     #Load template with SQL statement
     with open(path_to_template, 'r') as f:
         sql_script = Template(f.read())
     #Replace values in template
-    sql_script = sql_script.substitute(TABLE_NAME=table_name, DATE_COLUMN=date_column)
+    sql_script = sql_script.substitute(TABLE_NAME=table_name,
+                                       DATE_COLUMN=date_column,
+                                       N_MONTHS=n_months)
     #Run the code using the connection
     #this is going to take a while
     try:
@@ -21,7 +23,7 @@ def create_events_3months_table(con, schema, table_name, date_column):
     except Exception, e:
         con.rollback()
         con.cursor().execute("SET SCHEMA '{}'".format(schema))
-        print 'Failed to create 3 month table. {}'.format(e)
+        print 'Failed to create {} month table. {}'.format(n_months, e)
 
 def compute_frequency_features(con, table_name, columns, ids=['parcel_id', 'inspection_date']):
     ids = [ids] if type(ids)==str else ids

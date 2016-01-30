@@ -1,4 +1,4 @@
-from feature_utils import create_events_3months_table, compute_frequency_features
+from feature_utils import create_inspections_address_xmonts_table, compute_frequency_features
 
 def make_fire_features(con):
     """
@@ -21,9 +21,9 @@ def make_fire_features(con):
     table_name = 'fire'
     date_column = 'date'
 
-    #Create table with events that happened before 3 months of inspection database
+    #Create table with events that happened before x months of inspection database
     #If table exists, send message and skip
-    create_events_3months_table(con, schema, table_name, date_column)
+    create_inspections_address_xmonts_table(con, schema, table_name, date_column)
 
     #Use the recently created table to compute features.
     #Group rows by parcel_id and inspection_date
