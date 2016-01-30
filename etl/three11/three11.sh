@@ -31,5 +31,5 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/process_tab
 echo 'Done creating three11 table!'
 
 #Match parcels to events (add indexes on parcel_id and event_id)
-echo 'Matching every parcel in cincinnati with every event in the three11 table, this may take a while...'
+echo 'Matching every parcel in cincinnati with every event in the three11 table (up to 3KM), this may take a while...'
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/parcel2three11.sql"  
