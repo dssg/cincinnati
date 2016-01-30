@@ -28,6 +28,11 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/match_events_w
 #Creates parcel2address table, which contains records for each parcel to its
 #addresses nearby
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/parcel_to_address.sql"
+
+#Creates already_computed_addresses table which keeps track of addresses
+#that were already used for calculating distances to parcels
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/already_computed_addresses.sql"
+
 #This script computes the distance for each parcel in  parcels_cincy (Note that this includes ALL
 #parcels in the city)
 #with each row in address. Once finished, it saves the records, so the next
