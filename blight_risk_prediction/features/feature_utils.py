@@ -46,7 +46,7 @@ def create_inspections_latlong_xmonths_table(con, schema, table_name, date_colum
         con.cursor().execute("SET SCHEMA '{}'".format(schema))
         print 'Failed to create {} month table. {}'.format(n_months, e)
 
-def compute_frequency_features_from_table(con, table_name, columns, ids=['parcel_id', 'inspection_date']):
+def compute_frequency_features(con, table_name, columns, ids=['parcel_id', 'inspection_date']):
     ids = [ids] if type(ids)==str else ids
     columns = [columns] if type(columns)==str else columns
 
