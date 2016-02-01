@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sqlalchemy import create_engine
 import datetime
-import config
+#import config
 
 #Load yaml configuration file
 from dstools.config import main

@@ -8,10 +8,10 @@ import logging
 import numpy as np
 import pandas as pd
 
-from blight_risk_prediction import util
-from blight_risk_prediction.features.featurebot import \
+import util
+from features.featurebot import \
     existing_feature_schemas, SchemaMissing
-from blight_risk_prediction.features.feature_parser import tables_and_columns_for_schema
+from features.feature_parser import tables_and_columns_for_schema
 import config
 
 logger = logging.getLogger(__name__)

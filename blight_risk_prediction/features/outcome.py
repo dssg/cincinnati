@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import pandas as pd
 import numpy as np
-from blight_risk_prediction import util
+import util
 
 def generate_labels():
     """

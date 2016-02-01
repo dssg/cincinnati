@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 
-from blight_risk_prediction import util, colmap
+import util, colmap
 
 
 def make_owner_features(db_connection):

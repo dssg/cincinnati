@@ -6,8 +6,8 @@ from collections import namedtuple
 import sys
 import psycopg2
 from dstools.config import main as main_cfg
-from blight_risk_prediction import util
-from blight_risk_prediction.features import (ner, parcel, outcome, tax, crime,
+import util
+from features import (ner, parcel, outcome, tax, crime,
                                              census, three11, fire)
 import argparse
 
