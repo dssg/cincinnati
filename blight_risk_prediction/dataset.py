@@ -12,7 +12,7 @@ import util
 from features.featurebot import \
     existing_feature_schemas, SchemaMissing
 from features.feature_parser import tables_and_columns_for_schema
-import config
+#import config
 
 logger = logging.getLogger(__name__)
 
