@@ -12,8 +12,8 @@ import copy
 from itertools import product
 import numpy as np
 from sklearn import linear_model, preprocessing, svm, ensemble
-from blight_risk_prediction import dataset, evaluation, util
-from blight_risk_prediction.features import feature_parser
+import dataset, evaluation, util
+from features import feature_parser
 import argparse
 
 from dstools.config import main as cfg_main
