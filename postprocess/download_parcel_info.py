@@ -3,15 +3,12 @@ Make a huge csv with a bunch of information about every property
 """
 
 import sys
-
 from sqlalchemy import create_engine
+from dstools.db import uri
 import pandas as pd
-
 import dbconfig
-from blight_risk_prediction import util
 
-
-engine = util.get_engine()
+engine = create_engine(uri)
 
 
 def get_neighbourhood():

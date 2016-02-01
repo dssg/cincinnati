@@ -2,8 +2,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-from blight_risk_prediction import util
-
 # rank 0: 1 property owned by this owner
 # rank 1: >= 2 properties owned by this owner
 # rank 2: >= 5 properties owned by this owner
@@ -19,7 +17,7 @@ probability_default_rank = 10
 
 def load_targeting_priority():
     schema = "features_01Aug2015"
-    engine = util.get_engine()
+    engine = create_engine(engine)
     pri = pd.read_sql_table("targeting_priority", schema=schema, con=engine)
     pri = pri.drop_duplicates(["parcel_id", "inspection_date"])  # there are 12 duplicates, don't care
     pri = pri.set_index(["parcel_id", "inspection_date"])

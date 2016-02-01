@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
 import pandas as pd
-import util, colmap
 
 def make_census_features(db_connection):
     """

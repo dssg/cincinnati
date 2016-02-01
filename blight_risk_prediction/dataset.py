@@ -9,6 +9,9 @@ import numpy as np
 import pandas as pd
 
 import util
+from sqlalchemy import create_engine
+from dstools.db import uri
+
 from features.featurebot import \
     existing_feature_schemas, SchemaMissing
 from features.feature_parser import tables_and_columns_for_schema
@@ -42,7 +45,7 @@ class FeatureLoader():
         # All querying is done using a raw connection.
         # In this connection set to use the relevant schema.
         # This makes sure that we grab the features from the correct schema.
-        engine = util.get_engine()
+        engine = create_engine(uri)
         self.con = engine.raw_connection()
         self.con.cursor().execute("SET SCHEMA '{}'".format(schema))
 
