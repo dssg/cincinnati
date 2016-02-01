@@ -1,4 +1,4 @@
-from feature_utils import create_inspections_address_xmonts_table, compute_frequency_features
+from feature_utils import create_inspections_address_xmonths_table, compute_frequency_features
 
 def make_fire_features(con):
     """
