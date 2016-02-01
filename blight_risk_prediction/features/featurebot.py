@@ -6,10 +6,10 @@ from collections import namedtuple
 import sys
 import psycopg2
 from dstools.config import main as main_cfg
-from dstool.db import uri
+from dstools.db import uri
 from sqlalchemy import create_engine
-from features import (ner, parcel, outcome, tax, crime,
-                                             census, three11, fire)
+
+import ner, parcel, outcome, tax, crime, census, three11, fire
 from sqlalchemy import types
 import argparse
 
