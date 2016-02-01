@@ -332,7 +332,7 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
         values = [x[1] for x in tuples]
         grouped_features.append((key, values))
 
-    print 'Grouped features: %s' % grouped_features
+    #print 'Grouped features: %s' % grouped_features
 
     #Start loading each group and features and join them to a big dataframe,
     #but first you need to load the inspections data (parcel_id, inspection_date
@@ -345,7 +345,8 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
     for table_name, feature_group in grouped_features:
         feature_df = loader.load_feature_group(table_name, feature_group)
         logger.debug('Trying to join:\n%s\n with:\n%s\n' % (feature_df.reset_index().dtypes, dataset.reset_index().dtypes))
-	dataset = dataset.join(feature_df, how='left')
+	print 'Trying to join {} with {}'.format(feature_df.reset_index().dtypes, dataset.reset_index().dtypes)
+        dataset = dataset.join(feature_df, how='left')
         # dataset = dataset.dropna(subset=['viol_outcome'])
 
     # randomize the ordering

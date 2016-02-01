@@ -6,9 +6,10 @@ from collections import namedtuple
 import sys
 import psycopg2
 from dstools.config import main as main_cfg
-import util
+from ... import util
 from features import (ner, parcel, outcome, tax, crime,
                                              census, three11, fire)
+from sqlalchemy import types
 import argparse
 
 logger = logging.getLogger(__name__)
@@ -106,7 +107,9 @@ def generate_features(features_to_generate):
         #corresponding parcels_inspections table in the schema being used
         # TO DO: check that feature_data has the right shape and indexes
         feature_data.to_sql(feature.table, engine, chunksize=50000,
-                            if_exists='replace', index=True, schema=schema)
+                            if_exists='replace', index=True, schema=schema,
+			    #Force saving inspection_date as timestamp without timezone
+			    dtype={'inspection_date': types.TIMESTAMP(timezone=False)})
         logging.debug("... table has {} rows".format(len(feature_data)))
 
 
