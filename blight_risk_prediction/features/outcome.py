@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import pandas as pd
 import numpy as np
-import util
+from dstools.db import uri
+from sqlalchemy import create_engine
 
 def generate_labels():
     """
@@ -14,7 +15,7 @@ def generate_labels():
         "parcel_id", "inspection_date", "viol_outcome"
     """
 
-    engine = util.get_engine()
+    engine = create_engine(uri)
 
     # SQL query to pull down all parcels with a inspection
     all_insp_query = ("SELECT parcel.parcel_no, events.number_key, "
@@ -106,7 +107,7 @@ def make_fake_inspections_all_parcels_cincy(fake_inspection_date):
     # get all cincinnati parcels
     parcels = ("SELECT DISTINCT(parcelid) AS parcel_id "
                "FROM shape_files.parcels_cincy")
-    engine = util.get_engine()
+    engine = create_engine(uri)
     parcels = pd.read_sql(parcels, con=engine)
 
     # add column with the fake inspection date

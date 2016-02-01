@@ -3,13 +3,14 @@ import random
 import pandas as pd
 
 import dbconfig
-from blight_risk_prediction import util
+from sqlalchemy import create_engine
+from dstools.db import uri
 
 
 random.seed(1024)
 num_parcels = 5
 
-engine = util.get_engine()
+engine = create_engine(engine)
 
 
 def get_sample_parcels():

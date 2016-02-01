@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 
-import util, colmap
+import colmap
 
 
 def make_owner_features(db_connection):
