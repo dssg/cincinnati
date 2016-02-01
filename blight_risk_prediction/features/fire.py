@@ -35,5 +35,5 @@ def make_fire_features(con):
     #More complex features could combine the distance value
     #as well as interacting features
     table_name = 'insp_{}months_{}'.format(n_months, table_name)
-    df = compute_frequency_features_from_table(con, table_name, columns='signal')
+    df = compute_frequency_features(con, table_name, columns='signal')
     return df
