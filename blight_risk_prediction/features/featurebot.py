@@ -6,7 +6,8 @@ from collections import namedtuple
 import sys
 import psycopg2
 from dstools.config import main as main_cfg
-import util
+from dstool.db import uri
+from sqlalchemy import create_engine
 from features import (ner, parcel, outcome, tax, crime,
                                              census, three11, fire)
 import argparse
@@ -49,7 +50,7 @@ class SchemaMissing():
         return "Schema {} does not exist".format(self.schema_name)
 
 def existing_feature_schemas():
-    engine = util.get_engine()
+    engine = create_engine(uri)
     schemas = "SELECT schema_name AS schema FROM information_schema.schemata"
     schemas = pd.read_sql(schemas, con=engine)["schema"]
     schemas = [s for s in schemas.values if s.startswith("features")]
@@ -69,7 +70,7 @@ def generate_features(features_to_generate):
 
     # use this engine for all data storing (somehow does
     # not work with the raw connection we create below)
-    engine = util.get_engine()
+    engine = create_engine(uri)
 
     # all querying is done using a raw connection. in this
     # connection set to use the relevant schema
@@ -121,7 +122,7 @@ def generate_features_for_fake_inspection(features_to_generate, inspection_date)
     """
     # use this engine for all data storing (somehow does not work
     # with the raw connection we create below)
-    engine = util.get_engine()
+    engine = create_engine(uri)
 
     # all querying is done using a raw connection. in this
     # connection set to use the relevant schema
