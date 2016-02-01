@@ -8,7 +8,7 @@ def create_inspections_address_xmonths_table(con, schema, table_name, date_colum
     path_to_template = os.path.join(os.environ['ROOT_FOLDER'],
                     'blight_risk_prediction',
                     'features',
-                    'inspection_address_xmonths.template.sql')
+                    'inspections_address_xmonths.template.sql')
     #Load template with SQL statement
     with open(path_to_template, 'r') as f:
         sql_script = Template(f.read())
@@ -29,7 +29,7 @@ def create_inspections_latlong_xmonths_table(con, schema, table_name, date_colum
     path_to_template = os.path.join(os.environ['ROOT_FOLDER'],
                     'blight_risk_prediction',
                     'features',
-                    'inspection_address_xmonths.template.sql')
+                    'inspections_latlong_xmonths.template.sql')
     #Load template with SQL statement
     with open(path_to_template, 'r') as f:
         sql_script = Template(f.read())
