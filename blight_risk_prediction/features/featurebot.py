@@ -6,12 +6,8 @@ from collections import namedtuple
 import sys
 import psycopg2
 from dstools.config import main as main_cfg
-<<<<<<< HEAD
-from ... import util
-=======
 from dstool.db import uri
 from sqlalchemy import create_engine
->>>>>>> 92282f604e1fb737f2e408c8e53984f3f851af5f
 from features import (ner, parcel, outcome, tax, crime,
                                              census, three11, fire)
 from sqlalchemy import types
