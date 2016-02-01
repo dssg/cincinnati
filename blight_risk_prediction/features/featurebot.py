@@ -41,16 +41,6 @@ existing_features = [FeatureToGenerate("tax", tax.make_tax_features),
 tables = [t.table for t in existing_features]
 tables_list = reduce(lambda x,y: x+", "+y, tables)
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-d", "--date",
-                    help=("To generate features for if an inspection happens"
-                          "at certain date. e.g. 01Jul2015"), type=str)
-parser.add_argument("-f", "--features", type=str, default="all",
-                        help=("Comma separated list of features to generate"
-                              "Possible values are %s. Defaults to all, which "
-                              "will generate all possible features" % tables_list))
-args = parser.parse_args()
-
 class SchemaMissing():
     def __init__(self, schema_name):
         self.schema_name = schema_name
@@ -175,6 +165,16 @@ def generate_features_for_fake_inspection(features_to_generate, inspection_date)
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-d", "--date",
+                        help=("To generate features for if an inspection happens"
+                              "at certain date. e.g. 01Jul2015"), type=str)
+    parser.add_argument("-f", "--features", type=str, default="all",
+                            help=("Comma separated list of features to generate"
+                                  "Possible values are %s. Defaults to all, which "
+                                  "will generate all possible features" % tables_list))
+    args = parser.parse_args()
+
     #Based on user selection create an array with the features to generate
     #Based on user selection, select method to use
     if args.features == 'all':
