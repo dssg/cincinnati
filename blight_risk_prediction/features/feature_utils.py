@@ -39,6 +39,7 @@ def load_inspections_address_nmonths_table(con, dataset, date_column, n_months=3
     #Check if table already exists in current schema
     #If not, create it
     if table_name not in tables_in_schema(con, current_schema):
+        print 'Table {} does not exist... Creating it'.format(table_name)
         path_to_template = os.path.join(os.environ['ROOT_FOLDER'],
                         'blight_risk_prediction',
                         'features',
@@ -53,12 +54,14 @@ def load_inspections_address_nmonths_table(con, dataset, date_column, n_months=3
         #Run the code using the connection
         #this is going to take a while
         con.cursor().execute(sql_script)
+        #Commit changes to db
+        con.commit()
     else:
         print 'Table {} already exists. Skipping...'.format(table_name)
 
     cur.close()
     #Load data
-    df = pd.read_sql('SELECT * FROM %(table)s LIMIT 100', cons,
+    df = pd.read_sql('SELECT * FROM %(table)s LIMIT 100', con,
                      params={'table': table_name})
     return df
 
