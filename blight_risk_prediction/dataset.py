@@ -276,8 +276,8 @@ class FeatureLoader():
             #But some others only have parcel_id
             features = features.set_index("parcel_id")
 
-        #Remove indexes from features to load
-        #if they exist
+        #Remove indexes from features to load if they exist
+        #so the next statement does not fail
         if 'parcel_id' in features_to_load: features_to_load.remove('parcel_id')
         if 'inspection_date' in features_to_load: features_to_load.remove('inspection_date')
 

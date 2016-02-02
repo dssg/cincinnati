@@ -96,15 +96,19 @@ def generate_features(features_to_generate):
         inspections.to_sql("parcels_inspections", engine, chunksize=50000,
                       if_exists='fail', index=False, schema=schema)
         logging.debug("... table has {} rows".format(len(inspections)))
+        #Create an index to make joins with events_Xmonths_* tables faster
+        #CREATE INDEX ON features.parcels_inspections (parcel_id);
+        #CREATE INDEX ON features.parcels_inspections (inspection_date);
+        cur.execute('SELECT current_schema;')
     except Exception, e:
-        print 'Failed to create inspections table. {}'.format(e)
+        print 'Failed to create inspections table: {}'.format(e)
 
     # make features and store in database
     #print 'FTG: {}'.format(features_to_generate)
     for feature in features_to_generate:
         logging.info("Generating {} features".format(feature.table))
         feature_data = feature.generator_function(con)
-        #Every generator function must have a column with parcel_id, 
+        #Every generator function must have a column with parcel_id,
         #inspection_date and the correct number of rows as their
         #corresponding parcels_inspections table in the schema being used
         # TO DO: check that feature_data has the right shape and indexes
@@ -172,10 +176,10 @@ def generate_features_for_fake_inspection(features_to_generate, inspection_date)
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--date",
-                        help=("To generate features for if an inspection happens"
+                        help=("To generate features for if an inspection happens "
                               "at certain date. e.g. 01Jul2015"), type=str)
     parser.add_argument("-f", "--features", type=str, default="all",
-                            help=("Comma separated list of features to generate"
+                            help=("Comma separated list of features to generate "
                                   "Possible values are %s. Defaults to all, which "
                                   "will generate all possible features" % tables_list))
     args = parser.parse_args()

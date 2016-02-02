@@ -46,9 +46,13 @@ def create_inspections_latlong_xmonths_table(con, schema, table_name, date_colum
         con.cursor().execute("SET SCHEMA '{}'".format(schema))
         print 'Failed to create {} month table. {}'.format(n_months, e)
 
-def compute_frequency_features(con, table_name, columns, ids=['parcel_id', 'inspection_date']):
+def compute_frequency_features(con, table_name, columns,
+                               ids=['parcel_id', 'inspection_date'],
+                               add_total=True):
     ids = [ids] if type(ids)==str else ids
     columns = [columns] if type(columns)==str else columns
+
+    print 'Loading data from {}, computing frequency features'.format(table_name)
 
     df = pd.read_sql('SELECT * FROM {}'.format(table_name), con)
     ids_series = [df[i] for i in ids]
@@ -58,4 +62,6 @@ def compute_frequency_features(con, table_name, columns, ids=['parcel_id', 'insp
     cross = pd.crosstab(ids_series, cols_series)
     #Rename columns to avoid capital letters and spaces
     cross.columns = cross.columns.map(lambda s: s.replace(' ', '_').lower())
+
+    
     return cross
