@@ -4,6 +4,7 @@ import os
 import re
 import logging
 import logging.config
+from dstools.config import load
 
 #This file provides generic functions
 #to generate spatiotemporal features
