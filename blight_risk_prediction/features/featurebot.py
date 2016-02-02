@@ -1,18 +1,24 @@
 #!/usr/bin/env python
-import pandas as pd
 import datetime
 import logging
+import logging.config
 from collections import namedtuple
 import sys
-import psycopg2
-from dstools.config import main as main_cfg
-from dstools.db import uri
-from sqlalchemy import create_engine
-from feature_utils import tables_in_schema
-import ner, parcel, outcome, tax, crime, census, three11, fire
-from sqlalchemy import types
 import argparse
 
+import pandas as pd
+import psycopg2
+from sqlalchemy import create_engine
+from sqlalchemy import types
+
+from dstools.config import main as main_cfg
+from dstools.db import uri
+from dstools.config import load
+
+from feature_utils import tables_in_schema
+import ner, parcel, outcome, tax, crime, census, three11, fire
+
+logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger(__name__)
 
 # for every feature-set to generate, you need to register a function
@@ -39,9 +45,6 @@ existing_features = [FeatureToGenerate("tax", tax.make_tax_features),
                                            three11.make_three11_features),
                          FeatureToGenerate("fire",
                                            fire.make_fire_features)]
-
-tables = [t.table for t in existing_features]
-tables_list = reduce(lambda x,y: x+", "+y, tables)
 
 class SchemaMissing():
     def __init__(self, schema_name):
@@ -84,28 +87,30 @@ def generate_features(features_to_generate):
     cur = con.cursor()    
     cur.execute('SELECT current_schema;')
     current_schema = cur.fetchone()[0]
-    print 'Current schema is {}'.format(current_schema)
+    logger.info('Starting feature generation. Loading from {} shema'.format(current_schema))
+    #Get existing tables
+    existing_tables =  tables_in_schema(con, schema)
     
     # make a new table that contains one row for every parcel in Cincinnati
     # this table has three columns: parcel_id, inspection_date, viol_outcome
     # inspection_date is the one given as a parameter and
     # is the same for all parcels
-    logging.info("Generating inspections table")
-    if 'parcels_inspections' not in tables_in_schema(con, schema):
+    if 'parcels_inspections' not in existing_tables:
+        logger.info('Creating parcels_inspections table...')
         inspections = outcome.generate_labels()
         inspections.to_sql("parcels_inspections", engine, chunksize=50000,
                       if_exists='fail', index=False, schema=schema)
         logging.debug("... table has {} rows".format(len(inspections)))
         #Create an index to make joins with events_Xmonths_* tables faster
-        #CREATE INDEX ON features.parcels_inspections (parcel_id);
-        #CREATE INDEX ON features.parcels_inspections (inspection_date);
-        cur.execute('SELECT current_schema;')
+        cur.execute('CREATE INDEX ON features.parcels_inspections (parcel_id);')
+        cur.execute('CREATE INDEX ON features.parcels_inspections (inspection_date);')
     else:
-        print 'Inspections table already exists, skipping...'
+        logger.info('parcels_inspections table already exists, skipping...')
 
-    # make features and store in database
-    #print 'FTG: {}'.format(features_to_generate)
     for feature in features_to_generate:
+        if feature.table in existing_tables:
+            logger.info('Features table {} already exists. Replacing...')
+
         logging.info("Generating {} features".format(feature.table))
         feature_data = feature.generator_function(con)
         #Every generator function must have a column with parcel_id,
@@ -174,6 +179,11 @@ def generate_features_for_fake_inspection(features_to_generate, inspection_date)
 
 
 if __name__ == '__main__':
+    #Get the table names for existing features
+    tables = [t.table for t in existing_features]
+    #Create a list to show it to the user
+    tables_list = reduce(lambda x,y: x+", "+y, tables)
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--date",
                         help=("To generate features for if an inspection happens "

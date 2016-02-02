@@ -35,7 +35,6 @@ def load_inspections_address_nmonths_table(con, dataset, date_column, n_months=3
     #Build the table name
     table_name = 'insp_{n_months}months_{dataset}'.format(n_months=n_months,
                                                           dataset=dataset)
-
     #Check if table already exists in current schema
     #If not, create it
     if table_name not in tables_in_schema(con, current_schema):
@@ -61,9 +60,7 @@ def load_inspections_address_nmonths_table(con, dataset, date_column, n_months=3
 
     cur.close()
     #Load data
-    df = pd.read_sql('SELECT * FROM %(table)s LIMIT 100', con,
-                     params={'table': table_name})
-    return df
+    return pd.read_sql_table(table_name, con, schema=current_schema)
 
 
 def compute_frequency_features(df, columns,
