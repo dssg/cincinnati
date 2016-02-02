@@ -1,9 +1,9 @@
 import pandas as pd
 from string import Template
 import os
+import re
 #This file provides generic functions
 #to generate spatiotemporal features
-
 def create_inspections_address_xmonths_table(con, schema, table_name, date_column, n_months=3):
     path_to_template = os.path.join(os.environ['ROOT_FOLDER'],
                     'blight_risk_prediction',
@@ -60,8 +60,16 @@ def compute_frequency_features(con, table_name, columns,
     #Group by parcel_id and inspection_date. Make columns with counts
     #for some columns
     cross = pd.crosstab(ids_series, cols_series)
+    #If add total, add column with rows sums
+    cross['total'] = cross.sum(axis=1)
+    #tables are named SMONETHING_DATASET, get DATASET from table_name
+    dataset = re.compile('^.+_{1}(\w+)$').findall(table_name)[0]
     #Rename columns to avoid capital letters and spaces
-    cross.columns = cross.columns.map(lambda s: s.replace(' ', '_').lower())
+    #Add prefix to identify where this feature came from
+    def process_column_name(raw_name):
+        col_name = s.replace(' ', '_').lower()
+        return '{dataset}_{col_name}'.format(dataset=dataset, col=col_name)
 
-    
+    cross.columns = cross.columns.map(process_column_name)
+
     return cross
