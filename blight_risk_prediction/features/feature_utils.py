@@ -25,8 +25,7 @@ def tables_in_schema(con, schema):
     names = [t[0] for t in tuples]
     return names
 
-
-def load_inspections_address_nmonths_table(con, dataset, date_column, n_months=3):
+def load_nmonths_table_from_template(con, dataset, date_column, n_months, template):
     '''
         Load inspections table matched with events that happened X months
         before. Returns pandas dataframe with the data loaded
@@ -47,7 +46,7 @@ def load_inspections_address_nmonths_table(con, dataset, date_column, n_months=3
         path_to_template = os.path.join(os.environ['ROOT_FOLDER'],
                         'blight_risk_prediction',
                         'features',
-                        'inspections_address_xmonths.template.sql')
+                        template)
         #Load template with SQL statement
         with open(path_to_template, 'r') as f:
             sql_script = Template(f.read())
@@ -64,6 +63,19 @@ def load_inspections_address_nmonths_table(con, dataset, date_column, n_months=3
     cur.close()
     #Load data
     return pd.read_sql_table(table_name, con, schema=current_schema)
+
+
+def load_inspections_address_nmonths_table(con, dataset, date_column, n_months=3):
+    return load_nmonths_table_from_template(con, dataset,
+                                            date_column,
+                                            n_months,
+                                            template='inspections_address_xmonths.template.sql')
+
+def load_inspections_latlong_nmonths_table(con, dataset, date_column, n_months=3):
+    return load_nmonths_table_from_template(con, dataset,
+                                            date_column,
+                                            n_months,
+                                            template='inspections_latlong_xmonths.template.sql')
 
 
 def compute_frequency_features(df, columns,
