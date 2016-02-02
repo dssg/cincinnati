@@ -8,7 +8,6 @@ import psycopg2
 from dstools.config import main as main_cfg
 from dstools.db import uri
 from sqlalchemy import create_engine
-
 import ner, parcel, outcome, tax, crime, census, three11, fire
 from sqlalchemy import types
 import argparse
