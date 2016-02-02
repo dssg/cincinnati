@@ -1,4 +1,4 @@
-from feature_utils import create_inspections_latlong_xmonths_table, compute_frequency_features
+from feature_utils import compute_frequency_features
 
 def make_three11_features(con):
     """
@@ -24,10 +24,10 @@ def make_three11_features(con):
 
     #Create table with events that happened before 3 months of inspection database
     #If table exists, send message and skip
-    create_inspections_latlong_xmonths_table(con, schema,
-                                            table_name,
-                                            date_column,
-                                            n_months=n_months)
+    #create_inspections_latlong_xmonths_table(con, schema,
+    #                                        table_name,
+    #                                       date_column,
+    #                                        n_months=n_months)
 
     #Use the recently created table to compute features.
     #Group rows by parcel_id and inspection_date
