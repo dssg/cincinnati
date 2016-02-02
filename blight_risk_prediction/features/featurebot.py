@@ -100,6 +100,7 @@ def generate_features(features_to_generate):
         print 'Failed to create inspections table. {}'.format(e)
 
     # make features and store in database
+    #print 'FTG: {}'.format(features_to_generate)
     for feature in features_to_generate:
         logging.info("Generating {} features".format(feature.table))
         feature_data = feature.generator_function(con)

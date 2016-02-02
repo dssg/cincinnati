@@ -348,7 +348,6 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
     for table_name, feature_group in grouped_features:
         feature_df = loader.load_feature_group(table_name, feature_group)
         logger.debug('Trying to join:\n%s\n with:\n%s\n' % (feature_df.reset_index().dtypes, dataset.reset_index().dtypes))
-	print 'Trying to join {} with {}'.format(feature_df.reset_index().dtypes, dataset.reset_index().dtypes)
         dataset = dataset.join(feature_df, how='left')
         # dataset = dataset.dropna(subset=['viol_outcome'])
 
