@@ -2,9 +2,15 @@ import pandas as pd
 from string import Template
 import os
 import re
+import logging
+import logging.config
 
 #This file provides generic functions
 #to generate spatiotemporal features
+
+#Config logger
+logging.config.dictConfig(load('logger_config.yaml'))
+logger = logging.getLogger(__name__)
 
 #Utility function to see which tables already exist in schema
 def tables_in_schema(con, schema):
@@ -53,7 +59,7 @@ def load_inspections_address_nmonths_table(con, dataset, date_column, n_months=3
         #this is going to take a while
         con.cursor().execute(sql_script)
     else:
-        print 'Table {} already exists. Skipping...'.format(table_name)
+        logger.info('Table {} already exists. Skipping...'.format(table_name))
 
     cur.close()
     #Load data

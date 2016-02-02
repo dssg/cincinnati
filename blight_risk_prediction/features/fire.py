@@ -1,4 +1,11 @@
+import logging
+import logging.config
+
 from feature_utils import create_inspections_address_nmonths_table, compute_frequency_features
+
+#Config logger
+logging.config.dictConfig(load('logger_config.yaml'))
+logger = logging.getLogger(__name__)
 
 def make_fire_features(con):
     """
@@ -27,6 +34,6 @@ def make_fire_features(con):
     #For now, just perform counts on the categorical variables
     #More complex features could combine the distance value
     #as well as interacting features
-    print 'Computing distance features for {}'.format(table_name)
+    logger.info('Computing distance features for {}'.format(table_name))
     freq = compute_frequency_features(df, columns='signal')
     return freq
