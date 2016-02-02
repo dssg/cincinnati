@@ -5,6 +5,19 @@ import re
 
 #This file provides generic functions
 #to generate spatiotemporal features
+
+#Utility function to see which tables already exist in schema
+def tables_in_schema(con, schema):
+    q = '''
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema={};
+    '''.format(schema)
+    cur = con.cursor()
+    cur.execute(q)
+    return cur.fetchall()
+
+
 def create_inspections_address_xmonths_table(con, schema, table_name, date_column, n_months=3):
     path_to_template = os.path.join(os.environ['ROOT_FOLDER'],
                     'blight_risk_prediction',
@@ -57,7 +70,8 @@ def compute_frequency_features(con, table_name, columns,
 
     print 'Loading data from {}, computing frequency features'.format(table_name)
 
-    df = pd.read_sql('SELECT * FROM {}'.format(table_name), con)
+    df = pd.read_sql('SELECT * FROM {} LIMIT 100'.format(table_name), con)
+    print 'Data loaded: %s' % df.head()
     ids_series = [df[i] for i in ids]
     cols_series = [df[i] for i in columns]
     #Group by parcel_id and inspection_date. Make columns with counts
@@ -70,7 +84,7 @@ def compute_frequency_features(con, table_name, columns,
     #Rename columns to avoid capital letters and spaces
     #Add prefix to identify where this feature came from
     def process_column_name(raw_name):
-        col_name = s.replace(' ', '_').lower()
+        col_name = raw_name.replace(' ', '_').lower()
         return '{dataset}_{col_name}'.format(dataset=dataset, col=col_name)
 
     cross.columns = cross.columns.map(process_column_name)

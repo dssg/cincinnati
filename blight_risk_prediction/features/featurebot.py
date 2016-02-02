@@ -6,10 +6,11 @@ from collections import namedtuple
 import sys
 import psycopg2
 from dstools.config import main as main_cfg
-from dstool.db import uri
+from dstools.db import uri
 from sqlalchemy import create_engine
-from features import (ner, parcel, outcome, tax, crime,
-                                             census, three11, fire)
+
+import ner, parcel, outcome, tax, crime, census, three11, fire
+from sqlalchemy import types
 import argparse
 
 logger = logging.getLogger(__name__)
@@ -103,6 +104,7 @@ def generate_features(features_to_generate):
         print 'Failed to create inspections table: {}'.format(e)
 
     # make features and store in database
+    #print 'FTG: {}'.format(features_to_generate)
     for feature in features_to_generate:
         logging.info("Generating {} features".format(feature.table))
         feature_data = feature.generator_function(con)
@@ -111,7 +113,9 @@ def generate_features(features_to_generate):
         #corresponding parcels_inspections table in the schema being used
         # TO DO: check that feature_data has the right shape and indexes
         feature_data.to_sql(feature.table, engine, chunksize=50000,
-                            if_exists='replace', index=True, schema=schema)
+                            if_exists='replace', index=True, schema=schema,
+			    #Force saving inspection_date as timestamp without timezone
+			    dtype={'inspection_date': types.TIMESTAMP(timezone=False)})
         logging.debug("... table has {} rows".format(len(feature_data)))
 
 
