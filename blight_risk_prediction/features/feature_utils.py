@@ -10,11 +10,13 @@ def tables_in_schema(con, schema):
     q = '''
         SELECT table_name 
         FROM information_schema.tables 
-        WHERE table_schema={};
-    '''.format(schema)
+        WHERE table_schema=%s;
+    '''
     cur = con.cursor()
-    cur.execute(q)
-    return cur.fetchall()
+    cur.execute(q, [schema])
+    tuples = cur.fetchall()
+    names = [t[0] for t in tuples]
+    return names
 
 
 def create_inspections_address_xmonths_table(con, schema, table_name, date_column, n_months=3):
@@ -59,15 +61,15 @@ def create_inspections_latlong_xmonths_table(con, schema, table_name, date_colum
         con.cursor().execute("SET SCHEMA '{}'".format(schema))
         print 'Failed to create {} month table. {}'.format(n_months, e)
 
-def compute_frequency_features(con, table_name, columns,
+def compute_frequency_features(con, from_table, columns,
                                ids=['parcel_id', 'inspection_date'],
                                add_total=True):
     ids = [ids] if type(ids)==str else ids
     columns = [columns] if type(columns)==str else columns
 
-    print 'Loading data from {}, computing frequency features'.format(table_name)
+    print 'Loading data from {}, computing frequency features'.format(from_table)
 
-    df = pd.read_sql('SELECT * FROM {} LIMIT 100'.format(table_name), con)
+    df = pd.read_sql('SELECT * FROM {} LIMIT 100'.format(from_table), con)
     print 'Data loaded: %s' % df.head()
     ids_series = [df[i] for i in ids]
     cols_series = [df[i] for i in columns]
@@ -77,7 +79,7 @@ def compute_frequency_features(con, table_name, columns,
     #If add total, add column with rows sums
     cross['total'] = cross.sum(axis=1)
     #tables are named SMONETHING_DATASET, get DATASET from table_name
-    dataset = re.compile('^.+_{1}(\w+)$').findall(table_name)[0]
+    dataset = re.compile('^.+_{1}(\w+)$').findall(from_table)[0]
     #Rename columns to avoid capital letters and spaces
     #Add prefix to identify where this feature came from
     def process_column_name(raw_name):

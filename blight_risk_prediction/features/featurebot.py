@@ -8,7 +8,7 @@ import psycopg2
 from dstools.config import main as main_cfg
 from dstools.db import uri
 from sqlalchemy import create_engine
-
+from feature_utils import tables_in_schema
 import ner, parcel, outcome, tax, crime, census, three11, fire
 from sqlalchemy import types
 import argparse
@@ -91,7 +91,7 @@ def generate_features(features_to_generate):
     # inspection_date is the one given as a parameter and
     # is the same for all parcels
     logging.info("Generating inspections table")
-    try:
+    if 'parcels_inspections' not in tables_in_schema(con, schema):
         inspections = outcome.generate_labels()
         inspections.to_sql("parcels_inspections", engine, chunksize=50000,
                       if_exists='fail', index=False, schema=schema)
@@ -100,8 +100,8 @@ def generate_features(features_to_generate):
         #CREATE INDEX ON features.parcels_inspections (parcel_id);
         #CREATE INDEX ON features.parcels_inspections (inspection_date);
         cur.execute('SELECT current_schema;')
-    except Exception, e:
-        print 'Failed to create inspections table: {}'.format(e)
+    else:
+        print 'Inspections table already exists, skipping...'
 
     # make features and store in database
     #print 'FTG: {}'.format(features_to_generate)
