@@ -2,6 +2,7 @@ import pandas as pd
 from string import Template
 import os
 import re
+
 #This file provides generic functions
 #to generate spatiotemporal features
 def create_inspections_address_xmonths_table(con, schema, table_name, date_column, n_months=3):
@@ -49,6 +50,8 @@ def create_inspections_latlong_xmonths_table(con, schema, table_name, date_colum
 def compute_frequency_features(con, table_name, columns,
                                ids=['parcel_id', 'inspection_date'],
                                add_total=True):
+    #Function assumes ids and columns are lists, if user sent
+    #only one string, convert it to a list
     ids = [ids] if type(ids)==str else ids
     columns = [columns] if type(columns)==str else columns
 
@@ -62,7 +65,7 @@ def compute_frequency_features(con, table_name, columns,
     cross = pd.crosstab(ids_series, cols_series)
     #If add total, add column with rows sums
     cross['total'] = cross.sum(axis=1)
-    #tables are named SMONETHING_DATASET, get DATASET from table_name
+    #tables are named SOMETHING_DATASET, get DATASET from table_name
     dataset = re.compile('^.+_{1}(\w+)$').findall(table_name)[0]
     #Rename columns to avoid capital letters and spaces
     #Add prefix to identify where this feature came from
