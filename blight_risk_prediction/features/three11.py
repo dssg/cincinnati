@@ -1,4 +1,10 @@
-from feature_utils import compute_frequency_features
+import logging
+import logging.config
+from feature_utils import load_inspections_latlong_nmonths_table, compute_frequency_features
+from feature_utils import format_column_names
+#Config logger
+logging.config.dictConfig(load('logger_config.yaml'))
+logger = logging.getLogger(__name__)
 
 def make_three11_features(con):
     """
@@ -12,28 +18,20 @@ def make_three11_features(con):
     Output:
     A pandas dataframe, with one row per inspection and one column per feature.
     """
-    #Save current schema, this is important because if some of the queries
-    #fail, you need to do a rollback, which will reset the previously set schema
-    cur = con.cursor()
-    cur.execute('SELECT current_schema;')
-    schema = cur.fetchone()[0]
-
     table_name = 'three11'
     date_column = 'requested_datetime'
     n_months = 3
 
-    #Create table with events that happened before 3 months of inspection database
-    #If table exists, send message and skip
-    #create_inspections_latlong_xmonths_table(con, schema,
-    #                                        table_name,
-    #                                       date_column,
-    #                                        n_months=n_months)
-
+    #Load data with events that happened before x months of inspection database
+    df = load_inspections_address_nmonths_table(con, dataset, date_column,
+                                                n_months=n_months)
     #Use the recently created table to compute features.
     #Group rows by parcel_id and inspection_date
     #For now, just perform counts on the categorical variables
     #More complex features could combine the distance value
     #as well as interacting features
-    table_name = 'insp_{}months_{}'.format(n_months, table_name)
-    df = compute_frequency_features(con, table_name, columns='agency_responsible')
-    return df
+    logger.info('Computing distance features for {}'.format(table_name))
+    freq = compute_frequency_features(df, columns='agency_responsible')
+    #Rename columns to avoid spaces and capital letters
+    freq.columns = format_column_names(freq.columns, prefix=dataset)
+    return freq
