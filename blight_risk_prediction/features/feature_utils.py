@@ -1,10 +1,28 @@
 import pandas as pd
 from string import Template
 import os
+from sqlalchemy import create_engine
+from dstools.db import uri
+from dstools.config import load
+import logging
+import logging.config
 import re
+
+#Config logger
+logging.config.dictConfig(load('logger_config.yaml'))
+logger = logging.getLogger(__name__)
 
 #This file provides generic functions
 #to generate spatiotemporal features
+
+
+def format_column_names(columns, prefix=None):
+    #Get rid of non alphanumeric characters
+    #and capital letters
+    f = lambda s: re.sub('[^0-9a-zA-Z]+', '_', s).lower()
+    names = columns.map(f)
+    names = names.map(lambda s: '{}_{}'.format(prefix, s)) if prefix else names
+    return names
 
 #Utility function to see which tables already exist in schema
 def tables_in_schema(con, schema):
@@ -38,7 +56,7 @@ def load_inspections_address_nmonths_table(con, dataset, date_column, n_months=3
     #Check if table already exists in current schema
     #If not, create it
     if table_name not in tables_in_schema(con, current_schema):
-        print 'Table {} does not exist... Creating it'.format(table_name)
+        logger.info('Table {} does not exist... Creating it'.format(table_name))
         path_to_template = os.path.join(os.environ['ROOT_FOLDER'],
                         'blight_risk_prediction',
                         'features',
@@ -56,11 +74,13 @@ def load_inspections_address_nmonths_table(con, dataset, date_column, n_months=3
         #Commit changes to db
         con.commit()
     else:
-        print 'Table {} already exists. Skipping...'.format(table_name)
+        logger.info('Table {} already exists. Skipping...'.format(table_name))
 
     cur.close()
     #Load data
-    return pd.read_sql_table(table_name, con, schema=current_schema)
+    e = create_engine(uri)
+    logger.info('Loading {} month table...'.format(n_months))
+    return pd.read_sql_table(table_name, e, schema=current_schema)
 
 
 def compute_frequency_features(df, columns,
@@ -78,13 +98,4 @@ def compute_frequency_features(df, columns,
     cross = pd.crosstab(ids_series, cols_series)
     #If add total, add column with rows sums
     cross['total'] = cross.sum(axis=1)
-    #tables are named SOMETHING_DATASET, get DATASET from table_name
-    dataset = re.compile('^.+_{1}(\w+)$').findall(from_table)[0]
-    #Rename columns to avoid capital letters and spaces
-    #Add prefix to identify where this feature came from
-    def process_column_name(raw_name):
-        col_name = raw_name.replace(' ', '_').lower()
-        return '{dataset}_{col_name}'.format(dataset=dataset, col=col_name)
-
-    cross.columns = cross.columns.map(process_column_name)
     return cross
