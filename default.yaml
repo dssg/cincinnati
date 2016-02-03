@@ -24,10 +24,10 @@ residential_only: True
 #is used in a LIKE statement
 #http://www.postgresql.org/docs/current/static/functions-matching.html
 features:
-    #- crime.%
+    - crime.%
     #- three11.%
     - fire.%
-    #- tax.%
+    - tax.%
     #- house_type.single-family
     #- census_2010.rate_%
 

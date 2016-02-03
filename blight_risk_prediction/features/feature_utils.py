@@ -21,7 +21,7 @@ def format_column_names(columns, prefix=None):
     #and capital letters
     f = lambda s: re.sub('[^0-9a-zA-Z]+', '_', s).lower()
     names = columns.map(f)
-    names = names.map(lambda s: '{}_{}'.format(prefix, s)) if prefix else names
+    names = pd.Series(names).map(lambda s: '{}_{}'.format(prefix, s)) if prefix else names
     return names
 
 #Utility function to see which tables already exist in schema
