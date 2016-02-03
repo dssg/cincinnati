@@ -8,6 +8,7 @@ import pickle
 import sys
 import os
 import logging
+import logging.config
 import copy
 from itertools import product
 import numpy as np
@@ -17,6 +18,7 @@ from features import feature_parser
 import argparse
 
 from dstools.config import main as cfg_main
+from dstools.config import load
 from sklearn_evaluation.Logger import Logger
 from grid_generator import grid_from_class
 
@@ -25,6 +27,7 @@ Purpose: train a binary classifier to identify those homes that are likely
 to have at least one violation.
 """
 
+logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger(__name__)
 field_test_dir = "field_test_predictions/"
 

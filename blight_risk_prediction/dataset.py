@@ -5,18 +5,21 @@ import datetime
 import itertools
 from collections import namedtuple
 import logging
+import logging.config
 import numpy as np
 import pandas as pd
 
 import util
 from sqlalchemy import create_engine
 from dstools.db import uri
+from dstools.config import load
 
 from features.featurebot import \
     existing_feature_schemas, SchemaMissing
 from features.feature_parser import tables_and_columns_for_schema
-#import config
 
+
+logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger(__name__)
 
 ############################################
