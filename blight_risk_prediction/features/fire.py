@@ -2,6 +2,7 @@ import logging
 import logging.config
 from feature_utils import load_inspections_address_nmonths_table, compute_frequency_features
 from feature_utils import format_column_names
+from dstools.config import load
 #Config logger
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger(__name__)
