@@ -19,7 +19,7 @@ from feature_utils import tables_in_schema
 import ner, parcel, outcome, tax, crime, census, three11, fire
 
 logging.config.dictConfig(load('logger_config.yaml'))
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 # for every feature-set to generate, you need to register a function
 # that can generate a dataframe containing the
