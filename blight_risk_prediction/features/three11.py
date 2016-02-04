@@ -19,19 +19,19 @@ def make_three11_features(con):
     Output:
     A pandas dataframe, with one row per inspection and one column per feature.
     """
-    table_name = 'three11'
+    dataset = 'three11'
     date_column = 'requested_datetime'
     n_months = 3
 
     #Load data with events that happened before x months of inspection database
-    df = load_inspections_address_nmonths_table(con, dataset, date_column,
+    df = load_inspections_latlong_nmonths_table(con, dataset, date_column,
                                                 n_months=n_months)
     #Use the recently created table to compute features.
     #Group rows by parcel_id and inspection_date
     #For now, just perform counts on the categorical variables
     #More complex features could combine the distance value
     #as well as interacting features
-    logger.info('Computing distance features for {}'.format(table_name))
+    logger.info('Computing distance features for {}'.format(dataset))
     freq = compute_frequency_features(df, columns='agency_responsible')
     #Rename columns to avoid spaces and capital letters
     freq.columns = format_column_names(freq.columns, prefix=dataset)

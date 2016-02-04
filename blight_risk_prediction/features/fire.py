@@ -31,7 +31,7 @@ def make_fire_features(con):
     #For now, just perform counts on the categorical variables
     #More complex features could combine the distance value
     #as well as interacting features
-    logger.info('Computing distance features for {}'.format(table_name))
+    logger.info('Computing distance features for {}'.format(dataset))
     freq = compute_frequency_features(df, columns='signal')
     #Rename columns to avoid spaces and capital letters
     freq.columns = format_column_names(freq.columns, prefix=dataset)
