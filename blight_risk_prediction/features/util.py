@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 import datetime
 from dstools.db import uri
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 years = ['2007', '2008', '2009', '2010', '2011',
          '2012', '2013', '2014', '2015']

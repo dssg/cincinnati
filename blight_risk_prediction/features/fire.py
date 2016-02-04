@@ -5,7 +5,7 @@ from feature_utils import format_column_names
 from dstools.config import load
 #Config logger
 logging.config.dictConfig(load('logger_config.yaml'))
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 def make_fire_features(con):
     """

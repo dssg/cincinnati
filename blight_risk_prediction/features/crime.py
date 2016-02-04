@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import util
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 first_ever_crime = {"year": 2004, "month": 1}
 last_ever_crime = {"year": 2014, "month": 12}

@@ -28,7 +28,7 @@ to have at least one violation.
 """
 
 logging.config.dictConfig(load('logger_config.yaml'))
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 field_test_dir = "field_test_predictions/"
 
 class ConfigError():

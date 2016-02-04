@@ -13,7 +13,7 @@ from dstools.config import load
 
 #Config logger
 logging.config.dictConfig(load('logger_config.yaml'))
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 #This file provides generic functions
 #to generate spatiotemporal features

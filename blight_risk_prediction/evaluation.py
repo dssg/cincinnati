@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import os
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 def plot_feature_importances(feature_names, feature_importances, filename):
     importances = list(zip(feature_names, list(feature_importances)))

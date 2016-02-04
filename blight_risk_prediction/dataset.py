@@ -20,7 +20,7 @@ from features.feature_parser import tables_and_columns_for_schema
 
 
 logging.config.dictConfig(load('logger_config.yaml'))
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 ############################################
 # Functions for loading labels and features
