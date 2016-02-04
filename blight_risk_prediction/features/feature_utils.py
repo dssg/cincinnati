@@ -98,9 +98,10 @@ def load_nmonths_table_from_template(con, dataset, date_column, n_months, templa
     cols = columns_for_table_in_schema(con, table_name, current_schema)
     valid_cols = filter(lambda x: x[1]!= 'USER-DEFINED', cols)
     valid_cols_names = [x[0] for x in valid_cols]
-    return pd.read_sql_table(table_name, e,
+    df = pd.read_sql_table(table_name, e,
                             schema=current_schema,
                             columns=valid_cols_names)
+    return df
 
 
 def load_inspections_address_nmonths_table(con, dataset, date_column, n_months=3):

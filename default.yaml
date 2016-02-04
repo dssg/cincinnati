@@ -25,8 +25,9 @@ residential_only: True
 #http://www.postgresql.org/docs/current/static/functions-matching.html
 features:
     - crime.%
-    #- three11.%
-    - fire.%
+    - three11.three11_total
+    - three11.three11_cinc_building_dept
+    - fire.fire_total
     - tax.%
     #- house_type.single-family
     #- census_2010.rate_%
@@ -38,12 +39,12 @@ features:
 #See grid_values.py for supported models
 #Use valid scikit-learn classes, provide the full path to the class
 models:
- # - 'sklearn.ensemble.AdaBoostClassifier'
+  - 'sklearn.ensemble.AdaBoostClassifier'
   - 'sklearn.ensemble.RandomForestClassifier'
 
 #For each model you select, the pipeline will
 #train a bunch of models, see grid_values for more
-grid_size: 'small' #small, medium or big
+grid_size: 'big' #small, medium or big
 
 ############################
 # Experiment name          #
