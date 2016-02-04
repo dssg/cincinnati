@@ -38,6 +38,19 @@ def tables_in_schema(con, schema):
     names = [t[0] for t in tuples]
     return names
 
+def columns_for_table_in_schema(con, table, schema):
+    q = '''
+        SELECT column_name, data_type
+        FROM information_schema.columns
+        WHERE table_schema = %s
+        AND table_name   = %s;
+    '''
+    cur = con.cursor()
+    cur.execute(q, [schema, table])
+    tuples = cur.fetchall()
+    #names = [t[0] for t in tuples]
+    return tuples
+
 def load_nmonths_table_from_template(con, dataset, date_column, n_months, template):
     '''
         Load inspections table matched with events that happened X months
@@ -80,7 +93,14 @@ def load_nmonths_table_from_template(con, dataset, date_column, n_months, templa
     #Load data
     e = create_engine(uri)
     logger.info('Loading {} month table...'.format(n_months))
-    return pd.read_sql_table(table_name, e, schema=current_schema)
+    #Since the table contains a geom column, you need to subselect columns
+    #to load otherwise pandas will complain
+    cols = columns_for_table_in_schema(con, table_name, current_schema)
+    valid_cols = filter(lambda x: x[1]!= 'USER-DEFINED', cols)
+    valid_cols_names = [x[0] for x in valid_cols]
+    return pd.read_sql_table(table_name, e,
+                            schema=current_schema,
+                            columns=valid_cols_names)
 
 
 def load_inspections_address_nmonths_table(con, dataset, date_column, n_months=3):
