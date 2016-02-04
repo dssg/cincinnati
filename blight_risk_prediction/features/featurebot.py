@@ -109,7 +109,7 @@ def generate_features(features_to_generate):
 
     for feature in features_to_generate:
         if feature.table in existing_tables:
-            logger.info('Features table {} already exists. Replacing...')
+            logger.info('Features table {} already exists. Replacing...'.format(feature.table))
 
         logging.info("Generating {} features".format(feature.table))
         feature_data = feature.generator_function(con)
