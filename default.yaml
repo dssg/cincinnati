@@ -26,9 +26,10 @@ residential_only: True
 features:
     - crime.%
     - three11.three11_total
-    - three11.three11_cinc_building_dept
+    #- three11.three11_cinc_building_dept
     - fire.fire_total
     - tax.%
+    - permits.permits_total
     #- house_type.single-family
     #- census_2010.rate_%
 
@@ -41,10 +42,12 @@ features:
 models:
   - 'sklearn.ensemble.AdaBoostClassifier'
   - 'sklearn.ensemble.RandomForestClassifier'
+  #- 'sklearn.linear_model.LogisticRegression'
+  #- 'sklearn.svm.SVC'
 
 #For each model you select, the pipeline will
 #train a bunch of models, see grid_values for more
-grid_size: 'big' #small, medium or big
+grid_size: 'small' #small, medium or big
 
 ############################
 # Experiment name          #
@@ -54,4 +57,4 @@ grid_size: 'big' #small, medium or big
 #in both case is optional. If you are using mongo, this will just simpy add a new
 #key, this is useful for comments. If you are pickling results, this will be a prefix
 #in your pkl files
-experiment_name: 'testing fire'
+experiment_name: 'testing spatiotemporal'
