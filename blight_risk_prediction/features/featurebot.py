@@ -16,7 +16,9 @@ from dstools.db import uri
 from dstools.config import load
 
 from feature_utils import tables_in_schema
-import ner, parcel, outcome, tax, crime, census, three11, fire, permits
+
+#Features
+import ner, parcel, outcome, tax, crime_agg, census, three11, fire, permits
 
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
@@ -30,7 +32,7 @@ FeatureToGenerate = namedtuple("FeatureToGenerate",
 
 # list all existing feature-sets
 existing_features = [FeatureToGenerate("tax", tax.make_tax_features),
-                         FeatureToGenerate("crime", crime.make_crime_features),
+                         FeatureToGenerate("crime_agg", crime_agg.make_crime_features),
                          FeatureToGenerate("named_entities",
                                            ner.make_owner_features),
                          FeatureToGenerate("house_type",
@@ -44,7 +46,9 @@ existing_features = [FeatureToGenerate("tax", tax.make_tax_features),
                          FeatureToGenerate("three11",
                                            three11.make_three11_features),
                          FeatureToGenerate("permits",
-                                           permits.make_permits_features)]
+                                           permits.make_permits_features),
+                         FeatureToGenerate("crime",
+                                           permits.make_crime_features)]
 
 class SchemaMissing():
     def __init__(self, schema_name):
@@ -60,7 +64,7 @@ def existing_feature_schemas():
     schemas = [s for s in schemas.values if s.startswith("features")]
     return schemas
 
-def generate_features(features_to_generate):
+def generate_features(features_to_generate, n_months):
     """
     Generate labels and features for all inspections
     in the inspections database.
@@ -87,7 +91,10 @@ def generate_features(features_to_generate):
     cur = con.cursor()    
     cur.execute('SELECT current_schema;')
     current_schema = cur.fetchone()[0]
-    logger.info('Starting feature generation. Loading from {} shema'.format(current_schema))
+    logger.info(('Starting feature generation. '
+                 'Loading data from {} schema. '
+                 'Generating spatiotemporal features '
+                 'for {} months.')).format(current_schema, n_months))
     #Get existing tables
     existing_tables =  tables_in_schema(con, schema)
     
@@ -112,16 +119,26 @@ def generate_features(features_to_generate):
             logger.info('Features table {} already exists. Replacing...'.format(feature.table))
 
         logging.info("Generating {} features".format(feature.table))
-        feature_data = feature.generator_function(con)
+        #Try generating features with the n_months argument
+        try:
+            logging.info("Generating {} features for {} months".format(feature.table))
+            feature_data = feature.generator_function(con, n_months=n_months)
+            table_to_save = '{}_{}_months'.format(feature.table, n_months)
+        #If it fails, feature is not spatiotemporal, send only connection
+        except Exception, e:
+            table_to_save = feature.table
+            logging.info("{} does not accept n_months".format(feature.table))
+            feature_data = feature.generator_function(con)
         #Every generator function must have a column with parcel_id,
         #inspection_date and the correct number of rows as their
         #corresponding parcels_inspections table in the schema being used
         # TO DO: check that feature_data has the right shape and indexes
-        feature_data.to_sql(feature.table, engine, chunksize=50000,
+        feature_data.to_sql(table_to_save, engine, chunksize=50000,
                             if_exists='replace', index=True, schema=schema,
 			    #Force saving inspection_date as timestamp without timezone
 			    dtype={'inspection_date': types.TIMESTAMP(timezone=False)})
-        logging.debug("... table has {} rows".format(len(feature_data)))
+        logging.debug("{} table has {} rows".format(table_to_save, 
+                                                len(feature_data)))
 
 
 def generate_features_for_fake_inspection(features_to_generate, inspection_date):
@@ -192,6 +209,10 @@ if __name__ == '__main__':
                             help=("Comma separated list of features to generate "
                                   "Possible values are %s. Defaults to all, which "
                                   "will generate all possible features" % tables_list))
+    parser.add_argument("-m", "--months",
+                        help=("Generates before m months for every event "
+                              "before inspection took place "
+                              "only supported by spatiotemporal features"), type=int)
     args = parser.parse_args()
 
     #Based on user selection create an array with the features to generate
@@ -216,4 +237,4 @@ if __name__ == '__main__':
         generate_features_for_fake_inspection(selected_features, d)
     else:
         # to generate features
-        generate_features(selected_features)
+        generate_features(selected_features, args.months)
