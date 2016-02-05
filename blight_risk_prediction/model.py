@@ -233,6 +233,10 @@ def main():
         if hasattr(model, 'n_jobs'):
             model.set_params(n_jobs=args.n_jobs)
 
+        #SVC does not predict probabilities by default
+        if hasattr(model, 'probability'):
+            model.probability = True
+
         timestamp = datetime.datetime.now().isoformat()
 
         # train
