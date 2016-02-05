@@ -161,9 +161,12 @@ def get_feature_importances(model):
     except:
         pass
     try:
-        return model.coef_
+        logging.info(('This model does not have feature_importances, '
+                      'returning .coef_[0] instead.'))
+        return model.coef_[0]
     except:
-        pass
+        logging.info(('This model does not have feature_importances, '
+                      'nor coef_ returning None'))
     return None
 
 

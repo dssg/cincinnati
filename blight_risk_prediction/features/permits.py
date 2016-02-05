@@ -33,5 +33,5 @@ def make_permits_features(con, n_months):
     logger.info('Computing distance features for {}'.format(dataset))
     freq = compute_frequency_features(df, columns='description')
     #Rename columns to avoid spaces and capital letters
-    freq.columns = format_column_names(freq.columns, prefix=dataset)
+    freq.columns = format_column_names(freq.columns)
     return freq

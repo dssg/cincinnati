@@ -250,7 +250,7 @@ class FeatureLoader():
             features = self.__read_feature_from_db(query, features_to_load,
                                                    drop_duplicates=True,
                                                    table_name=table_name)
-    
+
             #Log how many rows were loaded
             logger.debug("... {} rows, {} features".format(len(features),
                                                            len(features.columns)))
