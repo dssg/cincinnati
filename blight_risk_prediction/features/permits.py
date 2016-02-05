@@ -7,7 +7,7 @@ from dstools.config import load
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
 
-def make_permits_features(con):
+def make_permits_features(con, n_months):
     """
     Make permits features
 
@@ -21,7 +21,6 @@ def make_permits_features(con):
     """
     dataset = 'permits'
     date_column = 'issueddate'
-    n_months = 3
 
     #Load data with events that happened before x months of inspection database
     df = load_inspections_latlong_nmonths_table(con, dataset, date_column,

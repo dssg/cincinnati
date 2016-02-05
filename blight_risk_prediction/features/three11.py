@@ -7,7 +7,7 @@ from dstools.config import load
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
 
-def make_three11_features(con):
+def make_three11_features(con, n_months):
     """
     Make three11 features
 
@@ -21,7 +21,6 @@ def make_three11_features(con):
     """
     dataset = 'three11'
     date_column = 'requested_datetime'
-    n_months = 3
 
     #Load data with events that happened before x months of inspection database
     df = load_inspections_latlong_nmonths_table(con, dataset, date_column,
