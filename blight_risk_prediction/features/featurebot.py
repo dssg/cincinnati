@@ -18,7 +18,7 @@ from dstools.config import load
 from feature_utils import tables_in_schema
 
 #Features
-import ner, parcel, outcome, tax, crime_agg, census, three11, fire, permits
+import ner, parcel, outcome, tax, crime_agg, census, three11, fire, permits, crime
 
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
@@ -48,7 +48,7 @@ existing_features = [FeatureToGenerate("tax", tax.make_tax_features),
                          FeatureToGenerate("permits",
                                            permits.make_permits_features),
                          FeatureToGenerate("crime",
-                                           permits.make_crime_features)]
+                                           crime.make_crime_features)]
 
 class SchemaMissing():
     def __init__(self, schema_name):
@@ -94,7 +94,7 @@ def generate_features(features_to_generate, n_months):
     logger.info(('Starting feature generation. '
                  'Loading data from {} schema. '
                  'Generating spatiotemporal features '
-                 'for {} months.')).format(current_schema, n_months))
+                 'for {} months.').format(current_schema, n_months))
     #Get existing tables
     existing_tables =  tables_in_schema(con, schema)
     
@@ -115,24 +115,24 @@ def generate_features(features_to_generate, n_months):
         logger.info('parcels_inspections table already exists, skipping...')
 
     for feature in features_to_generate:
-        if feature.table in existing_tables:
-            logger.info('Features table {} already exists. Replacing...'.format(feature.table))
-
         logging.info("Generating {} features".format(feature.table))
         #Try generating features with the n_months argument
         try:
-            logging.info("Generating {} features for {} months".format(feature.table))
+            logging.info("Generating {} features for {} months".format(feature.table, n_months))
             feature_data = feature.generator_function(con, n_months=n_months)
             table_to_save = '{}_{}_months'.format(feature.table, n_months)
         #If it fails, feature is not spatiotemporal, send only connection
         except Exception, e:
             table_to_save = feature.table
-            logging.info("{} does not accept n_months".format(feature.table))
+            logging.info("Failed to call function with n_months: {}".format(str(e)))
             feature_data = feature.generator_function(con)
         #Every generator function must have a column with parcel_id,
         #inspection_date and the correct number of rows as their
         #corresponding parcels_inspections table in the schema being used
         # TO DO: check that feature_data has the right shape and indexes
+        if table_to_save in existing_tables:
+            logger.info('Features table {} already exists. Replacing...'.format(feature.table))
+
         feature_data.to_sql(table_to_save, engine, chunksize=50000,
                             if_exists='replace', index=True, schema=schema,
 			    #Force saving inspection_date as timestamp without timezone
@@ -212,7 +212,9 @@ if __name__ == '__main__':
     parser.add_argument("-m", "--months",
                         help=("Generates before m months for every event "
                               "before inspection took place "
-                              "only supported by spatiotemporal features"), type=int)
+                              "only supported by spatiotemporal features. "
+			      "Defaults to 3 months"), type=int,
+			      default=3)
     args = parser.parse_args()
 
     #Based on user selection create an array with the features to generate
