@@ -111,13 +111,13 @@ def load_nmonths_table_from_template(con, dataset, date_column,
 
 
 def load_inspections_address_nmonths_table(con, dataset, date_column,
-                                           n_months=3, max_dist=1000):
+                                           n_months, max_dist):
     return load_nmonths_table_from_template(con, dataset, date_column,
                             n_months, max_dist,
                             template='inspections_address_xmonths.template.sql')
 
 def load_inspections_latlong_nmonths_table(con, dataset, date_column,
-                                           n_months=3, max_dist=1000):
+                                           n_months, max_dist):
     return load_nmonths_table_from_template(con, dataset, date_column,
                             n_months, max_dist,
                             template='inspections_latlong_xmonths.template.sql')
