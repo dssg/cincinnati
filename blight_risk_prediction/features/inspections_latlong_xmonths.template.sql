@@ -6,7 +6,7 @@
 
 --This script is intended to be used as a template for various tables
 --Example for three11
-CREATE TABLE insp_${N_MONTHS}months_${DATASET} AS (
+CREATE TABLE ${TABLE_NAME} AS (
     SELECT insp.parcel_id, insp.inspection_date, p2e.dist_km, event.*
     FROM features.parcels_inspections AS insp
     JOIN public.parcel2${DATASET} AS p2e
