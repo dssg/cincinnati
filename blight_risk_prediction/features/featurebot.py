@@ -122,7 +122,7 @@ def generate_features(features_to_generate, n_months, max_dist):
             logging.info(("Generating {} "
                           "features for {} months "
                           "and within {} m").format(feature.table, n_months, max_dist))
-            feature_data = feature.generator_function(con, n_months=n_months)
+            feature_data = feature.generator_function(con, n_months, max_dist)
             table_to_save = '{}_{}m_{}months'.format(feature.table, max_dist, n_months)
         #If it fails, feature is not spatiotemporal, send only connection
         except Exception, e:
