@@ -1,6 +1,12 @@
 --This script updates the distance from every parcel to every address in the
 --address table
 
+--Units for SRID 3735 are US survey foot
+--https://en.wikipedia.org/wiki/Foot_(unit)#US_survey_foot
+--1 US survey foot = 1200⁄3937 m
+--1000 m ~ 3281 US survey foot
+-- X [US Survey foot] / 3.281 ~ Y m
+
 --Get pending addresses
 --http://stackoverflow.com/questions/22702388/improve-postgresql-set-difference-efficiency
 WITH pending_addresses AS (
@@ -8,9 +14,11 @@ WITH pending_addresses AS (
 ),
 
 computed_distances AS (
-    SELECT parcels.parcelid AS parcel_id, address.id AS address_id, ST_Distance(parcels.geom, address.geom)/1000 AS dist_km
+    SELECT parcels.parcelid AS parcel_id,
+           address.id AS address_id,
+           ST_Distance(parcels.geom, address.geom)/3.281 AS dist_m
     FROM shape_files.parcels_cincy AS parcels
-    JOIN pending_addresses AS address ON ST_DWithin(parcels.geom, address.geom, 1000) --meters
+    JOIN pending_addresses AS address ON ST_DWithin(parcels.geom, address.geom, 3281)
 )
 
 --Add computed addresses ids
