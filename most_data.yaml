@@ -28,22 +28,18 @@ residential_only: True
 #is used in a LIKE statement
 #http://www.postgresql.org/docs/current/static/functions-matching.html
 features:
-#For tables with the format dataset_X_months
-#you can create them by an arbitrary number of months
-#in featurebot
     #Spatio temporal features from the fire dataset
-    - fire_3_months.total
+    - fire_1000m_3months.total
     #Spatiotemporal features form the crime dataset
-    - crime_3_months.total
+    - crime_1000m_3months.total
     #Crime aggregation features: crime rate 1, 3 years
     - crime_agg.%
     #Tax aggregation features with home values and years in foreclosure
     - tax.%
     #Spatio temporal features from the 311 dataset
-    - three11_3_months.total
-    #- three11.three11_cinc_building_dept
+    - three11_1000m_3months.total
     #Spatio temporal features from the permits data
-    - permits_3_months.total
+    - permits_1000m_3months.total
     #Census aggregation features: housing density, rates per household
     - census_2010.%
     #Named entities: count of years in a given period of time that the
