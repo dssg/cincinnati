@@ -10,7 +10,7 @@ WITH pending_addresses AS (
 computed_distances AS (
     SELECT parcels.parcelid AS parcel_id, address.id AS address_id, ST_Distance(parcels.geom, address.geom)/1000 AS dist_km
     FROM shape_files.parcels_cincy AS parcels
-    JOIN pending_addresses AS address ON ST_DWithin(parcels.geom, address.geom, 3000) --meters
+    JOIN pending_addresses AS address ON ST_DWithin(parcels.geom, address.geom, 1000) --meters
 )
 
 --Add computed addresses ids

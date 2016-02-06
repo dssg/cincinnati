@@ -349,9 +349,16 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
     # merging makes sure we have the same index and sorting
     # for all features and inspections
     for table_name, feature_group in grouped_features:
-        feature_df = loader.load_feature_group(table_name, feature_group)
-        logger.debug('Trying to join:\n%s\n with:\n%s\n' % (feature_df.reset_index().dtypes, dataset.reset_index().dtypes))
-        dataset = dataset.join(feature_df, how='left')
+        #Load features as data frame
+        feats = loader.load_feature_group(table_name, feature_group)
+        #Rename columns to [table_name]_[feature_name]
+        #this will help to identify features when evaluating models
+        feats.columns = feats.columns.map(lambda s: '{}_{}'.format(table_name, s))
+        logger.debug('Trying to join:\n%s\n with:\n%s\n' % 
+            (feats.reset_index().dtypes,
+            dataset.reset_index().dtypes))
+        #Join with the labels and the rest of the features
+        dataset = dataset.join(feats, how='left')
         # dataset = dataset.dropna(subset=['viol_outcome'])
 
     # randomize the ordering
