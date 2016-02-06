@@ -218,7 +218,7 @@ if __name__ == '__main__':
                               "Only supported by spatiotemporal features. "
 			                  "Defaults to 3 months"), type=int,
 			                  default=3)
-    parser.add_argument("-d", "--distance",
+    parser.add_argument("-m", "--maxdist",
                         help=("Count events that happened max m meters "
                               "from inspection. "
                               "Only supported by spatiotemporal features. "
@@ -248,4 +248,4 @@ if __name__ == '__main__':
         generate_features_for_fake_inspection(selected_features, d)
     else:
         # to generate features
-        generate_features(selected_features, args.months, args.max_dist)
+        generate_features(selected_features, args.months, args.maxdist)
