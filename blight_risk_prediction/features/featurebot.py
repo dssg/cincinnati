@@ -49,7 +49,7 @@ existing_features = [FeatureToGenerate("tax", tax.make_tax_features),
                                            permits.make_permits_features),
                          FeatureToGenerate("crime",
                                            crime.make_crime_features),
-			FeatureToGenerate("fire",
+			             FeatureToGenerate("fire",
                                            fire.make_fire_features)]
 class SchemaMissing():
     def __init__(self, schema_name):
@@ -65,7 +65,7 @@ def existing_feature_schemas():
     schemas = [s for s in schemas.values if s.startswith("features")]
     return schemas
 
-def generate_features(features_to_generate, n_months):
+def generate_features(features_to_generate, n_months, max_dist):
     """
     Generate labels and features for all inspections
     in the inspections database.
@@ -119,13 +119,15 @@ def generate_features(features_to_generate, n_months):
         logging.info("Generating {} features".format(feature.table))
         #Try generating features with the n_months argument
         try:
-            logging.info("Generating {} features for {} months".format(feature.table, n_months))
-            feature_data = feature.generator_function(con, n_months=n_months)
-            table_to_save = '{}_{}_months'.format(feature.table, n_months)
+            logging.info(("Generating {} "
+                          "features for {} months "
+                          "and within {} m").format(feature.table, n_months, max_dist))
+            feature_data = feature.generator_function(con, n_months, max_dist)
+            table_to_save = '{}_{}m_{}months'.format(feature.table, max_dist, n_months)
         #If it fails, feature is not spatiotemporal, send only connection
         except Exception, e:
             table_to_save = feature.table
-            logging.info("Failed to call function with n_months: {}".format(str(e)))
+            logging.info("Failed to call function with months and dist: {}".format(str(e)))
             feature_data = feature.generator_function(con)
         #Every generator function must have a column with parcel_id,
         #inspection_date and the correct number of rows as their
@@ -211,11 +213,17 @@ if __name__ == '__main__':
                                   "Possible values are %s. Defaults to all, which "
                                   "will generate all possible features" % tables_list))
     parser.add_argument("-m", "--months",
-                        help=("Generates before m months for every event "
-                              "before inspection took place "
-                              "only supported by spatiotemporal features. "
-			      "Defaults to 3 months"), type=int,
-			      default=3)
+                        help=("Count events that happened m months "
+                              "before inspection took place. "
+                              "Only supported by spatiotemporal features. "
+			                  "Defaults to 3 months"), type=int,
+			                  default=3)
+    parser.add_argument("-d", "--distance",
+                        help=("Count events that happened max m meters "
+                              "from inspection. "
+                              "Only supported by spatiotemporal features. "
+                              "Defaults to 1000 m (max value posible)"), type=int,
+                        default=1000)
     args = parser.parse_args()
 
     #Based on user selection create an array with the features to generate
@@ -240,4 +248,4 @@ if __name__ == '__main__':
         generate_features_for_fake_inspection(selected_features, d)
     else:
         # to generate features
-        generate_features(selected_features, args.months)
+        generate_features(selected_features, args.months, args.max_dist)

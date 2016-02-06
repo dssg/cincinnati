@@ -33,5 +33,5 @@ echo 'Done creating permits table!'
 
 #Match parcels to events (add indexes on parcel_id and event_id)
 echo 'Matching every parcel in cincinnati with every event in the permits table (up to 3KM), this may take a while...'
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/permits/parcel2permits.sql"  
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/permits/parcel2permits.sql"
 

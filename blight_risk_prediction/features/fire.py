@@ -7,7 +7,7 @@ from dstools.config import load
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
 
-def make_fire_features(con, n_months):
+def make_fire_features(con, n_months, max_dist):
     """
     Make Fire features
 
@@ -24,7 +24,8 @@ def make_fire_features(con, n_months):
 
     #Load data with events that happened before x months of inspection database
     df = load_inspections_address_nmonths_table(con, dataset, date_column,
-                                                n_months=n_months)
+                                                n_months=n_months,
+                                                max_dist=max_dist)
     #Use the recently created table to compute features.
     #Group rows by parcel_id and inspection_date
     #For now, just perform counts on the categorical variables

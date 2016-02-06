@@ -51,7 +51,9 @@ def columns_for_table_in_schema(con, table, schema):
     #names = [t[0] for t in tuples]
     return tuples
 
-def load_nmonths_table_from_template(con, dataset, date_column, n_months, template):
+def load_nmonths_table_from_template(con, dataset, date_column,
+                                     n_months, max_dist,
+                                     template):
     '''
         Load inspections table matched with events that happened X months
         before. Returns pandas dataframe with the data loaded
@@ -64,8 +66,10 @@ def load_nmonths_table_from_template(con, dataset, date_column, n_months, templa
     current_schema = cur.fetchone()[0]
 
     #Build the table name
-    table_name = 'insp_{n_months}months_{dataset}'.format(n_months=n_months,
-                                                          dataset=dataset)
+    table_name = ('insp2{dataset}_{n_months}months'
+                  '_{max_dist}m').format(dataset=dataset,
+                                         n_months=n_months,
+                                         max_dist=max_dist)
     #Check if table already exists in current schema
     #If not, create it
     if table_name not in tables_in_schema(con, current_schema):
@@ -78,9 +82,11 @@ def load_nmonths_table_from_template(con, dataset, date_column, n_months, templa
         with open(path_to_template, 'r') as f:
             sql_script = Template(f.read())
         #Replace values in template
-        sql_script = sql_script.substitute(DATASET=dataset,
+        sql_script = sql_script.substitute(TABLE_NAME=table_name,
+                                           DATASET=dataset,
                                            DATE_COLUMN=date_column,
-                                           N_MONTHS=n_months)
+                                           N_MONTHS=n_months,
+                                           MAX_DIST=max_dist)
         #Run the code using the connection
         #this is going to take a while
         con.cursor().execute(sql_script)
@@ -104,17 +110,17 @@ def load_nmonths_table_from_template(con, dataset, date_column, n_months, templa
     return df
 
 
-def load_inspections_address_nmonths_table(con, dataset, date_column, n_months=3):
-    return load_nmonths_table_from_template(con, dataset,
-                                            date_column,
-                                            n_months,
-                                            template='inspections_address_xmonths.template.sql')
+def load_inspections_address_nmonths_table(con, dataset, date_column,
+                                           n_months, max_dist):
+    return load_nmonths_table_from_template(con, dataset, date_column,
+                            n_months, max_dist,
+                            template='inspections_address_xmonths.template.sql')
 
-def load_inspections_latlong_nmonths_table(con, dataset, date_column, n_months=3):
-    return load_nmonths_table_from_template(con, dataset,
-                                            date_column,
-                                            n_months,
-                                            template='inspections_latlong_xmonths.template.sql')
+def load_inspections_latlong_nmonths_table(con, dataset, date_column,
+                                           n_months, max_dist):
+    return load_nmonths_table_from_template(con, dataset, date_column,
+                            n_months, max_dist,
+                            template='inspections_latlong_xmonths.template.sql')
 
 
 def compute_frequency_features(df, columns,

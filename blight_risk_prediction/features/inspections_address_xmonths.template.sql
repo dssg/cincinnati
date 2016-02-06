@@ -5,7 +5,7 @@
 --inspection date
 
 --This script is intended to be used as a template for various tables
-CREATE TABLE insp_${N_MONTHS}months_${DATASET} AS (
+CREATE TABLE ${TABLE_NAME} AS (
     SELECT
         insp.parcel_id, insp.inspection_date,
         p2a.dist_km,
