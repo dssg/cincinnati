@@ -48,8 +48,9 @@ existing_features = [FeatureToGenerate("tax", tax.make_tax_features),
                          FeatureToGenerate("permits",
                                            permits.make_permits_features),
                          FeatureToGenerate("crime",
-                                           crime.make_crime_features)]
-
+                                           crime.make_crime_features),
+			FeatureToGenerate("fire",
+                                           fire.make_fire_features)]
 class SchemaMissing():
     def __init__(self, schema_name):
         self.schema_name = schema_name
