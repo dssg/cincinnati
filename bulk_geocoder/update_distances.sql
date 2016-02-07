@@ -31,4 +31,4 @@ INSERT INTO parcel2address
 --I don't think there are many (maybe the one outside cincinnati)
 --but this is a simple solution
 INSERT INTO already_computed_addresses
-    SELECT id AS address_id FROM pending_addresses;
+    SELECT address_id FROM pending_addresses;

@@ -6,7 +6,6 @@
 #This file trains on the period for which we have the most
 #data available which starting from Jan 2012 to Dec 2014
 
-
 # Temporal stuff
 start_date: '01Jan2012'    #train only on inspections after this date
 fake_today: '31Dec2013'

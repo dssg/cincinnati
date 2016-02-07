@@ -6,3 +6,4 @@ CREATE TABLE parcel2address (
 );
 
 CREATE INDEX ON parcel2address (parcel_id);
+CREATE INDEX ON parcel2address (address_id);
