@@ -18,7 +18,8 @@ from dstools.config import load
 from feature_utils import tables_in_schema
 
 #Features
-import ner, parcel, outcome, tax, crime_agg, census, three11, fire, permits, crime
+import ner, parcel, outcome, tax, crime_agg, census, three11
+import fire, permits, crime, sales
 
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
@@ -50,7 +51,9 @@ existing_features = [FeatureToGenerate("tax", tax.make_tax_features),
                          FeatureToGenerate("crime",
                                            crime.make_crime_features),
 			             FeatureToGenerate("fire",
-                                           fire.make_fire_features)]
+                                           fire.make_fire_features),
+                         FeatureToGenerate("sales",
+                                           sales.make_sales_features)]
 class SchemaMissing():
     def __init__(self, schema_name):
         self.schema_name = schema_name
