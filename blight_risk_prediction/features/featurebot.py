@@ -218,7 +218,7 @@ if __name__ == '__main__':
                               "Only supported by spatiotemporal features. "
 			                  "Defaults to 3 months"), type=int,
 			                  default=3)
-    parser.add_argument("-m", "--maxdist",
+    parser.add_argument("-md", "--maxdist",
                         help=("Count events that happened max m meters "
                               "from inspection. "
                               "Only supported by spatiotemporal features. "

@@ -8,7 +8,7 @@
 CREATE TABLE ${TABLE_NAME} AS (
     SELECT
         insp.parcel_id, insp.inspection_date,
-        p2a.dist_km,
+        p2a.dist_m,
         event.*
     FROM parcels_inspections AS insp
     JOIN public.parcel2address AS p2a
