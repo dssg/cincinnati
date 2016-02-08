@@ -53,7 +53,7 @@ def columns_for_table_in_schema(con, table, schema):
 
 def load_nmonths_table_from_template(con, dataset, date_column,
                                      n_months, max_dist,
-                                     template):
+                                     template, columns='all'):
     '''
         Load inspections table matched with events that happened X months
         before. Returns pandas dataframe with the data loaded
@@ -98,15 +98,21 @@ def load_nmonths_table_from_template(con, dataset, date_column,
     cur.close()
     #Load data
     e = create_engine(uri)
-    logger.info('Loading {} month table...'.format(n_months))
-    #Since the table contains a geom column, you need to subselect columns
-    #to load otherwise pandas will complain
-    cols = columns_for_table_in_schema(con, table_name, current_schema)
-    valid_cols = filter(lambda x: x[1]!= 'USER-DEFINED', cols)
-    valid_cols_names = [x[0] for x in valid_cols]
+    logger.info('Loading {} month table...'.format(table_name))
+    if columns=='all':
+        #Since the table contains a geom column, you need to subselect columns
+        #to load otherwise pandas will complain
+        cols = columns_for_table_in_schema(con, table_name, current_schema)
+        valid_cols = filter(lambda x: x[1]!= 'USER-DEFINED', cols)
+        cols_to_load = [x[0] for x in valid_cols]
+    #If the user passed and array in the columns parameter, only
+    #select those columns
+    else:
+        cols_to_load = columns
+
     df = pd.read_sql_table(table_name, e,
                             schema=current_schema,
-                            columns=valid_cols_names)
+                            columns=cols_to_load)
     return df
 
 
