@@ -69,7 +69,7 @@ models:
 
 #For each model you select, the pipeline will
 #train a bunch of models, see grid_values for more
-grid_size: 'small' #small, medium or big
+grid_size: 'big' #small, medium or big
 
 ############################
 # Experiment name          #
@@ -79,4 +79,4 @@ grid_size: 'small' #small, medium or big
 #in both case is optional. If you are using mongo, this will just simpy add a new
 #key, this is useful for comments. If you are pickling results, this will be a prefix
 #in your pkl files
-experiment_name: 'small grid. most data. all features. 2 years training. 1 year validation.'
+experiment_name: 'all_freq_features_3months_1000m'
