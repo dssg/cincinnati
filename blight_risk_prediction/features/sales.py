@@ -1,7 +1,7 @@
 import logging
 import logging.config
 from feature_utils import load_inspections_address_nmonths_table, compute_frequency_features
-from feature_utils import format_column_names
+from feature_utils import format_column_names, group_and_count_from_db
 from dstools.config import load
 #Config logger
 logging.config.dictConfig(load('logger_config.yaml'))
@@ -32,7 +32,8 @@ def make_sales_features(con, n_months, max_dist):
     #More complex features could combine the distance value
     #as well as interacting features
     logger.info('Computing distance features for {}'.format(dataset))
-    freq = compute_frequency_features(df, columns='usecode')
+    #freq = compute_frequency_features(df, columns='usecode')
+    freq = group_and_count_from_db(con, dataset, n_months, max_dist)
     #Rename columns to avoid spaces and capital letters
     freq.columns = format_column_names(freq.columns)
     return freq
