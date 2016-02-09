@@ -54,16 +54,16 @@ features:
 #See grid_values.py for supported models
 #Use valid scikit-learn classes, provide the full path to the class
 models:
-  - 'sklearn.ensemble.AdaBoostClassifier'
+#  - 'sklearn.ensemble.AdaBoostClassifier'
   - 'sklearn.ensemble.RandomForestClassifier'
-  - 'sklearn.ensemble.ExtraTreesClassifier'
-  - 'sklearn.ensemble.GradientBoostingClassifier'
-  - 'sklearn.linear_model.LogisticRegression'
-  - 'sklearn.svm.SVC'
+#  - 'sklearn.ensemble.ExtraTreesClassifier'
+#  - 'sklearn.ensemble.GradientBoostingClassifier'
+#  - 'sklearn.linear_model.LogisticRegression'
+#  - 'sklearn.svm.SVC'
 
 #For each model you select, the pipeline will
 #train a bunch of models, see grid_values for more
-grid_size: 'big' #small, medium or big
+grid_size: 'small' #small, medium or big
 
 ############################
 # Experiment name          #
