@@ -130,6 +130,17 @@ def load_inspections_latlong_nmonths_table(con, dataset, date_column,
                             'inspections_latlong_xmonths.template.sql',
                             columns)
 
+def group_and_count_from_db(con, dataset, n_months, max_dist):
+    table_name = ('insp2{dataset}_{n_months}months'
+                  '_{max_dist}m').format(dataset=dataset,
+                                         n_months=n_months,
+                                         max_dist=max_dist)
+    q = ('SELECT parcel_id, inspection_date, COUNT(*) AS total '
+         'FROM %(table_name)s '
+         'GROUP BY parcel_id, inspection_date;')
+    df = pd.read_sql_(q, e, params={'table_name':table_name})
+    return df
+
 
 def compute_frequency_features(df, columns,
                                ids=['parcel_id', 'inspection_date'],
