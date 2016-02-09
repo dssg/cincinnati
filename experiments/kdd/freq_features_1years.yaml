@@ -4,7 +4,7 @@
 ##################################################################
 
 # Temporal stuff
-start_date: '01Jan2009'    #train only on inspections after this date
+start_date: '01Jan2013'    #train only on inspections after this date
 fake_today: '31Dec2013'
 validation_window: '1Year'  # Or '1Month'
 
@@ -53,16 +53,16 @@ features:
 #See grid_values.py for supported models
 #Use valid scikit-learn classes, provide the full path to the class
 models:
- # - 'sklearn.ensemble.AdaBoostClassifier'
+  - 'sklearn.ensemble.AdaBoostClassifier'
   - 'sklearn.ensemble.RandomForestClassifier'
- # - 'sklearn.ensemble.ExtraTreesClassifier'
- # - 'sklearn.ensemble.GradientBoostingClassifier'
- # - 'sklearn.linear_model.LogisticRegression'
- # - 'sklearn.svm.SVC'
+  - 'sklearn.ensemble.ExtraTreesClassifier'
+  - 'sklearn.ensemble.GradientBoostingClassifier'
+  - 'sklearn.linear_model.LogisticRegression'
+  - 'sklearn.svm.SVC'
 
 #For each model you select, the pipeline will
 #train a bunch of models, see grid_values for more
-grid_size: 'small' #small, medium or big
+grid_size: 'big' #small, medium or big
 
 ############################
 # Experiment name          #
@@ -72,4 +72,4 @@ grid_size: 'small' #small, medium or big
 #in both case is optional. If you are using mongo, this will just simpy add a new
 #key, this is useful for comments. If you are pickling results, this will be a prefix
 #in your pkl files
-experiment_name: 'freq_features_5years'
+experiment_name: 'freq_features_1years'
