@@ -136,9 +136,9 @@ def group_and_count_from_db(con, dataset, n_months, max_dist):
                                          n_months=n_months,
                                          max_dist=max_dist)
     q = ('SELECT parcel_id, inspection_date, COUNT(*) AS total '
-         'FROM %(table_name)s '
-         'GROUP BY parcel_id, inspection_date;')
-    df = pd.read_sql_(q, e, params={'table_name':table_name})
+         'FROM {} '
+         'GROUP BY parcel_id, inspection_date;').format(table_name)
+    df = pd.read_sql(q, con, index_col=['parcel_id', 'inspection_date'])
     return df
 
 
