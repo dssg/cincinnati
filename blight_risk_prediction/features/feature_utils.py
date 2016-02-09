@@ -120,14 +120,14 @@ def load_inspections_address_nmonths_table(con, dataset, date_column,
                                            n_months, max_dist, columns):
     return load_nmonths_table_from_template(con, dataset, date_column,
                             n_months, max_dist,
-                            template='inspections_address_xmonths.template.sql'
+                            'inspections_address_xmonths.template.sql',
                             columns)
 
 def load_inspections_latlong_nmonths_table(con, dataset, date_column,
                                            n_months, max_dist, columns):
     return load_nmonths_table_from_template(con, dataset, date_column,
                             n_months, max_dist,
-                            template='inspections_latlong_xmonths.template.sql',
+                            'inspections_latlong_xmonths.template.sql',
                             columns)
 
 def group_and_count_from_db(con, dataset, n_months, max_dist):
@@ -136,9 +136,9 @@ def group_and_count_from_db(con, dataset, n_months, max_dist):
                                          n_months=n_months,
                                          max_dist=max_dist)
     q = ('SELECT parcel_id, inspection_date, COUNT(*) AS total '
-         'FROM %(table_name)s '
-         'GROUP BY parcel_id, inspection_date;')
-    df = pd.read_sql_(q, e, params={'table_name':table_name})
+         'FROM {} '
+         'GROUP BY parcel_id, inspection_date;').format(table_name)
+    df = pd.read_sql(q, con, index_col=['parcel_id', 'inspection_date'])
     return df
 
 

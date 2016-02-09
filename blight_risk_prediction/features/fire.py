@@ -23,16 +23,17 @@ def make_fire_features(con, n_months, max_dist):
     date_column = 'date'
 
     #Load data with events that happened before x months of inspection database
-    df = load_inspections_address_nmonths_table(con, dataset, date_column,
-                                                n_months=n_months,
-                                                max_dist=max_dist,
-                                                columns=['inspection_date', 
-                                                         'parcel_id', 'signal'])
+    #df = load_inspections_address_nmonths_table(con, dataset, date_column,
+    #                                            n_months=n_months,
+    #                                            max_dist=max_dist,
+    #                                            columns=['inspection_date', 
+    #                                                     'parcel_id', 'signal'])
     #Use the recently created table to compute features.
     #Group rows by parcel_id and inspection_date
     #For now, just perform counts on the categorical variables
     #More complex features could combine the distance value
     #as well as interacting features
+    #freq = df.groupby(['inspection_date', 'parcel_id']).size()
     logger.info('Computing distance features for {}'.format(dataset))
     freq = group_and_count_from_db(con, dataset, n_months, max_dist)
     #freq = compute_frequency_features(df, columns='signal')
