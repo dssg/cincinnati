@@ -34,7 +34,8 @@ def make_fire_features(con, n_months, max_dist):
     #More complex features could combine the distance value
     #as well as interacting features
     logger.info('Computing distance features for {}'.format(dataset))
-    freq = compute_frequency_features(df, columns='signal')
+    freq = group_and_count_from_db(con, dataset, n_months, max_dist)
+    #freq = compute_frequency_features(df, columns='signal')
     #Rename columns to avoid spaces and capital letters
     freq.columns = format_column_names(freq.columns)
     return freq
