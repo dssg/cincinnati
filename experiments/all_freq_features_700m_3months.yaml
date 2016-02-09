@@ -42,7 +42,7 @@ features:
     #Spatio temporal features from the permits data
     - permits_700m_3months.total
     #Census aggregation features: housing density, rates per household
-    - census_2010.%
+    - census_2010.rate_%
     #Named entities: count of years in a given period of time that the
     #was owned by a person, government institution or company
     - names_entities.%
