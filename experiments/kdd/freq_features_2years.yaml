@@ -63,7 +63,7 @@ models:
 
 #For each model you select, the pipeline will
 #train a bunch of models, see grid_values for more
-grid_size: 'big' #small, medium or big
+grid_size: 'small' #small, medium or big
 
 ############################
 # Experiment name          #
