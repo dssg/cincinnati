@@ -1,7 +1,7 @@
 import logging
 import logging.config
 from feature_utils import make_inspections_latlong_nmonths_table, compute_frequency_features
-from feature_utils import format_column_names
+from feature_utils import format_column_names, group_and_count_from_db
 from dstools.config import load
 #Config logger
 logging.config.dictConfig(load('logger_config.yaml'))
