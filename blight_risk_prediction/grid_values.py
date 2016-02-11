@@ -109,3 +109,12 @@ small = {
         'learning_rate' : [0.05,0.1],
     }
 }
+
+single = {
+    "sklearn.ensemble.RandomForestClassifier": {
+        'n_estimators': [1000],
+        'max_depth': [100],
+        'max_features': ['sqrt'],
+        'min_samples_split': ['entropy']
+    }
+}
