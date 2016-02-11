@@ -1,6 +1,6 @@
 import logging
 import logging.config
-from feature_utils import load_inspections_address_nmonths_table, compute_frequency_features
+from feature_utils import make_inspections_address_nmonths_table, compute_frequency_features
 from feature_utils import format_column_names, group_and_count_from_db
 from dstools.config import load
 #Config logger
