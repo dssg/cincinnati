@@ -22,14 +22,11 @@ def make_fire_features(con, n_months, max_dist):
     dataset = 'fire'
     date_column = 'date'
 
-    #Load data with events that happened before x months of inspection database
-    df = load_inspections_address_nmonths_table(con, dataset, date_column,
+    make_inspections_address_nmonths_table(con, dataset, date_column,
                                                 n_months=n_months,
-                                                max_dist=max_dist,
-                                                columns=['inspection_date', 
-                                                         'parcel_id', 'signal'])
+                                                max_dist=max_dist)
     logger.info('Computing distance features for {}'.format(dataset))
-    freq = compute_frequency_features(df, columns='signal')
+    freq = group_and_count_from_db(con, dataset, n_months, max_dist)
     #Rename columns to avoid spaces and capital letters
     freq.columns = format_column_names(freq.columns)
     return freq

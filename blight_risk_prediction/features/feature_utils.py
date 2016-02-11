@@ -51,6 +51,27 @@ def columns_for_table_in_schema(con, table, schema):
     #names = [t[0] for t in tuples]
     return tuples
 
+def make_load_nmonths_table_from_template(con, dataset, date_column,
+                                     n_months, max_dist,
+                                     template):
+    path_to_template = os.path.join(os.environ['ROOT_FOLDER'],
+                        'blight_risk_prediction',
+                        'features',
+                        template)
+    #Load template with SQL statement
+    with open(path_to_template, 'r') as f:
+        sql_script = Template(f.read())
+    #Replace values in template
+    sql_script = sql_script.substitute(TABLE_NAME=table_name,
+                                       DATASET=dataset,
+                                       DATE_COLUMN=date_column,
+                                       N_MONTHS=n_months,
+                                       MAX_DIST=max_dist)
+    #Run the code using the connection
+    #this is going to take a while
+    con.cursor().execute(sql_script)
+    #Commit changes to db
+    con.commit()
 
 def load_nmonths_table_from_template(con, dataset, date_column,
                                      n_months, max_dist,
