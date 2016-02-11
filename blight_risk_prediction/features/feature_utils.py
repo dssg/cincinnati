@@ -51,6 +51,7 @@ def columns_for_table_in_schema(con, table, schema):
     #names = [t[0] for t in tuples]
     return tuples
 
+
 def load_nmonths_table_from_template(con, dataset, date_column,
                                      n_months, max_dist,
                                      template, columns='all'):
