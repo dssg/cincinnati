@@ -22,9 +22,10 @@ def make_three11_features(con, n_months, max_dist):
     dataset = 'three11'
     date_column = 'requested_datetime'
 
-    make_inspections_address_nmonths_table(con, dataset, date_column,
+    make_inspections_latlong_nmonths_table(con, dataset, date_column,
                                                 n_months=n_months,
-                                                max_dist=max_dist)
+                                                max_dist=max_dist,
+                                                load=False)
     logger.info('Computing distance features for {}'.format(dataset))
     freq = group_and_count_from_db(con, dataset, n_months, max_dist)
     #Rename columns to avoid spaces and capital letters

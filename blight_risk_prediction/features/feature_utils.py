@@ -51,31 +51,9 @@ def columns_for_table_in_schema(con, table, schema):
     #names = [t[0] for t in tuples]
     return tuples
 
-def make_load_nmonths_table_from_template(con, dataset, date_column,
+def make_nmonths_table_from_template(con, dataset, date_column,
                                      n_months, max_dist,
-                                     template):
-    path_to_template = os.path.join(os.environ['ROOT_FOLDER'],
-                        'blight_risk_prediction',
-                        'features',
-                        template)
-    #Load template with SQL statement
-    with open(path_to_template, 'r') as f:
-        sql_script = Template(f.read())
-    #Replace values in template
-    sql_script = sql_script.substitute(TABLE_NAME=table_name,
-                                       DATASET=dataset,
-                                       DATE_COLUMN=date_column,
-                                       N_MONTHS=n_months,
-                                       MAX_DIST=max_dist)
-    #Run the code using the connection
-    #this is going to take a while
-    con.cursor().execute(sql_script)
-    #Commit changes to db
-    con.commit()
-
-def load_nmonths_table_from_template(con, dataset, date_column,
-                                     n_months, max_dist,
-                                     template, columns='all'):
+                                     template, load=False,  columns='all'):
     '''
         Load inspections table matched with events that happened X months
         before. Returns pandas dataframe with the data loaded
@@ -132,25 +110,26 @@ def load_nmonths_table_from_template(con, dataset, date_column,
     else:
         cols_to_load = columns
 
-    df = pd.read_sql_table(table_name, e,
+    if load:
+        df = pd.read_sql_table(table_name, e,
                             schema=current_schema,
                             columns=cols_to_load)
-    return df
+        return df
 
 
-def load_inspections_address_nmonths_table(con, dataset, date_column,
-                                           n_months, max_dist, columns):
+def make_inspections_address_nmonths_table(con, dataset, date_column,
+                                           n_months, max_dist, load, columns):
     return load_nmonths_table_from_template(con, dataset, date_column,
                             n_months, max_dist,
                             'inspections_address_xmonths.template.sql',
-                            columns)
+                            load, columns)
 
-def load_inspections_latlong_nmonths_table(con, dataset, date_column,
-                                           n_months, max_dist, columns):
+def make_inspections_latlong_nmonths_table(con, dataset, date_column,
+                                           n_months, max_dist, load, columns):
     return load_nmonths_table_from_template(con, dataset, date_column,
                             n_months, max_dist,
                             'inspections_latlong_xmonths.template.sql',
-                            columns)
+                            load, columns)
 
 def group_and_count_from_db(con, dataset, n_months, max_dist):
     table_name = ('insp2{dataset}_{n_months}months'
