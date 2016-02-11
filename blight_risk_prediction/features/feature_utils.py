@@ -120,7 +120,7 @@ def make_nmonths_table_from_template(con, dataset, date_column,
 def make_inspections_address_nmonths_table(con, dataset, date_column,
                                            n_months, max_dist, load=False,
                                            columns='all'):
-    return load_nmonths_table_from_template(con, dataset, date_column,
+    return make_nmonths_table_from_template(con, dataset, date_column,
                             n_months, max_dist,
                             'inspections_address_xmonths.template.sql',
                             load, columns)
@@ -128,7 +128,7 @@ def make_inspections_address_nmonths_table(con, dataset, date_column,
 def make_inspections_latlong_nmonths_table(con, dataset, date_column,
                                            n_months, max_dist, load=False,
                                            columns='all'):
-    return load_nmonths_table_from_template(con, dataset, date_column,
+    return make_nmonths_table_from_template(con, dataset, date_column,
                             n_months, max_dist,
                             'inspections_latlong_xmonths.template.sql',
                             load, columns)
