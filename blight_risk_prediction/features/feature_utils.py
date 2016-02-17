@@ -97,9 +97,13 @@ def make_nmonths_table_from_template(con, dataset, date_column,
         #delete it, we don't need it here
         cols = columns_for_table_in_schema(con, table_name, current_schema)
         if ('geom', 'USER-DEFINED') in cols:
-            q = ('ALTER TABLE %(table_name)s '
-                 'DROP COLUMN geom')
-            cur.execute(q, {'table_name':table_name})
+            #Important: this is not prouction ready since it's
+            #vulnerable to SQL injection, I haven't found any solution
+            #to dynamically pass table names as parameters in psycopg2
+            #it seems like the only solution is to prevent SQL injection
+            #in the code
+            q = ('ALTER TABLE {} DROP COLUMN geom').format(table_name)
+            cur.execute(q)
             logger.info('Table {} has a PostGIS column, deleting...'.format(table_name))
 
     else:
