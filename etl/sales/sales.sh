@@ -34,8 +34,4 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/sales.sql"
 #Upload data to the database
 cat "$TMP_FOLDER/sales_db.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.sales FROM STDIN  WITH CSV HEADER DELIMITER ',';"
 
-#Create index, this is going to speed up joins for feature generation
-#when looking for events that happened shortly before an inspection
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE INDEX ON sales (datesale);"
-
 echo 'Done creating sales table!'

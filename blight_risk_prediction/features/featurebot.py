@@ -54,6 +54,7 @@ existing_features = [FeatureToGenerate("tax", tax.make_tax_features),
                                            fire.make_fire_features),
                          FeatureToGenerate("sales",
                                            sales.make_sales_features)]
+
 class SchemaMissing():
     def __init__(self, schema_name):
         self.schema_name = schema_name
@@ -146,7 +147,6 @@ def generate_features(features_to_generate, n_months, max_dist):
         logging.debug("{} table has {} rows".format(table_to_save, 
                                                 len(feature_data)))
 
-
 def generate_features_for_fake_inspection(features_to_generate, inspection_date):
     """
     Generate fake inspections and features for some fake inspection_date
@@ -199,7 +199,6 @@ def generate_features_for_fake_inspection(features_to_generate, inspection_date)
         feature_data.to_sql(feature.table, engine, chunksize=50000,
                             if_exists='replace', index=True, schema=schema)
         logging.debug("... table has {} rows".format(len(feature_data)))
-
 
 if __name__ == '__main__':
     #Get the table names for existing features
