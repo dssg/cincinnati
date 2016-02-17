@@ -135,3 +135,17 @@ CREATE VIEW inspections_views.events_parcel_id AS
     events.event
    FROM inspections_views.events AS events
    JOIN inspections_views.number_key2parcel_no AS parcel ON events.number_key = parcel.number_key;
+
+--Parcel id to coordinate
+CREATE VIEW shape_files.parcel2lat_long AS(
+  SELECT parcelid AS parcel_id, ST_Y(ST_Transform(ST_Centroid(geom), 4326)) AS latitude, ST_X(ST_Transform(ST_Centroid(geom), 4326)) AS longitude
+  FROM shape_files.parcels_cincy
+);
+
+--Visualize inspections and violations over the years
+CREATE VIEW inspections_views.events_and_lat_long AS(
+  SELECT events.parcel_no AS parcel_id, events.date, events.event, geo.latitude, geo.longitude
+  FROM inspections_views.events_parcel_id AS events
+  JOIN shape_files.parcel2lat_long AS geo
+  ON events.parcel_no=geo.parcel_id
+);
