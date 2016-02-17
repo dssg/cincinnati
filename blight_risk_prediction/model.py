@@ -228,7 +228,8 @@ def main():
     models = [a_grid for a_model_grid in grids for a_grid in a_model_grid]
 
     # fit each model for all of these
-    for model in models:
+    for idx, model in enumerate(models):
+
         #Try to run in parallel if possible
         if hasattr(model, 'n_jobs'):
             model.set_params(n_jobs=args.n_jobs)
@@ -240,7 +241,9 @@ def main():
         timestamp = datetime.datetime.now().isoformat()
 
         # train
-        logger.info("Training {}".format(model))
+        logger.info("Training {} ({} out of {})".format(model,
+                                                        idx+1,
+                                                        len(models)))
         model.fit(train.x, train.y)
 
         # predict
