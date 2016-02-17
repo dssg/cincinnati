@@ -89,9 +89,19 @@ def make_nmonths_table_from_template(con, dataset, date_column,
                                            MAX_DIST=max_dist)
         #Run the code using the connection
         #this is going to take a while
-        con.cursor().execute(sql_script)
+        cur.execute(sql_script)
         #Commit changes to db
         con.commit()
+
+        #If table created has a geom column which type USER DEFINED,
+        #delete it, we don't need it here
+        cols = columns_for_table_in_schema(con, table_name, current_schema)
+        if ('geom', 'USER-DEFINED') in cols:
+            q = ('ALTER TABLE %(table_name)s '
+                 'DROP COLUMN geom')
+            cur.execute(q, {'table_name':table_name})
+            logger.info('Table {} has a PostGIS column, deleting...'.format(table_name))
+
     else:
         logger.info('Table {} already exists. Skipping...'.format(table_name))
 
