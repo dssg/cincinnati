@@ -106,6 +106,10 @@ For example, to load the cagis data, run:
 
 `bash etl/cagis/cagis.sh`
 
+##Geocoding
+
+After loading the data to the database using the [etl](etl/) folder, use the `geocode.sh` script to perform geocoding. See [bulk_geocoder](bulk_geocoder/) folder for more information.
+
 ##Feature generation
 
 Once you have uploaded all the data, you will be able to generate features for the model, for more information run:
