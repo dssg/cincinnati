@@ -229,7 +229,6 @@ def main():
 
     # fit each model for all of these
     for idx, model in enumerate(models):
-
         #Try to run in parallel if possible
         if hasattr(model, 'n_jobs'):
             model.set_params(n_jobs=args.n_jobs)
@@ -241,7 +240,7 @@ def main():
         timestamp = datetime.datetime.now().isoformat()
 
         # train
-        logger.info("Training {} ({} out of {})".format(model,
+        logger.info("{} out of {} - Training {}".format(model,
                                                         idx+1,
                                                         len(models)))
         model.fit(train.x, train.y)

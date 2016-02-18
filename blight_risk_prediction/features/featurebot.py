@@ -54,6 +54,7 @@ existing_features = [FeatureToGenerate("tax", tax.make_tax_features),
                                            fire.make_fire_features),
                          FeatureToGenerate("sales",
                                            sales.make_sales_features)]
+
 class SchemaMissing():
     def __init__(self, schema_name):
         self.schema_name = schema_name
@@ -68,17 +69,22 @@ def existing_feature_schemas():
     schemas = [s for s in schemas.values if s.startswith("features")]
     return schemas
 
-def generate_features(features_to_generate, n_months, max_dist):
+def generate_features(features_to_generate, n_months, max_dist,
+                     inspection_date=None):
     """
     Generate labels and features for all inspections
     in the inspections database.
 
-    The features and labels will be stored in schema
-    "features". This schema must exist in the database before calling
-    this function (for security reasons).
-    :return:
+    If inspection_date is passed, features will be generated as if
+    an inspection will occur on that day
     """
-    schema = "features"
+    #select schema
+    #depending on the value of inspection date
+    if inspection_date is None:
+        schema = "features"
+    else:
+        schema = "features_{}".format(inspection_date.strftime('%d%b%Y')).lower()
+
 
     # use this engine for all data storing (somehow does
     # not work with the raw connection we create below)
@@ -89,6 +95,20 @@ def generate_features(features_to_generate, n_months, max_dist):
     # this makes sure that we grab the "inspections_parcels"
     # table from the correct schema in all feature creators
     con = engine.raw_connection()
+
+    if schema not in existing_feature_schemas():
+        #Create schema here
+        cur = con.cursor()
+        cur.execute("CREATE  SCHEMA %s;" % schema)
+        con.commit()
+        cur.close()
+        logging.info('Creating schema %s' % schema)
+    else:
+        logging.info('Using existing schema')
+
+    #Note on SQL injection: schema is either features or features_DATE
+    #date is generated using datetime.datetime.strptime, so if somebody
+    #tries to inject SQL there, it will fail
     con.cursor().execute("SET SCHEMA '{}'".format(schema))
 
     #Print the current schema by reading it from the db
@@ -97,8 +117,7 @@ def generate_features(features_to_generate, n_months, max_dist):
     current_schema = cur.fetchone()[0]
     logger.info(('Starting feature generation. '
                  'Loading data from {} schema. '
-                 'Generating spatiotemporal features '
-                 'for {} months.').format(current_schema, n_months))
+                 'n_monts={}. max_dist={}').format(current_schema, n_months, max_dist))
     #Get existing tables
     existing_tables =  tables_in_schema(con, schema)
     
@@ -108,7 +127,12 @@ def generate_features(features_to_generate, n_months, max_dist):
     # is the same for all parcels
     if 'parcels_inspections' not in existing_tables:
         logger.info('Creating parcels_inspections table...')
-        inspections = outcome.generate_labels()
+
+        if inspection_date is None:
+            inspections = outcome.generate_labels()
+        else:
+            inspections = outcome.make_fake_inspections_all_parcels_cincy(inspection_date)
+
         inspections.to_sql("parcels_inspections", engine, chunksize=50000,
                       if_exists='fail', index=False, schema=schema)
         logging.debug("... table has {} rows".format(len(inspections)))
@@ -146,61 +170,6 @@ def generate_features(features_to_generate, n_months, max_dist):
 			    dtype={'inspection_date': types.TIMESTAMP(timezone=False)})
         logging.debug("{} table has {} rows".format(table_to_save, 
                                                 len(feature_data)))
-
-
-def generate_features_for_fake_inspection(features_to_generate, inspection_date):
-    """
-    Generate fake inspections and features for some fake inspection_date
-
-    The features and labels will be stored in schema "features_dayMonthYear"
-    (according to the inspection date, e.g.
-    features_01Aug2015.
-    :return:
-    """
-    # use this engine for all data storing (somehow does not work
-    # with the raw connection we create below)
-    engine = create_engine(uri)
-
-    # all querying is done using a raw connection. in this
-    # connection set to use the relevant schema
-    # this makes sure that we grab the "inspections_parcels"
-    # table from the correct schema in all feature creators
-    con = engine.raw_connection()
-
-    schema = "features_{}".format(inspection_date.strftime('%d%b%Y')).lower()
-    if schema not in existing_feature_schemas():
-        #Create schema here
-        cur = con.cursor()
-        cur.execute("CREATE  SCHEMA %s;" % schema)
-        con.commit()
-        cur.close()
-        print 'Creating schema %s' % schema
-    else:
-        print 'Using existing schema'
-
-    con.cursor().execute("SET SCHEMA '{}'".format(schema))
-
-    # make a new table that contains one row for every parcel in Cincinnati
-    # this table has two columns: parcel_id, inspection_date
-    # inspection_date is the one give as a parameter and is the same
-    # for all parcels
-    logging.info("Generating inspections table")
-    inspections = outcome.make_fake_inspections_all_parcels_cincy(inspection_date)
-    inspections.to_sql("parcels_inspections", engine, chunksize=50000,
-                      if_exists='replace', index=False, schema=schema)
-    logging.debug("... table has {} rows".format(len(inspections)))
-
-    # make features and store in database
-    # some features depend on timestamps, e.g. crime in the last year, 
-    # the temporal features take the timestamp from the parcels_inspections
-    # table in the same schema and compute features based on that date
-    for feature in features_to_generate:
-        logging.info("Generating {} features".format(feature.table))
-        feature_data = feature.generator_function(con)
-        feature_data.to_sql(feature.table, engine, chunksize=50000,
-                            if_exists='replace', index=True, schema=schema)
-        logging.debug("... table has {} rows".format(len(feature_data)))
-
 
 if __name__ == '__main__':
     #Get the table names for existing features
@@ -245,11 +214,5 @@ if __name__ == '__main__':
     selected  = [t.table for t in selected_features]
     selected = reduce(lambda x,y: x+", "+y, selected) 
     print "Selected features: %s" % selected
-
-    if args.date:
-        # to generate features for if an inspection happens at date d
-        d = datetime.datetime.strptime(args.date, '%d%b%Y')
-        generate_features_for_fake_inspection(selected_features, d)
-    else:
-        # to generate features
-        generate_features(selected_features, args.months, args.maxdist)
+    d = datetime.datetime.strptime(args.date, '%d%b%Y') if args.date is not None else None
+    generate_features(selected_features, args.months, args.maxdist, d)
