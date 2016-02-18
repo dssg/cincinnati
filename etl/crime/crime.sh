@@ -29,7 +29,8 @@ xlsx2csv -d x09 -s 1 "$CRIME_CPD_FOLDER/CRIME 2013-2014.xlsx" > "$TMP_FOLDER/cri
 xlsx2csv -d x09 -s 2 "$CRIME_CPD_FOLDER/CRIME 2013-2014.xlsx" > "$TMP_FOLDER/crime_2014.csv"
 
 #Put all files in a single CSV file
-cat $TMP_FOLDER/crime_*.csv > "$TMP_FOLDER/2004-2014.csv"
+echo 'Concatenating crime_20*.csv into a single one...'
+cat $TMP_FOLDER/crime_20*.csv > "$TMP_FOLDER/2004-2014.csv"
 
 #Perform cleaning on the  CSV file
 python "$ROOT_FOLDER/etl/crime/clean.py" "$TMP_FOLDER/2004-2014.csv" > "$TMP_FOLDER/2004-2014_cleaned.csv"
