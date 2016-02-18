@@ -104,8 +104,8 @@ def make_nmonths_table_from_template(con, dataset, date_column,
             #in the code
             q = ('ALTER TABLE {} DROP COLUMN geom').format(table_name)
             cur.execute(q)
+            con.commit()
             logger.info('Table {} has a PostGIS column, deleting...'.format(table_name))
-
     else:
         logger.info('Table {} already exists. Skipping...'.format(table_name))
 
