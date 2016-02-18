@@ -50,7 +50,7 @@ existing_features = [FeatureToGenerate("tax", tax.make_tax_features),
                                            permits.make_permits_features),
                          FeatureToGenerate("crime",
                                            crime.make_crime_features),
-			             FeatureToGenerate("fire",
+			                   FeatureToGenerate("fire",
                                            fire.make_fire_features),
                          FeatureToGenerate("sales",
                                            sales.make_sales_features)]

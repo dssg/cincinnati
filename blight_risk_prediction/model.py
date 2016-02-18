@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-import matplotlib as mpl
-mpl.use('Agg')
 import pandas as pd
 import datetime
 import yaml
@@ -20,6 +18,7 @@ import argparse
 from dstools.config import main as cfg_main
 from dstools.config import load
 from sklearn_evaluation.Logger import Logger
+from sklearn_evaluation.metrics import precision_at
 from grid_generator import grid_from_class
 
 """
@@ -143,17 +142,13 @@ def output_evaluation_statistics(test, predictions):
     evaluation.print_model_statistics(test.y, predictions_binary)
     evaluation.print_confusion_matrix(test.y, predictions_binary)
 
-    precision1 = evaluation.precision_at_x_percent(test.y, predictions,
-                                                   x_percent=0.01)
+    precision1 = precision_at(test.y, predictions, 0.01)
     logger.debug("Precision at 1%: {} (probability cutoff {})".format(
-                 round(precision1[1], 2), precision1[0]))
-    precision10 = evaluation.precision_at_x_percent(test.y, predictions,
-                                                    x_percent=0.1)
+                 round(precision1[0], 2), precision1[1]))
+    precision10 = precision_at(test.y, predictions, 0.1)
     logger.debug("Precision at 10%: {} (probability cutoff {})".format(
-                 round(precision10[1], 2), precision10[0]))
-
-    evaluation.plot_precision_at_varying_percent(test.y, predictions)
-
+                 round(precision10[0], 2), precision10[1]))
+    #evaluation.plot_precision_at_varying_percent(test.y, predictions)
 
 def get_feature_importances(model):
     try:
@@ -178,8 +173,8 @@ def save_results(pkl_file, config, test, predictions, feature_importances, model
         logger_collection = cfg_main['logger']['collection']
         mongo_logger = Logger(logger_uri, logger_db, logger_collection)
         #Compute some statistics to log
-        cutoff_at_1, prec_at_1 = evaluation.precision_at_x_percent(test.y, predictions, x_percent=0.01)
-        cutoff_at_10, prec_at_10 = evaluation.precision_at_x_percent(test.y, predictions, x_percent=0.1)
+        prec_at_1, cutoff_at_1 = precision_at(test.y, predictions, 0.01)
+        prec_at_10, cutoff_at_10 = precision_at(test.y, predictions, 0.1)
         #Add the name of the experiment if available
         experiment_name = config["experiment_name"] if config["experiment_name"] else None
         #Sending model will log model name, parameters and datetime
