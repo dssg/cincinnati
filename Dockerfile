@@ -77,9 +77,6 @@ RUN pip install -r /tmp/requirements.txt
 
 #Install Python3 environment with some dependencies (this is required to run the NER code)
 #https://www.continuum.io/content/python-3-support-anaconda
-
-
-
 RUN conda create -n py3 python=3 pandas sqlalchemy pyyaml psycopg2 pip
 RUN source activate py3
 RUN pip install dstools

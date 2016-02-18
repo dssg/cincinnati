@@ -1,11 +1,7 @@
 #!/usr/bin/env python
-
 import numpy as np
 import pandas as pd
-
-
 import colmap
-
 
 def make_owner_features(db_connection):
     """
@@ -45,4 +41,5 @@ def make_owner_features(db_connection):
         except:
             df.ix[indices_this_year, "owner_ner"] = np.nan
 
-    return df
+    df.set_index(['inspection_date', 'parcel_id'], inplace=True)
+    return df['owner_ner']
