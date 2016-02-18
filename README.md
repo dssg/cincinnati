@@ -108,13 +108,17 @@ For example, to load the cagis data, run:
 
 ##Feature generation
 
-Once you have uploaded all the data, you will be able to generate features for the model, to do that run:
+Once you have uploaded all the data, you will be able to generate features for the model, for more information run:
 
-`python -m blight_risk_prediction.features.featurebot`
+`./blight_risk_prediction/features/featurebot.py --help`
 
 See [blight_risk_prediction/](blight_risk_prediction/) folder for more details on how to generate features.
  
 ##Modeling
+
+For information on hwo to run models, run:
+
+`./blight_risk_prediction/model.py --help`
 
 ###Logging model results
 
@@ -134,14 +138,6 @@ The recommended way is to use MongoDB, since it's the most complete one.
 
 Before training a model, efit the `default.yaml` configuration file to select which model to train and features to include. Documentation is on the file.
 
-###Run the model
-
-To run a model using the `default.yaml` configuration file:
-
-    python -m blight_risk_prediction.model
-
-Run `python -m blight_risk_prediction.model --help`  to see other options available.
-
 ###Preparing results for a field test
 
 If the `prepare_field_test` in the configuration file, predictions such test will be saved on `$OUTPUT_FOLDER/field_test_predictions`. Make sure that folder exists.
@@ -155,4 +151,3 @@ If the `prepare_field_test` in the configuration file, predictions such test wil
 * postprocess - add details (e.g. address) about properties to predictions
 * targeting_priority - re-rank predictions according to some targeting priority
 * test - unit tests
-
