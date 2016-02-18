@@ -84,8 +84,6 @@ Once the image is ready, run it:
 
 Note that we are passing our three environment variables, and linking them to three folders inside the container. The purpose of the Docker container is to run code but not to store anything (not code and of course not data).
 
-We are also forwarding the 4000 from the container to the host, this port is used for the evaluation webapp.
-
 ##Setup your database
 
 The data is organized in different schemas, before you start loading any data, run the following script.
