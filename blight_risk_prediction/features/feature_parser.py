@@ -1,9 +1,9 @@
-#This script contains functions to parse
-#features specified in the configuration file
-#for the modeling step
 from dstools.config import main
 from psycopg2 import connect
 
+#Parameters in some of this functions are being passed in SQL queries,
+#this makes them vulverable to SQL injection, if this goes into production
+#local SQL verification will be needed
 
 def parse_feature_pattern(pattern):
     '''

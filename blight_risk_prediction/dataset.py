@@ -237,9 +237,9 @@ class FeatureLoader():
             #Log table name and timestamps selected
             logger.debug("GENERIC FUNCTION: Loading {} features for [{}, {})".format(table_name,
                                              self.start_date, self.end_date))
-            #SQL query to load features
-	        #CONCATENATING LIKE THIS IS REALLY REALLY BAD, THIS IS JUST A TMP FIX
-	        #I NEED TO REFACTOR THE WHOLE FILE
+            #This piece of code has some security concerns since it is
+            #vulnerable to SQL injection, if this goes into production
+            #it will need a local SQL verification
             query = ("SELECT feature.* "
                      "FROM "+table_name+"  AS feature "
                      "WHERE feature.inspection_date >= %(start_date)s "

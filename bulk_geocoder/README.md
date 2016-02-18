@@ -1,8 +1,9 @@
-#Geocoding
+# Geocoding
 
 There are two types of data that include location:
-    * Data with latitude and longitude (three11, permits)
-    * Data with address only (fire, sales, crime)
+
+*   Data with latitude and longitude (three11, permits)
+*   Data with address only (fire, sales, crime)
 
 For both groups we need to create PostGIS geometry columns. For datasets that already include latlong, the creation of PostGIS columns is done in their corresponding etl script.
 
