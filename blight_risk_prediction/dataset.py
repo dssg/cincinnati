@@ -18,8 +18,6 @@ from features.featurebot import \
     existing_feature_schemas, SchemaMissing
 from features.feature_parser import tables_and_columns_for_schema
 
-from sklearn import preprocessing
-
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
 
@@ -320,6 +318,9 @@ class Dataset():
         index = pd.MultiIndex.from_tuples(self.parcels, names=['parcel_id', 'inspection_date'])
         df.set_index(index, inplace=True)
         return df
+    def impute(self):
+        # impute missing feature values
+        self.x = util.mean_impute_frame(self.x)
 
 def get_dataset(schema, features, start_date, end_date, only_residential):
     start_date = start_date.strftime('%Y-%m-%d')
@@ -376,9 +377,6 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
     labels = dataset["viol_outcome"].values
     features = dataset.drop('viol_outcome', axis=1)
     parcels_inspections = dataset.index.values
-
-    # impute missing feature values
-    features = util.mean_impute_frame(features)
 
     logger.debug("Dataset has {} rows and {} features".format(
         len(labels), len(features.columns)))
