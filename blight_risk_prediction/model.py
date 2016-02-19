@@ -218,7 +218,7 @@ def main():
                     (field_test, 'field_test')]
         for data, name in datasets:
             if data is not None:
-                filename = '{}_{}'.format(config["experiment_name"], name)
+                filename = '{}_{}.csv'.format(config["experiment_name"], name)
                 df = data.to_df()
                 df.to_csv(os.path.join(path, filename))
             else:

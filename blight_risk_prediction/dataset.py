@@ -313,6 +313,12 @@ class Dataset():
         self.x = x
         self.y = y
         self.feature_names = feature_names
+    def to_df(self):
+        df = pd.DataFrame(self.x, columns=self.feature_names)
+        df['viol_outcome'] = self.y
+        index = pd.MultiIndex.from_tuples(self.parcels, names=['parcel_id', 'inspection_date'])
+	df.set_index(index, inplace=True)
+        return df
 
 
 def get_dataset(schema, features, start_date, end_date, only_residential):
