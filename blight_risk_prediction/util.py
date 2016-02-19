@@ -6,6 +6,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 import datetime
 
+logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
 
 years = ['2007', '2008', '2009', '2010', '2011',
