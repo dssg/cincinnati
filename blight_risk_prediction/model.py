@@ -227,15 +227,16 @@ def main():
                 logger.info('{} is None, skipping dump...'.format(name))
 
 
+    #Impute missing values (mean is the only strategy for now)
+    logger.info('Imputing values on traini and test...')
+    train.impute()
+    test.impute()
+
     # Scale features to zero mean and unit variance
     logger.info('Scaling train, test...')
     scaler = preprocessing.StandardScaler().fit(train.x)
     train.x = scaler.transform(train.x)
     test.x = scaler.transform(test.x)
-
-    #Impute missing values (mean is the only strategy for now)
-    logger.info('Imputing values on train...')
-    train.impute()
 
     #Get size of grids
     grid_size = config["grid_size"]
@@ -283,15 +284,16 @@ def main():
 
         # generate blight probabilities for field test
         if config["prepare_field_test"]:
+            #Impute missing values (mean is the only strategy for now)
+            logger.info('Imputing values on field_train and field_test...')
+            field_train.impute()
+            field_test.impute()
+            
             # Scale features to zero mean and unit variance
             logger.info('Scaling field_train, field_test...')
             scaler = preprocessing.StandardScaler().fit(field_train.x)
             field_train.x = scaler.transform(field_train.x)
             field_test.x = scaler.transform(field_test.x)
-
-            #Impute missing values (mean is the only strategy for now)
-            logger.info('Imputing values on field_train...')
-            field_train.impute()
 
             logger.info("Predicting for all cincinnati parcels ")
             model.fit(field_train.x, field_train.y)
