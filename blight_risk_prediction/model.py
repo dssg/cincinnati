@@ -10,7 +10,7 @@ import logging.config
 import copy
 from itertools import product
 import numpy as np
-from sklearn import linear_model, preprocessing, svm, ensemble
+from sklearn import linear_model, svm, ensemble
 import dataset, evaluation, util
 from features import feature_parser
 import argparse
@@ -224,6 +224,12 @@ def main():
             else:
                 logger.info('{} is None, skipping dump...'.format(name))
 
+    # Scale features to zero mean and unit variance
+    logger.info('Scaling train, test...')
+    scaler = preprocessing.StandardScaler().fit(train.x)
+    train.x = scaler.transform(train.x)
+    test.x = scaler.transform(test.x)
+
     #Get size of grids
     grid_size = config["grid_size"]
     #Get list of models selected
@@ -270,6 +276,12 @@ def main():
 
         # generate blight probabilities for field test
         if config["prepare_field_test"]:
+            # Scale features to zero mean and unit variance
+            logger.info('Scaling field_train, field_test...')
+            scaler = preprocessing.StandardScaler().fit(field_train.x)
+            field_train.x = scaler.transform(field_train.x)
+            field_test.x = scaler.transform(field_test.x)
+
             logger.info("Predicting for all cincinnati parcels ")
             model.fit(field_train.x, field_train.y)
 

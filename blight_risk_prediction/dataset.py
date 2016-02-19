@@ -18,6 +18,7 @@ from features.featurebot import \
     existing_feature_schemas, SchemaMissing
 from features.feature_parser import tables_and_columns_for_schema
 
+from sklearn import preprocessing
 
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
@@ -317,9 +318,8 @@ class Dataset():
         df = pd.DataFrame(self.x, columns=self.feature_names)
         df['viol_outcome'] = self.y
         index = pd.MultiIndex.from_tuples(self.parcels, names=['parcel_id', 'inspection_date'])
-	df.set_index(index, inplace=True)
+        df.set_index(index, inplace=True)
         return df
-
 
 def get_dataset(schema, features, start_date, end_date, only_residential):
     start_date = start_date.strftime('%Y-%m-%d')
