@@ -14,6 +14,7 @@ from sklearn import linear_model, svm, ensemble
 import dataset, evaluation, util
 from features import feature_parser
 import argparse
+from sklearn import preprocessing
 
 from dstools.config import main as cfg_main
 from dstools.config import load
@@ -205,6 +206,7 @@ def main():
     # datasets
     train, test, field_train, field_test = make_datasets(config)
 
+    
     # Dump datasets if dump option was selected
     if args.dump:
         logger.info('Dumping train, test, field_train and field_test')
@@ -224,12 +226,13 @@ def main():
             else:
                 logger.info('{} is None, skipping dump...'.format(name))
 
+
     # Scale features to zero mean and unit variance
     logger.info('Scaling train, test...')
     scaler = preprocessing.StandardScaler().fit(train.x)
     train.x = scaler.transform(train.x)
     test.x = scaler.transform(test.x)
-
+    
     #Get size of grids
     grid_size = config["grid_size"]
     #Get list of models selected
