@@ -228,7 +228,7 @@ def main():
 
 
     #Impute missing values (mean is the only strategy for now)
-    logger.info('Imputing values on traini and test...')
+    logger.info('Imputing values on train and test...')
     train.impute()
     test.impute()
 
@@ -332,9 +332,10 @@ if __name__ == '__main__':
                         help="Log results to MongoDB or pickle results. Defaults to mongo",
                         default='mongo')
     parser.add_argument("-d", "--dump", action="store_true",
-                        help=("Dump train and test sets (including indexes). "
-                              "Will be saved as "
-                              "$OUTPUT_FOLDER/dumps/[experiment_name]"))
+                        help=("Dump train and test sets (including indexes), "
+                              "before imputation and scaling. "
+                              "Output will be saved as "
+                              "$OUTPUT_FOLDER/dumps/[experiment_name]_[train/test]"))
     args = parser.parse_args()
 
     print ('Starting modeling pipeline, configuring models using %s '
