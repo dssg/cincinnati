@@ -94,11 +94,6 @@ def make_datasets(config):
         end_date=fake_today + validation_window,
         only_residential=only_residential)
 
-    # Scale features to zero mean and unit variance
-    scaler = preprocessing.StandardScaler().fit(train.x)
-    train.x = scaler.transform(train.x)
-    test.x = scaler.transform(test.x)
-
     field_train, field_test = None, None
 
     if config["prepare_field_test"]:
@@ -124,10 +119,6 @@ def make_datasets(config):
             features=features,
             fake_inspection_date=inspection_date,
             only_residential=only_residential)
-
-        scaler = preprocessing.StandardScaler().fit(field_train.x)
-        field_train.x = scaler.transform(field_train.x)
-        field_test.x = scaler.transform(field_test.x)
 
     return train, test, field_train, field_test
 
