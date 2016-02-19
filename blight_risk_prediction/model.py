@@ -213,6 +213,8 @@ def main():
 
     # datasets
     train, test, field_train, field_test = make_datasets(config)
+
+
     #Get size of grids
     grid_size = config["grid_size"]
     #Get list of models selected

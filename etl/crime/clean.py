@@ -25,7 +25,7 @@ with open(file_path) as f:
         # too much weird windows whitespace going on
         raw = r.split("\t")
         raw = [c.strip() for c in raw]
-
+	
         # some data conversions, will make sure that everything that should be int actually is
         converted = dict()
         converted["incident_number"] = raw[0]
