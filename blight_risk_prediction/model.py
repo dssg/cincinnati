@@ -232,7 +232,11 @@ def main():
     scaler = preprocessing.StandardScaler().fit(train.x)
     train.x = scaler.transform(train.x)
     test.x = scaler.transform(test.x)
-    
+
+    #Impute missing values (mean is the only strategy for now)
+    logger.info('Imputing values on train...')
+    train.impute()
+
     #Get size of grids
     grid_size = config["grid_size"]
     #Get list of models selected
@@ -284,6 +288,10 @@ def main():
             scaler = preprocessing.StandardScaler().fit(field_train.x)
             field_train.x = scaler.transform(field_train.x)
             field_test.x = scaler.transform(field_test.x)
+
+            #Impute missing values (mean is the only strategy for now)
+            logger.info('Imputing values on field_train...')
+            field_train.impute()
 
             logger.info("Predicting for all cincinnati parcels ")
             model.fit(field_train.x, field_train.y)
