@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sqlalchemy import create_engine
 import datetime
+from dstools.config import load
 
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
