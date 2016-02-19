@@ -213,6 +213,26 @@ def main():
 
     # datasets
     train, test, field_train, field_test = make_datasets(config)
+
+    # Dump datasets if dump option was selected
+    if args.dump:
+        logger.info('Dumping train, test, field_train and field_test')
+        #Make the directory if does not exists to prevent errors
+        path = os.path.join(os.environ['OUTPUT_FOLDER'], "dumps")
+        if not os.path.exists(path):
+            os.makedirs(path)
+        datasets = [(train, 'train'), 
+                    (test, 'test'),
+                    (field_train, 'field_train'),
+                    (field_test, 'field_test')]
+        for data, name in datasets:
+            if data is not None:
+                filename = '{}_{}'.format(config["experiment_name"], name)
+                df = data.to_df()
+                df.to_csv(os.path.join(path, filename))
+            else:
+                logger.info('{} is None, skipping dump...'.format(name))
+
     #Get size of grids
     grid_size = config["grid_size"]
     #Get list of models selected
@@ -295,6 +315,10 @@ if __name__ == '__main__':
     parser.add_argument("-s", "--how_to_save", type=str, choices=['mongo', 'pickle', 'none'],
                         help="Log results to MongoDB or pickle results. Defaults to mongo",
                         default='mongo')
+    parser.add_argument("-d", "--dump", action="store_true",
+                        help=("Dump train and test sets (including indexes). "
+                              "Will be saved as "
+                              "$OUTPUT_FOLDER/dumps/[experiment_name]"))
     args = parser.parse_args()
 
     print ('Starting modeling pipeline, configuring models using %s '
