@@ -13,3 +13,6 @@ mkdir -p $TMP_FOLDER
 #Convert files
 ssconvert "$SUMMER_FOLDER/8-21-2015.xls" "$TMP_FOLDER/8-21-2015.csv"
 ssconvert "$SUMMER_FOLDER/8-24-2015.xls" "$TMP_FOLDER/8-24-2015.csv"
+
+#Clean and upload to the database
+python "$ROOT_FOLDER/etl/summer-test/process.py"
