@@ -2,7 +2,7 @@
 --the score is simply the violation counts at a certain distance and time window
 --using this table we will identify interesting predictions in our model
 --for example, true positives outside 'bad beighborhoods'
-CREATE TABLE features.neighborhood_score AS(
+CREATE TABLE ${schema}.${table_name} AS(
     --First: attach geo to parcels_inspections table
     WITH inspections_location AS(
         SELECT insp.*, parcels.geom
@@ -18,8 +18,8 @@ CREATE TABLE features.neighborhood_score AS(
                --parcels_a.parcel_id, parcels_a.inspection_date, parcels_b.viol_outcome
         FROM inspections_location AS parcels_a
         JOIN inspections_location AS parcels_b
-        ON ST_DWithin(parcels_a.geom, parcels_b.geom, 1640) --1640 US survey foot ~500m
-        AND (parcels_a.inspection_date - '6 month'::interval) <= parcels_b.inspection_date
+        ON ST_DWithin(parcels_a.geom, parcels_b.geom, ${max_dist_foot}) --1640 US survey foot ~500m
+        AND (parcels_a.inspection_date - '${n_months}'::interval) <= parcels_b.inspection_date
         AND parcels_b.inspection_date <= parcels_a.inspection_date
         AND parcels_b.viol_outcome=1
     )
