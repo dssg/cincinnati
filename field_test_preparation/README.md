@@ -1,4 +1,4 @@
-###Preparing results for a field test
+#Preparing results for a field test [WORK IN PROGRESS]
 
 If the `prepare_field_test` in the configuration file, predictions such test will be saved on `$OUTPUT_FOLDER/field_test_predictions`. Make sure that folder exists.
 
