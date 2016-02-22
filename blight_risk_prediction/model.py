@@ -205,8 +205,6 @@ def main():
 
     # datasets
     train, test, field_train, field_test = make_datasets(config)
-
-    
     # Dump datasets if dump option was selected
     if args.dump:
         logger.info('Dumping train, test, field_train and field_test')
