@@ -94,7 +94,16 @@ The data is organized in different schemas, before you start loading any data, r
 
 #Data Pipeline
 
-For this part, it is assumed that you are logged in the Docker container inside the `/root/code` folder.
+Once you have set up your environment, you can start usng the pipeline, the general procedure is the following (specific instructions for each step are available inside each subfolder):
+
+1. Load data into the database 
+   1. Use the [ETL folder](etl/) to upload all the data to the database, also check the [docs folder ](docs/) for some information on the data
+   2. Perform geocoding on some datasets. Use the [bulk_geocode](bulk_geocoder/) for this.
+2. [Explore](exploration/) the data
+3. [Generate features](blight_risk_prediction/features) from the data
+4. Run some experiments. Use `model.py` inside [blight_risk_prediction](blight_risk_prediction/) to train models. `model.py` requires you to provide a configuration file, see `default.yaml` in this folder for reference.  [experiments](blight_risk_prediction/experiments) folder contains more samples.
+5. Evaluate experiments, [model_evaluation](model_evaluation/) folder contains notebooks to evaluate models
+6. Prepare a new field test using the tools in [field_test_preparation](field_test_preparation/)
 
 ##ETL
 
@@ -115,7 +124,7 @@ Once you have uploaded all the data, you will be able to generate features for t
 `./blight_risk_prediction/features/featurebot.py --help`
 
 See [blight_risk_prediction/](blight_risk_prediction/) folder for more details on how to generate features.
- 
+
 ##Modeling
 
 For information on hwo to run models, run:
@@ -143,15 +152,3 @@ Before training a model, efit the `default.yaml` configuration file to select wh
 ###Preparing results for a field test
 
 If the `prepare_field_test` in the configuration file, predictions such test will be saved on `$OUTPUT_FOLDER/field_test_predictions`. Make sure that folder exists.
-
-## Repository layout
-
-* [docs](docs/) - Useful documentation
-* [etl](etl/) - Scripts for loading the Cincinnati datasets into a postgres database
-* [exploration](exploration/) - Exploration notebooks
-* [bulk_geocoder](bulk_geocoder/) - Code for geocoding using the Census API
-* [blight_risk_prediction](blight_risk_prediction/) - Feature generation, modeling pipeline
-* [experiments](experiments/) - Model configuration files from experiments we have tried
-* [model_evaluation](model_evaluation/) - notebooks to evaluate models if using MongoDB logging (if you are looking for the webapp, [look here](https://github.com/dssg/cincinnati2015))
-* [field_test_preparation](field_test_preparation/) - Tools for preparing a new field test
-* [tests](tests/) - Summer unit tests
