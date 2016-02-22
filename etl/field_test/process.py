@@ -12,7 +12,7 @@ def clean_column_name(s):
     s = s.lower()
     return s
 
-path_to_tmp = os.path.join(os.environ['DATA_FOLDER'], 'etl/summer-test/tmp')
+path_to_tmp = os.path.join(os.environ['DATA_FOLDER'], 'etl/field_test/tmp')
 
 #Load files with summer results
 a = pd.read_csv(os.path.join(path_to_tmp, '8-21-2015.csv'), parse_dates=['INSP DATE'])
