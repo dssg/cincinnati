@@ -152,6 +152,6 @@ If the `prepare_field_test` in the configuration file, predictions such test wil
 * [bulk_geocoder](bulk_geocoder/) - Code for geocoding using the Census API
 * [blight_risk_prediction](blight_risk_prediction/) - Feature generation, modeling pipeline
 * [experiments](experiments/) - Model configuration files from experiments we have tried
-* [model_evaluation](model_evaluation/) - notebooks to evaluate models (if using MongoDB logging, if you are looking for the summer webapp, see the summer repo)
+* [model_evaluation](model_evaluation/) - notebooks to evaluate models if using MongoDB logging (if you are looking for the webapp, [look here](https://github.com/dssg/cincinnati2015))
 * [field_test_preparation](field_test_preparation/) - Tools for preparing a new field test
 * [tests](tests/) - Summer unit tests
