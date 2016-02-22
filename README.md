@@ -19,11 +19,11 @@ The code relies on three environment variables, before you start running the cod
 
 Then add these three environment variables:
 
-`export ROOT_FOLDER="/absolute/path/to/the/repo"`
-
-`export DATA_FOLDER="/absolute/path/to/the/raw/data"`
-
-`export OUTPUT_FOLDER="/absolute/path/to/output/folder"`
+```bash
+export ROOT_FOLDER="/absolute/path/to/the/repo"
+export DATA_FOLDER="/absolute/path/to/the/raw/data"
+export OUTPUT_FOLDER="/absolute/path/to/output/folder"
+```
 
 Consider adding that to your shell profile.
 
@@ -31,7 +31,9 @@ Consider adding that to your shell profile.
 
 Clone the repo in `$ROOT_FOLDER`
 
-`git clone https://github.com/dssg/cincinnati $ROOT_FOLDER`
+```bash
+git clone https://github.com/dssg/cincinnati $ROOT_FOLDER
+```
 
 ###Put the data following the repo structure
 
@@ -70,7 +72,9 @@ Most dependencies are needed for the ETL step, after the raw data is on the data
 
 Once Docker is properly setup, go to your `$ROOT_FOLDER` and run:
 
-`docker build -t cincinnati .`
+```bash
+docker build -t cincinnati .
+```
 
 This process takes a while since it needs to download and install all dependencies, but with a decent internet connection is should take less than 1 hour.
 
@@ -78,7 +82,9 @@ This process takes a while since it needs to download and install all dependenci
 
 Once the image is ready, run it: 
 
-`docker run -v $DATA_FOLDER:/root/data -v $ROOT_FOLDER:/root/code -v $OUTPUT_FOLDER:/root/output -i -t cincinnati /bin/bash`
+```bash
+docker run -v $DATA_FOLDER:/root/data -v $ROOT_FOLDER:/root/code -v $OUTPUT_FOLDER:/root/output -i -t cincinnati /bin/bash
+```
 
 Note that we are passing our three environment variables, and linking them to three folders inside the container. The purpose of the Docker container is to run code but not to store anything (not code and of course not data).
 
