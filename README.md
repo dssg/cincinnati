@@ -146,14 +146,12 @@ If the `prepare_field_test` in the configuration file, predictions such test wil
 
 ## Repository layout
 
-* [blight_risk_prediction](blight_risk_prediction/) - Feature generation, modeling pipeline
-* [bulk_geocoder](bulk_geocoder/) - Code for geocoding using the Census API
 * [docs](docs/) - Useful documentation
 * [etl](etl/) - Scripts for loading the Cincinnati datasets into a postgres database
-* [evaluation](evaluation/) - Summer webapp for comparing different models. Also notebooks to evaluate models (for mongo db logging)
-* [experiments](experiments/) - Model configuration files from experiments we have tried
 * [exploration](exploration/) - Exploration notebooks
-* [field_test](field_test/) - Summer notebook for the field test
-* [postprocess](postprocess/) - Add details (e.g. address) about properties to predictions
-* [targeting_priority](targeting_priority/) - Re-rank predictions according to some targeting priority
+* [bulk_geocoder](bulk_geocoder/) - Code for geocoding using the Census API
+* [blight_risk_prediction](blight_risk_prediction/) - Feature generation, modeling pipeline
+* [experiments](experiments/) - Model configuration files from experiments we have tried
+* [model_evaluation](model_evaluation/) - notebooks to evaluate models (if using MongoDB logging, if you are looking for the summer webapp, see the summer repo)
+* [field_test_preparation](field_test_preparation/) - Tools for preparing a new field test
 * [tests](tests/) - Summer unit tests
