@@ -66,15 +66,13 @@ The ETL step depends on these programs:
 
 To ease the setup, a Dockerfile is provided which builds an Ubuntu 14.04 image with all dependencies included and properly configured.
 
-Most dependencies are needed for the ETL step, after the raw data is on the database, only Python (and a few packages) and psql is needed, hence, if you want, you can use the Docker image for the ETL phase only. However, the Docker container is the easiest way to run the pipeline and hence, the rest of this instructions assume you are running code inside the container.
-
-For information on how to setup Docker, see the [official docs](https://docs.docker.com/).
+Most dependencies are needed for the ETL step, after the raw data is on the database, only Python (and a few packages) and psql is needed, hence, if you want, you can use the Docker image for the ETL phase only. For information on how to setup Docker, see the [official docs](https://docs.docker.com/).
 
 Once Docker is properly setup, go to your `$ROOT_FOLDER` and run:
 
 `docker build -t cincinnati .`
 
-This process takes a long time since it needs to download and install all dependencies, but with a decent internet connection is should take less than 1 hour.
+This process takes a while since it needs to download and install all dependencies, but with a decent internet connection is should take less than 1 hour.
 
 ###Run docker image
 
