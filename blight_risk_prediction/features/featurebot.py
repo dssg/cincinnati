@@ -81,7 +81,7 @@ def generate_features(features_to_generate, n_months, max_dist,
     #select schema
     #depending on the value of inspection date
     
-    if insp_set=='all_inspections'
+    if insp_set=='all_inspections':
       if inspection_date is None:
         schema = "features"
       else:
