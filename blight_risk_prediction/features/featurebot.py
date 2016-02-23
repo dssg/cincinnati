@@ -3,7 +3,6 @@ import datetime
 import logging
 import logging.config
 from collections import namedtuple
-import sys
 import argparse
 
 import pandas as pd
@@ -63,6 +62,9 @@ class SchemaMissing():
         return "Schema {} does not exist".format(self.schema_name)
 
 class MaxDateError(Exception):
+    pass
+
+class NoFeaturesSelected(Exception):
     pass
 
 def existing_feature_schemas():
@@ -226,8 +228,7 @@ if __name__ == '__main__':
         selected_features = filter(lambda x: x.table in selected_tables, existing_features)
     
     if len(selected_features)==0:
-        print 'You did not select any features'
-        sys.exit()
+        raise NoFeaturesSelected('You did not select any features')
    
     selected  = [t.table for t in selected_features]
     selected = reduce(lambda x,y: x+", "+y, selected) 
