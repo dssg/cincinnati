@@ -168,7 +168,7 @@ def get_feature_importances(model):
                       'nor coef_ returning None'))
     return None
 
-def log_results(model, config, test, predictions, feature_importances, model):
+def log_results(model, config, test, predictions, feature_importances):
     '''
         Log results to a MongoDB database
     '''
@@ -289,7 +289,7 @@ def main():
             #Save predictions to CSV file
             #and pickle model
             log_results(model, config_raw, test, predicted,
-                feature_importances, model)
+                feature_importances)
 
         # generate blight probabilities for field test
         if config["prepare_field_test"]:
@@ -345,6 +345,4 @@ if __name__ == '__main__':
                               "Output will be saved as "
                               "$OUTPUT_FOLDER/dumps/[experiment_name]_[train/test]"))
     args = parser.parse_args()
-
-    #print args
     main()
