@@ -229,7 +229,10 @@ def main():
     config, config_raw = configure_model(config_file)
 
     # datasets
+    logger.info('Loading datasets...')
     train, test, field_train, field_test = make_datasets(config)
+    logger.debug('Train x shape: {} Test x shape: {}'.format(train.x.shape,
+        test.x.shape))
     # Dump datasets if dump option was selected
     if args.dump:
         logger.info('Dumping train, test, field_train and field_test')
@@ -251,12 +254,16 @@ def main():
     imputer = preprocessing.Imputer().fit(train.x)
     train.x = imputer.transform(train.x)
     test.x = imputer.transform(test.x)
+    logger.debug('Train x shape: {} Test x shape: {}'.format(train.x.shape,
+        test.x.shape))
 
     # Scale features to zero mean and unit variance
     logger.info('Scaling train, test...')
     scaler = preprocessing.StandardScaler().fit(train.x)
     train.x = scaler.transform(train.x)
     test.x = scaler.transform(test.x)
+    logger.debug('Train x shape: {} Test x shape: {}'.format(train.x.shape,
+        test.x.shape))
 
     #Get size of grids
     grid_size = config["grid_size"]
