@@ -12,7 +12,7 @@ def clean_column_name(s):
     s = s.lower()
     return s
 
-path_to_tmp = os.path.join(os.environ['DATA_FOLDER'], 'etl/summer-test/tmp')
+path_to_tmp = os.path.join(os.environ['DATA_FOLDER'], 'etl/field_test/tmp')
 
 #Load files with summer results
 a = pd.read_csv(os.path.join(path_to_tmp, '8-21-2015.csv'), parse_dates=['INSP DATE'])
@@ -27,4 +27,4 @@ df.rename(columns={'parcel_no':'parcel_id', 'violations_':'viol_outcome'}, inpla
 df.viol_outcome = df.viol_outcome.map({'YES': 1, 'NONE': 0})
 
 #Save to the field_tests table, id table exists append results
-df.to_sql('field_tests', e, if_exists='replace', index=False)
+df.to_sql('field_test', e, if_exists='replace', index=False)

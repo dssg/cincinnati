@@ -1,8 +1,8 @@
-#Cincinnati project
+#Cincinnati
 
 This is the continuation of the Cincinnati [summer project](https://github.com/dssg/cincinnati2015) done during DSSG 2015.
 
-#About
+##About
 
 First settled in 1788, Cincinnati is one of the oldest American cities west of the original colonies. Today, the 
 city struggles with aging home stock, stifling economic redevelopment in some neighborhoods. 
@@ -11,29 +11,31 @@ DSSG is working with the City of Cincinnati to identify properties at risk of co
 that early intervention strategies can prevent further damage and stimulate neighborhood revitalization. Read more about
 our project [here](http://dssg.uchicago.edu/2015/08/20/cincy-blight-prevention.html). 
 
-#Setup
+##Setup
 
-##Select folders for the code, data and output
+###Select folders for the code, data and output
 
 The code relies on three environment variables, before you start running the code, decide where are you going to store the *raw data*,  *code* and *output*.
 
 Then add these three environment variables:
 
-`export ROOT_FOLDER="/absolute/path/to/the/repo"`
-
-`export DATA_FOLDER="/absolute/path/to/the/raw/data"`
-
-`export OUTPUT_FOLDER="/absolute/path/to/output/folder"`
+```bash
+export ROOT_FOLDER="/absolute/path/to/the/repo"
+export DATA_FOLDER="/absolute/path/to/the/raw/data"
+export OUTPUT_FOLDER="/absolute/path/to/output/folder"
+```
 
 Consider adding that to your shell profile.
 
-##Clone the repo
+###Clone the repo
 
 Clone the repo in `$ROOT_FOLDER`
 
-`git clone https://github.com/dssg/cincinnati $ROOT_FOLDER`
+```bash
+git clone https://github.com/dssg/cincinnati $ROOT_FOLDER
+```
 
-##Put the data following the repo structure
+###Put the data following the repo structure
 
 The pipeline follows certain simple conventions to make the code easy to understand. It is assumed that a file in `$ROOT_FOLDER/etl/something/` will get its raw data from `$DATA_FOLDER/etl/something/`.
 
@@ -41,7 +43,7 @@ Having, said that it's easy to know where to store the raw data. For example, th
 
 The other convention is that intermediate files are stored on a `tmp/` folder, for example, since we need to preprocess the taxes files before uploading them to the database, the intermediate csv files will be on `$DATA_FOLDER/etl/taxes/tmp/`.
 
-##Provide config.yaml and pgpass
+###Provide config.yaml and pgpass
 
 The code loads some parameters from a `config.yaml` file stored in the `$ROOT_FOLDER`.
 
@@ -50,7 +52,7 @@ Use the `config_sample.yaml` file to see the structure and then rename it to `co
 `.pgpass` (note the dot) is needed if your are going to use the Docker image and it will take
 the file in `$ROOT_FOLDER/.pgpass` to build it. If you are not going to use Docker, just make sure that a standard `.pgpass` file is on your home folder. See `.pgpass_sample` for syntax details.
 
-##Build docker ETL image
+###Build docker ETL image
 
 The ETL step depends on these programs:
 
@@ -66,94 +68,38 @@ The ETL step depends on these programs:
 
 To ease the setup, a Dockerfile is provided which builds an Ubuntu 14.04 image with all dependencies included and properly configured.
 
-Most dependencies are needed for the ETL step, after the raw data is on the database, only Python (and a few packages) and psql is needed, hence, if you want, you can use the Docker image for the ETL phase only. However, the Docker container is the easiest way to run the pipeline and hence, the rest of this instructions assume you are running code inside the container.
-
-For information on how to setup Docker, see the [official docs](https://docs.docker.com/).
+Most dependencies are needed for the ETL step, after the raw data is on the database, only Python (and a few packages) and psql is needed, hence, if you want, you can use the Docker image for the ETL phase only. For information on how to setup Docker, see the [official docs](https://docs.docker.com/).
 
 Once Docker is properly setup, go to your `$ROOT_FOLDER` and run:
 
-`docker build -t cincinnati .`
+```bash
+docker build -t cincinnati .
+```
 
-This process takes a long time since it needs to download and install all dependencies, but with a decent internet connection is should take less than 1 hour.
+This process takes a while since it needs to download and install all dependencies, but with a decent internet connection is should take less than 1 hour.
 
-##Run docker image
+###Run docker image
 
 Once the image is ready, run it: 
 
-`docker run -v $DATA_FOLDER:/root/data -v $ROOT_FOLDER:/root/code -v $OUTPUT_FOLDER:/root/output -i -t cincinnati /bin/bash`
+```bash
+docker run -v $DATA_FOLDER:/root/data -v $ROOT_FOLDER:/root/code -v $OUTPUT_FOLDER:/root/output -i -t cincinnati /bin/bash
+```
 
 Note that we are passing our three environment variables, and linking them to three folders inside the container. The purpose of the Docker container is to run code but not to store anything (not code and of course not data).
 
-##Setup your database
+##Data Pipeline
 
-The data is organized in different schemas, before you start loading any data, run the following script.
+Once you have set up your environment, you can start usng the pipeline, the general procedure is the following (specific instructions for each step are available inside each subfolder):
 
-`./db_setup.sh`
+1. Load data into the database 
+   1. Use the [ETL folder](etl/) to upload all the data to the database, also check the [docs folder ](docs/) for some information on the data
+   2. Perform geocoding on some datasets. Use the [bulk_geocode](bulk_geocoder/) for this.
+2. [Explore](exploration/) the data
+3. [Generate features](blight_risk_prediction/features) from the data
+4. Run some experiments. Use `model.py` inside [blight_risk_prediction](blight_risk_prediction/) to train models. `model.py` requires you to provide a configuration file, see `default.yaml` in this folder for reference.  [experiments](blight_risk_prediction/experiments) folder contains more samples.
+5. Evaluate experiments, [model_evaluation](model_evaluation/) folder contains notebooks to evaluate models
+6. Prepare a new field test using the tools in [field_test_preparation](field_test_preparation/)
 
-*Important:* it is assumed that you are using PostgreSQL with PostGIS installed as your database. Make sure that you have [PostGIS](http://postgis.net/) installed before proceeding. This is the only manual step you need to do.
-
-#Data Pipeline
-
-For this part, it is assumed that you are logged in the Docker container inside the `/root/code` folder.
-
-##ETL
-
-Inside the [etl](etl/), you will find one folder for each dataset that we used. For each folder, a shell script (with the same name as the parent folder) is provided which performs the etl for that dataset.
-
-For example, to load the cagis data, run:
-
-`bash etl/cagis/cagis.sh`
-
-##Geocoding
-
-After loading the data to the database using the [etl](etl/) folder, use the `geocode.sh` script to perform geocoding. See [bulk_geocoder](bulk_geocoder/) folder for more information.
-
-##Feature generation
-
-Once you have uploaded all the data, you will be able to generate features for the model, for more information run:
-
-`./blight_risk_prediction/features/featurebot.py --help`
-
-See [blight_risk_prediction/](blight_risk_prediction/) folder for more details on how to generate features.
- 
-##Modeling
-
-For information on hwo to run models, run:
-
-`./blight_risk_prediction/model.py --help`
-
-###Logging model results
-
-Each time you run a model, the pipeline will store the results. There are two ways to do this (to change, modify the `--how_to_save` parameter when running `model.py`:
-
-1. Log to a MongoDB database
-2. Pickle results and save them to disk
-
-If you decide to use MongoDB ([mongolab](https://mongolab.com) provides a free instance that you can use), some results will be saved in a collection,
-make sure you provide a valid mongo URI in the config.yaml file. However, for performance reasons, predictions will be stored as csv files in `$OUTPUT_FOLDER/predictions`. Make sure that folder exists in your `$OUTPUT_FOLDER`.
-
-If you prefer to pickle results, .pkl files will be stored in `$OUTPUT_FOLDER/pickled_results`. Those files can be visualized using the webapp that the summer team developed.
-
-The recommended way is to use MongoDB, since it's the most complete one.
-
-###Configure the model to train
-
-Before training a model, efit the `default.yaml` configuration file to select which model to train and features to include. Documentation is on the file.
-
-###Preparing results for a field test
-
-If the `prepare_field_test` in the configuration file, predictions such test will be saved on `$OUTPUT_FOLDER/field_test_predictions`. Make sure that folder exists.
-
-## Repository layout
-
-* [blight_risk_prediction](blight_risk_prediction/) - Feature generation, modeling pipeline
-* [bulk_geocoder](bulk_geocoder/) - Code for geocoding using the Census API
-* [docs](docs/) - Useful documentation
-* [etl](etl/) - Scripts for loading the Cincinnati datasets into a postgres database
-* [evaluation](evaluation/) - Summer webapp for comparing different models. Also notebooks to evaluate models (for mongo db logging)
-* [experiments](experiments/) - Model configuration files from experiments we have tried
-* [exploration](exploration/) - Exploration notebooks
-* [field_test](field_test/) - Summer notebook for the field test
-* [postprocess](postprocess/) - Add details (e.g. address) about properties to predictions
-* [targeting_priority](targeting_priority/) - Re-rank predictions according to some targeting priority
-* [tests](tests/) - Summer unit tests
+##Notes
+* In the code you'll notice two rare packages [`dstools`](https://github.com/edublancas/dstools) and [`sklearn_evaluation`](https://github.com/edublancas/sklearn-evaluation/). The first one is just a collection of functions for loading yaml files and log models to MongoDB, the second one contains tools to evaluate scikit-learn models. While both packages are WIP, I made a release for both and published them on PyPI, so they should work without any problem.
