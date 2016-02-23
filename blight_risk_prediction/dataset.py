@@ -307,7 +307,7 @@ class FeatureLoader():
 #####################################################
 
 class Dataset():
-    def __init__(self, parcels, x, y, feature_names, feature_mapping):
+    def __init__(self, parcels, x, y, feature_mapping):
         self.parcels = parcels
         self.x = x
         self.y = y
