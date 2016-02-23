@@ -121,7 +121,7 @@ def generate_features(features_to_generate, n_months, max_dist,
     cur = con.cursor()    
     cur.execute('SELECT current_schema;')
     current_schema = cur.fetchone()[0]
-    logger.info(('Starting feature generation. '
+    logger.info(('Starting feature generation in {}. '
                  'n_monts={}. max_dist={}').format(current_schema, n_months, max_dist))
     #Get existing tables
     existing_tables =  tables_in_schema(con, schema)
