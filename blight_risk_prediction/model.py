@@ -29,6 +29,7 @@ to have at least one violation.
 
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
+
 field_test_dir = "field_test_predictions/"
 
 class ConfigError():
@@ -156,48 +157,51 @@ def get_feature_importances(model):
                       'nor coef_ returning None'))
     return None
 
+def log_to_mongo(config, test, predictions, feature_importances, model):
+    '''
+        Log results to a MongoDB database
+    '''
+    #Instantiate logger
+    logger_uri = cfg_main['logger']['uri']
+    logger_db = cfg_main['logger']['db']
+    logger_collection = cfg_main['logger']['collection']
+    mongo_logger = Logger(logger_uri, logger_db, logger_collection)
+    #Compute some statistics to log
+    prec_at_1, cutoff_at_1 = precision_at(test.y, predictions, 0.01)
+    prec_at_10, cutoff_at_10 = precision_at(test.y, predictions, 0.1)
+    #Add the name of the experiment if available
+    experiment_name = config["experiment_name"] if config["experiment_name"] else None
+    #Sending model will log model name, parameters and datetime
+    #Also log other important things by sending named parameters
+    mongo_id = mongo_logger.log_model(model, features=list(test.feature_names),
+        feature_importances=list(feature_importances),
+        config=config, prec_at_1=prec_at_1,
+        prec_at_10=prec_at_10, cutoff_at_1=cutoff_at_1,
+        cutoff_at_10=cutoff_at_10, experiment_name=experiment_name)
+    #Dump test_labels, test_predictions and test_parcels to a csv file
+    parcel_id = [record[0] for record in test.parcels]
+    inspection_date = [record[1] for record in test.parcels]
+    dump = pd.DataFrame({'parcel_id': parcel_id,
+        'inspection_date': inspection_date,
+        'viol_outcome': test.y,
+        'prediction': predictions})
+    dump.to_csv(os.path.join(os.environ['OUTPUT_FOLDER'], "predictions", mongo_id))
 
-def save_results(pkl_file, config, test, predictions, feature_importances, model):
-    if args.how_to_save == 'mongo':
-        #Instantiate logger
-        logger_uri = cfg_main['logger']['uri']
-        logger_db = cfg_main['logger']['db']
-        logger_collection = cfg_main['logger']['collection']
-        mongo_logger = Logger(logger_uri, logger_db, logger_collection)
-        #Compute some statistics to log
-        prec_at_1, cutoff_at_1 = precision_at(test.y, predictions, 0.01)
-        prec_at_10, cutoff_at_10 = precision_at(test.y, predictions, 0.1)
-        #Add the name of the experiment if available
-        experiment_name = config["experiment_name"] if config["experiment_name"] else None
-        #Sending model will log model name, parameters and datetime
-        #Also log other important things by sending named parameters
-        mongo_id = mongo_logger.log_model(model, features=list(test.feature_names),
-            feature_importances=list(feature_importances),
-            config=config, prec_at_1=prec_at_1,
-            prec_at_10=prec_at_10, cutoff_at_1=cutoff_at_1,
-            cutoff_at_10=cutoff_at_10, experiment_name=experiment_name)
-        #Dump test_labels, test_predictions and test_parcels to a csv file
-        parcel_id = [record[0] for record in test.parcels]
-        inspection_date = [record[1] for record in test.parcels]
-        dump = pd.DataFrame({'parcel_id': parcel_id,
-            'inspection_date': inspection_date,
-            'viol_outcome': test.y,
-            'prediction': predictions})
-        dump.to_csv(os.path.join(os.environ['OUTPUT_FOLDER'], "predictions", mongo_id))
-    elif args.how_to_save == 'pickle':
-        to_save = {"config": config,
+def pickle_results(pkl_file, config, test, predictions, feature_importances, model):
+    '''
+        Legacy logging from the summer project, use this option if you want
+        to use the summer webapp
+    '''
+    to_save = {"config": config,
                    "features": test.feature_names,
                    "feature_importances": feature_importances,
                    "test_labels": test.y,
                    "test_predictions": predictions,
                    "test_parcels": test.parcels}
-
-        #Preppend output folder to pkl_file so results are stored there
-        path_to_pkl = os.path.join(os.environ['OUTPUT_FOLDER'], "pickled_results", pkl_file)
-        with open(path_to_pkl, 'wb') as f:
-            pickle.dump(to_save, f, protocol=pickle.HIGHEST_PROTOCOL)
-    elif args.how_to_save == 'none':
-        logger.info("You selected to not log results. Skipping logging...")
+    #Preppend output folder to pkl_file so results are stored there
+    path_to_pkl = os.path.join(os.environ['OUTPUT_FOLDER'], "pickled_results", pkl_file)
+    with open(path_to_pkl, 'wb') as f:
+        pickle.dump(to_save, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 def main():
     config_file = args.path_to_config_file
@@ -277,8 +281,18 @@ def main():
         outfile = "{prefix}{timestamp}.pkl".format(prefix=prefix,
                                                    timestamp=timestamp)
         config_raw["parameters"] = model.get_params()
-        save_results(outfile, config_raw, test,
-                              predicted, feature_importances, model)
+        
+        #Log depending on user selection
+        if args.how_to_save == 'mongo':
+            log_to_mongo(config_raw, test, predicted,
+                feature_importances, model)
+        elif args.how_to_save == 'pickle':
+            pickle_results(outfile, config_raw, test, predicted,
+                feature_importances, model)
+        elif args.how_to_save == 'none':
+            logger.info("You selected to not log results. Skipping logging...")
+        else:
+            logger.info("Invalid logging option. Skipping logging...")
 
         # generate blight probabilities for field test
         if config["prepare_field_test"]:

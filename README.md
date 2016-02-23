@@ -97,8 +97,8 @@ Once you have set up your environment, you can start usng the pipeline, the gene
    2. Perform geocoding on some datasets. Use the [bulk_geocode](bulk_geocoder/) for this.
 2. [Explore](exploration/) the data
 3. [Generate features](blight_risk_prediction/features) from the data
-4. Run some experiments. Use `model.py` inside [blight_risk_prediction](blight_risk_prediction/) to train models. `model.py` requires you to provide a configuration file, see `default.yaml` in this folder for reference.  [experiments](blight_risk_prediction/experiments) folder contains more samples.
-5. Evaluate experiments, [model_evaluation](model_evaluation/) folder contains notebooks to evaluate models
+4. Run some experiments. Use `model.py` inside [blight_risk_prediction](blight_risk_prediction/) to train models. `model.py` requires you to provide a configuration file, see `default.yaml` in this folder for reference.  [experiments](blight_risk_prediction/experiments) folder contains more examples.
+5. Evaluate experiments, [model_evaluation](model_evaluation/) folder contains notebooks to evaluate models.
 6. Prepare a new field test using the tools in [field_test_preparation](field_test_preparation/)
 
 ##Notes
