@@ -30,6 +30,6 @@ df.columns = df.columns.map(clean_column_name)
 df.rename(columns={'parcel_no':'parcel_id', 'violations_':'viol_outcome',
     'insp_date': 'inspection_date'}, inplace=True)
 df.viol_outcome = df.viol_outcome.map({'YES': 1, 'NONE': 0})
-
+df.parcel_id = df.parcel_id.map(lambda s: s.zfill(12))
 #Save to the field_tests table, id table exists append results
 df.to_sql('field_test', e, if_exists='replace', index=False)
