@@ -83,7 +83,7 @@ def generate_features(features_to_generate, n_months, max_dist,
     if inspection_date is None:
         schema = "features"
     else:
-        if insp_set=='all_inspections'
+        if insp_set=='all_inspections':
           str_date = inspection_date.strftime('%d%b%Y')
           schema = "features_all_inspections_{}".format(str_date).lower()
         elif insp_set=='field_test':
@@ -133,7 +133,7 @@ def generate_features(features_to_generate, n_months, max_dist,
         if inspection_date is None:
             inspections = outcome.generate_labels()
         else:
-          if insp_set=='all_inspections'
+          if insp_set=='all_inspections':
             inspections = outcome.make_fake_inspections_all_parcels_cincy(inspection_date)
           elif insp_set=='field_test':
             inspections = outcome.load_inspections_from_field_test()
