@@ -5,7 +5,7 @@ from dstools.db import uri
 from sqlalchemy import create_engine
 
 def load_inspections_from_field_test():
-  query = ('SELECT parcel_id, inspection_date, viol_outcome FROM field_test')
+  query = 'SELECT parcel_id, inspection_date, viol_outcome FROM field_test'
   engine = create_engine(uri)
   df = pd.read_sql_query(query, con=engine)
   return df
