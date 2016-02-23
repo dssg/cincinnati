@@ -80,14 +80,17 @@ def generate_features(features_to_generate, n_months, max_dist,
     """
     #select schema
     #depending on the value of inspection date
-    if inspection_date is None:
+    
+    if insp_set=='all_inspections'
+      if inspection_date is None:
         schema = "features"
-    else:
-        if insp_set=='all_inspections':
-          str_date = inspection_date.strftime('%d%b%Y')
-          schema = "features_all_inspections_{}".format(str_date).lower()
-        elif insp_set=='field_test':
-          schema = 'features_field_test'
+      else:
+        schema = "features_{}".format(str_date).lower()
+    elif insp_set=='field_test':
+      if inspection_date is None:
+        schema = "features_field_test"
+      else:
+        schema = "features_field_test_{}".format(inspection_date.strftime('%d%b%Y')).lower()
 
     # use this engine for all data storing (somehow does
     # not work with the raw connection we create below)
@@ -136,7 +139,7 @@ def generate_features(features_to_generate, n_months, max_dist,
           if insp_set=='all_inspections':
             inspections = outcome.make_fake_inspections_all_parcels_cincy(inspection_date)
           elif insp_set=='field_test':
-            inspections = outcome.load_inspections_from_field_test()
+            inspections = outcome.load_inspections_from_field_test(inspection_date)
 
         inspections.to_sql("parcels_inspections", engine, chunksize=50000,
                       if_exists='fail', index=False, schema=schema)
