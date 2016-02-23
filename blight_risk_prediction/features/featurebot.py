@@ -85,7 +85,7 @@ def generate_features(features_to_generate, n_months, max_dist,
       if inspection_date is None:
         schema = "features"
       else:
-        schema = "features_{}".format(str_date).lower()
+        schema = "features_{}".format(inspection_date.strftime('%d%b%Y')).lower()
     elif insp_set=='field_test':
       if inspection_date is None:
         schema = "features_field_test"
@@ -230,4 +230,12 @@ if __name__ == '__main__':
     selected = reduce(lambda x,y: x+", "+y, selected) 
     print "Selected features: %s" % selected
     d = datetime.datetime.strptime(args.date, '%d%b%Y') if args.date is not None else None
+
+    if d is not None and d > datetime.datetime.strptime('31Dec2014', '%d%b%Y'):
+      print ('Error: This pipeline cannot generate features after '
+             'December 31, 2014 since data is incomplete for 2015. Add new '
+             'data and change the date limit to prevent this message from '
+             'appearing')
+      sys.exit()
+
     generate_features(selected_features, args.months, args.maxdist, d, args.set)
