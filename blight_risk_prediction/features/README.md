@@ -6,6 +6,10 @@ Once you have uploaded all the data, you will be able to generate features for t
 
 `./blight_risk_prediction/features/featurebot.py --help`
 
+##About feature schemas
+
+[WIP]
+
 ##Generating features for arbitrary inspections list
 
 When training models, we select a training size and a validation window, this gives us a way to calculate metrics for our models and rank them according to our precision ad 1% metric.

@@ -207,8 +207,8 @@ if __name__ == '__main__':
                         default=1000)
     parser.add_argument("-s", "--set", type=str,
                         choices=['all_inspections', 'field_test'],
-                        help=("Which inspections from the public schema to use, "
-                          "all_inspections will use public.parcels_cincy table, "
+                        help=("Which inspections set to use, "
+                          "all_inspections will use shape_files.parcels_cincy table, "
                           "field_test will use public.field_test table. Defaults "
                           "to all_inspections"),
                         default='all_inspections')

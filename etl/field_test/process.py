@@ -15,8 +15,12 @@ def clean_column_name(s):
 path_to_tmp = os.path.join(os.environ['DATA_FOLDER'], 'etl/field_test/tmp')
 
 #Load files with summer results
-a = pd.read_csv(os.path.join(path_to_tmp, '8-21-2015.csv'), parse_dates=['INSP DATE'])
-b = pd.read_csv(os.path.join(path_to_tmp, '8-24-2015.csv'), parse_dates=['INSP DATE'])
+a = pd.read_csv(os.path.join(path_to_tmp, '8-21-2015.csv'),
+    dtype={'PARCEL_NO':str},
+    parse_dates=['INSP DATE'])
+b = pd.read_csv(os.path.join(path_to_tmp, '8-24-2015.csv'),
+    dtype={'PARCEL_NO':str},
+    parse_dates=['INSP DATE'])
 #Merge them into a single dataframe
 df = a.append(b)
 
