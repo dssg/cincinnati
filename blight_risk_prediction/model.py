@@ -43,10 +43,10 @@ for directory in [path_to_pickles, path_to_predictions, path_to_dumps]:
 
 field_test_dir = "field_test_predictions/"
 
-class ConfigError():
+class ConfigError(Exception):
     pass
 
-class MaxDateError():
+class MaxDateError(Exception):
     pass
 
 def configure_model(config_file):
@@ -89,13 +89,13 @@ def make_datasets(config):
     #Check start date
     max_date = datetime.datetime.strptime('31Dec2014', '%d%b%Y')
     if start_date > max_date:
-        MaxDateError('Error: Your start_date exceeds '
+        raise MaxDateError('Error: Your start_date exceeds '
              'December 31, 2014.  There\'s no data for 2015. Udpate '
              'data and change the date limit to prevent this message from '
              'appearing')
     #Check fake today + validation window
     if fake_today + validation_window > max_date:
-        MaxDateError('Error: your fake_today + validation_window exceeds '
+        raise MaxDateError('Error: your fake_today + validation_window exceeds '
              'December 31, 2014.  There\'s no data for 2015. Udpate '
              'data and change the date limit to prevent this message from '
              'appearing')
