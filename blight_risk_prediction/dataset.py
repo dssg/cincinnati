@@ -375,12 +375,12 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
 
     # split up the dataset into features, labels, etc
     labels = dataset["viol_outcome"].values
-    features = dataset.drop('viol_outcome', axis=1)
+    features_df = dataset.drop('viol_outcome', axis=1)
     parcels_inspections = dataset.index.values
 
     logger.debug("Dataset has {} rows and {} features".format(
-        len(labels), len(features.columns)))
-    return Dataset(parcels_inspections, features, labels, features.columns)
+        len(labels), len(features_df.columns)))
+    return Dataset(parcels_inspections, features_df, labels, features)
 
 
 def get_training_dataset(features, start_date, end_date, only_residential):
