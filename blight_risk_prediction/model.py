@@ -327,18 +327,12 @@ if __name__ == '__main__':
                         help=("Path to the yaml configuration file. "
                               "Defaults to the default.yaml in the $ROOT_FOLDER"),
                         type=str, default=os.path.join(os.environ["ROOT_FOLDER"], "default.yaml"))
-    #Two options for saving results: 1. save to mongodb, you
-    #can use something like MongoChef to see results (to do that you need to
-    #provided a mongo URI in the config.yaml file). 2. Pickle results (you can see
-    #results with the webapp)
-    #Important: even if you use MONGO, for performance reasons, some results will
-    #still be saved as csv files in your $OUTPUT_FOLDER
     parser.add_argument("-n", "--n_jobs", type=int, default=-1,
                             help=("n_jobs flag passed to scikit-learn models, "
                                   "fails silently if the model does not support "
                                   "such flag. Defaults to -1 (all jobs possible)"))
     parser.add_argument("-nl", "--notlog", action="store_true",
-                        help="Do not log results to MongoDB and pickle model")
+                        help="Do not log results to MongoDB")
     parser.add_argument("-p", "--pickle", action="store_true",
                         help="Pickle model, only valid if logging is True")
     parser.add_argument("-d", "--dump", action="store_true",
