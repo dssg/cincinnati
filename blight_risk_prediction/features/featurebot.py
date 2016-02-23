@@ -70,7 +70,7 @@ def existing_feature_schemas():
     return schemas
 
 def generate_features(features_to_generate, n_months, max_dist,
-                     inspection_date=None):
+                     inspection_date=None, insp_set='all_inspections'):
     """
     Generate labels and features for all inspections
     in the inspections database.
@@ -83,8 +83,11 @@ def generate_features(features_to_generate, n_months, max_dist,
     if inspection_date is None:
         schema = "features"
     else:
-        schema = "features_{}".format(inspection_date.strftime('%d%b%Y')).lower()
-
+        if insp_set=='all_inspections'
+          str_date = inspection_date.strftime('%d%b%Y')
+          schema = "features_all_inspections_{}".format(str_date).lower()
+        elif insp_set=='field_test':
+          schema = 'features_field_test'
 
     # use this engine for all data storing (somehow does
     # not work with the raw connection we create below)
@@ -130,7 +133,10 @@ def generate_features(features_to_generate, n_months, max_dist,
         if inspection_date is None:
             inspections = outcome.generate_labels()
         else:
+          if insp_set=='all_inspections'
             inspections = outcome.make_fake_inspections_all_parcels_cincy(inspection_date)
+          elif insp_set=='field_test':
+            inspections = outcome.load_inspections_from_field_test()
 
         inspections.to_sql("parcels_inspections", engine, chunksize=50000,
                       if_exists='fail', index=False, schema=schema)
@@ -196,6 +202,13 @@ if __name__ == '__main__':
                               "Only supported by spatiotemporal features. "
                               "Defaults to 1000 m (max value posible)"), type=int,
                         default=1000)
+    parser.add_argument("-s", "--set", type=str,
+                        choices=['all_inspections', 'field_test'],
+                        help=("Which inspections from the public schema to use, "
+                          "all_inspections will use public.parcels_cincy table, "
+                          "field_test will use public.field_test table. Defaults "
+                          "to all_inspections"),
+                        default='all_inspections')
     args = parser.parse_args()
 
     #Based on user selection create an array with the features to generate
@@ -214,4 +227,4 @@ if __name__ == '__main__':
     selected = reduce(lambda x,y: x+", "+y, selected) 
     print "Selected features: %s" % selected
     d = datetime.datetime.strptime(args.date, '%d%b%Y') if args.date is not None else None
-    generate_features(selected_features, args.months, args.maxdist, d)
+    generate_features(selected_features, args.months, args.maxdist, d, args.set)
