@@ -8,6 +8,9 @@ def load_inspections_from_field_test(date):
   query = 'SELECT parcel_id, inspection_date, viol_outcome FROM field_test'
   engine = create_engine(uri)
   df = pd.read_sql_query(query, con=engine)
+  #If date is not none, replace inspection_date column with fake date
+  if date is not None:
+    df.inspection_date = date
   return df
 
 def generate_labels():
