@@ -35,9 +35,10 @@ logger = logging.getLogger()
 path_to_predictions = os.path.join(os.environ['OUTPUT_FOLDER'], "predictions")
 #Where to pickle models
 path_to_pickles = os.path.join(os.environ['OUTPUT_FOLDER'], "pickles")
+#Where to dump train and testing sets
+path_to_dumps = os.path.join(os.environ['OUTPUT_FOLDER'], "dumps")
 #Make directories if they don't exist
-
-for directory in [path_to_pickles, path_to_predictions]:
+for directory in [path_to_pickles, path_to_predictions, path_to_dumps]:
     if not os.path.exists(directory):
         os.makedirs(directory)
 
@@ -211,10 +212,6 @@ def main():
     # Dump datasets if dump option was selected
     if args.dump:
         logger.info('Dumping train, test, field_train and field_test')
-        #Make the directory if does not exists to prevent errors
-        path = os.path.join(os.environ['OUTPUT_FOLDER'], "dumps")
-        if not os.path.exists(path):
-            os.makedirs(path)
         datasets = [(train, 'train'), 
                     (test, 'test'),
                     (field_train, 'field_train'),
@@ -223,7 +220,7 @@ def main():
             if data is not None:
                 filename = '{}_{}.csv'.format(config["experiment_name"], name)
                 df = data.to_df()
-                df.to_csv(os.path.join(path, filename))
+                df.to_csv(os.path.join(path_to_dumps, filename))
             else:
                 logger.info('{} is None, skipping dump...'.format(name))
 
