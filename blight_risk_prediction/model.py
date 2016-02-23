@@ -207,7 +207,8 @@ def log_results(model, config, test, predictions, feature_importances):
         feature_importances=list(feature_importances),
         config=config, prec_at_1=prec_at_1,
         prec_at_10=prec_at_10, cutoff_at_1=cutoff_at_1,
-        cutoff_at_10=cutoff_at_10, experiment_name=experiment_name)
+        cutoff_at_10=cutoff_at_10, experiment_name=experiment_name,
+        feature_mapping=test.feature_mapping)
 
     #Dump test_labels, test_predictions and test_parcels to a csv file
     parcel_id = [record[0] for record in test.parcels]

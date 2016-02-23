@@ -307,11 +307,13 @@ class FeatureLoader():
 #####################################################
 
 class Dataset():
-    def __init__(self, parcels, x, y, feature_names):
+    def __init__(self, parcels, x, y, feature_names, feature_mapping):
         self.parcels = parcels
         self.x = x
         self.y = y
-        self.feature_names = feature_names
+        self.feature_names = x.columns
+        #table_name, feature_name tuples
+        self.feature_mapping = feature_mapping
     def to_df(self):
         df = pd.DataFrame(self.x, columns=self.feature_names)
         df['viol_outcome'] = self.y

@@ -8,7 +8,7 @@ from dataset import get_features_for_inspections_in_schema
 #Given a mongo_id from an experiment
 #perform predictions using that model on other inspections lists
 #e.g. using all parcels or field_test table for evaluating performance
-EXPERIMENT_ID = '56cce1ace0f48cdadd94dbc2'
+EXPERIMENT_ID = '56cce46ae0f48cdf9c6a7369'
 #Where to load list of inspections and features?
 SCHEMA = 'features_field_test_31dec2014'
 
@@ -24,7 +24,7 @@ collection = client['models']['cincinnati']
 #Convert string with date and time to datetime object
 results = collection.find_one({"_id": ObjectId(EXPERIMENT_ID)})
 #Get table_name,feature_name tuples
-features = results['features']
+features = results['feature_mapping']
 #Mongodb returns tuples as lists, but our loading method
 #takes tuples as parameter
 features = [tuple(feat) for feat in features]
