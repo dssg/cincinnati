@@ -71,7 +71,6 @@ def configure_model(config_file):
     return cfg, copy.deepcopy(cfg)
 
 def make_datasets(config):
-
     start_date = datetime.datetime.strptime(config["start_date"], '%d%b%Y')
     fake_today = datetime.datetime.strptime(config['fake_today'], '%d%b%Y')
 
