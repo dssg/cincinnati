@@ -3,7 +3,6 @@ import pandas as pd
 import datetime
 import yaml
 import pickle
-import sys
 import os
 import logging
 import logging.config
@@ -47,6 +46,9 @@ field_test_dir = "field_test_predictions/"
 class ConfigError():
     pass
 
+class MaxDateError():
+    pass
+
 def configure_model(config_file):
     logger.info("Reading config from {}".format(config_file))
     with open(config_file, 'r') as f:
@@ -87,18 +89,16 @@ def make_datasets(config):
     #Check start date
     max_date = datetime.datetime.strptime('31Dec2014', '%d%b%Y')
     if start_date > max_date:
-        print ('Error: Your start_date exceeds '
+        MaxDateError('Error: Your start_date exceeds '
              'December 31, 2014.  There\'s no data for 2015. Udpate '
              'data and change the date limit to prevent this message from '
              'appearing')
-        sys.exit()
     #Check fake today + validation window
     if fake_today + validation_window > max_date:
-        print ('Error: your fake_today + validation_window exceeds '
+        MaxDateError('Error: your fake_today + validation_window exceeds '
              'December 31, 2014.  There\'s no data for 2015. Udpate '
              'data and change the date limit to prevent this message from '
              'appearing')
-        sys.exit()
 
     #Parse each feature pattern (table_name.pattern) in the config file and
     #return a list with tuples of the form (table_name, feature_name)
