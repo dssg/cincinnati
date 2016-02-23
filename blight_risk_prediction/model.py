@@ -201,7 +201,10 @@ def log_results(model, config, test, predictions, feature_importances):
     #Dump predictions to CSV
     dump.to_csv(os.path.join(path_to_predictions, mongo_id))
     #Pickle model
-    joblib.dump(model, os.path.join(path_to_pickles, mongo_id)) 
+    if args.pickle:
+        path_to_file = os.path.join(path_to_pickles, mongo_id)
+        logger.info('Pickling: {}'.format(path_to_file))
+        joblib.dump(model, path_to_file) 
 
 def main():
     config_file = args.path_to_config_file
@@ -336,6 +339,8 @@ if __name__ == '__main__':
                                   "such flag. Defaults to -1 (all jobs possible)"))
     parser.add_argument("-nl", "--notlog", action="store_true",
                         help="Do not log results to MongoDB and pickle model")
+    parser.add_argument("-p", "--pickle", action="store_true",
+                        help="Pickle model, only valid if logging is True")
     parser.add_argument("-d", "--dump", action="store_true",
                         help=("Dump train and test sets (including indexes), "
                               "before imputation and scaling. "
