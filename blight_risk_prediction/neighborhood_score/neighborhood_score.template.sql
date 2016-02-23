@@ -6,7 +6,7 @@ CREATE TABLE ${schema}.${table_name} AS(
     --First: attach geo to parcels_inspections table
     WITH inspections_location AS(
         SELECT insp.*, parcels.geom
-        FROM features.parcels_inspections AS insp
+        FROM ${schema}.parcels_inspections AS insp
         JOIN shape_files.parcels_cincy AS parcels
         ON insp.parcel_id=parcels.parcelid
     ),
@@ -18,7 +18,7 @@ CREATE TABLE ${schema}.${table_name} AS(
                --parcels_a.parcel_id, parcels_a.inspection_date, parcels_b.viol_outcome
         FROM inspections_location AS parcels_a
         JOIN inspections_location AS parcels_b
-        ON ST_DWithin(parcels_a.geom, parcels_b.geom, ${max_dist_foot}) --1640 US survey foot ~500m
+        ON ST_DWithin(parcels_a.geom, parcels_b.geom, ${max_dist_foot})
         AND (parcels_a.inspection_date - '${n_months}'::interval) <= parcels_b.inspection_date
         AND parcels_b.inspection_date <= parcels_a.inspection_date
         AND parcels_b.viol_outcome=1
