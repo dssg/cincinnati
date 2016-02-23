@@ -248,11 +248,9 @@ def main():
 
     #Impute missing values (mean is the only strategy for now)
     logger.info('Imputing values on train and test...')
-    imputer = sklearn.preprocessing.Imputer().fit(train.x)
+    imputer = preprocessing.Imputer().fit(train.x)
     train.x = imputer.transform(train.x)
     test.x = imputer.transform(test.x)
-    #train.impute()
-    #test.impute()
 
     # Scale features to zero mean and unit variance
     logger.info('Scaling train, test...')
@@ -316,11 +314,9 @@ def main():
         if config["prepare_field_test"]:
             #Impute missing values (mean is the only strategy for now)
             logger.info('Imputing values on field_train and field_test...')
-            imputer = sklearn.preprocessing.Imputer().fit(field_train.x)
+            imputer = preprocessing.Imputer().fit(field_train.x)
             field_train.x = imputer.transform(field_train.x)
             field_test.x = imputer.transform(field_test.x)
-            #field_train.impute()
-            #field_test.impute()
             
             # Scale features to zero mean and unit variance
             logger.info('Scaling field_train, field_test...')

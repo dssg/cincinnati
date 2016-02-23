@@ -318,9 +318,6 @@ class Dataset():
         index = pd.MultiIndex.from_tuples(self.parcels, names=['parcel_id', 'inspection_date'])
         df.set_index(index, inplace=True)
         return df
-    def impute(self):
-        # impute missing feature values
-        self.x = util.mean_impute_frame(self.x)
 
 def get_dataset(schema, features, start_date, end_date, only_residential):
     start_date = start_date.strftime('%Y-%m-%d')
