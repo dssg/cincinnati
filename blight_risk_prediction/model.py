@@ -36,9 +36,10 @@ path_to_predictions = os.path.join(os.environ['OUTPUT_FOLDER'], "predictions")
 #Where to pickle models
 path_to_pickles = os.path.join(os.environ['OUTPUT_FOLDER'], "pickles")
 #Make directories if they don't exist
+
 for directory in [path_to_pickles, path_to_predictions]:
     if not os.path.exists(directory):
-        os.makedirs(directory
+        os.makedirs(directory)
 
 field_test_dir = "field_test_predictions/"
 
