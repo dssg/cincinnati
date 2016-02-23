@@ -23,7 +23,8 @@ df = a.append(b)
 #Cleaning
 df.dropna(axis=1, how='all', inplace=True)
 df.columns = df.columns.map(clean_column_name)
-df.rename(columns={'parcel_no':'parcel_id', 'violations_':'viol_outcome'}, inplace=True)
+df.rename(columns={'parcel_no':'parcel_id', 'violations_':'viol_outcome',
+    'insp_date': 'inspection_date'}, inplace=True)
 df.viol_outcome = df.viol_outcome.map({'YES': 1, 'NONE': 0})
 
 #Save to the field_tests table, id table exists append results
