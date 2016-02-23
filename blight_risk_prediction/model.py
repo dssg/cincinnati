@@ -73,6 +73,14 @@ def make_datasets(config):
     start_date = datetime.datetime.strptime(config["start_date"], '%d%b%Y')
     fake_today = datetime.datetime.strptime(config['fake_today'], '%d%b%Y')
 
+    if config["validation_window"] == "1Year":
+        validation_window = datetime.timedelta(days=365)
+    elif config["validation_window"] == "1Month":
+        validation_window = datetime.timedelta(days=30)
+    else:
+        raise ConfigError("Unsupported validation window: {}".format(
+                          config["validation_window"]))
+
     #Before proceeding, make sure dates for training and testing are 
     #December 31, 2014 at most. Further dates won't work since you don't
     #have data.
@@ -91,15 +99,6 @@ def make_datasets(config):
              'data and change the date limit to prevent this message from '
              'appearing')
         sys.exit()
-
-
-    if config["validation_window"] == "1Year":
-        validation_window = datetime.timedelta(days=365)
-    elif config["validation_window"] == "1Month":
-        validation_window = datetime.timedelta(days=30)
-    else:
-        raise ConfigError("Unsupported validation window: {}".format(
-                          config["validation_window"]))
 
     #Parse each feature pattern (table_name.pattern) in the config file and
     #return a list with tuples of the form (table_name, feature_name)
