@@ -32,8 +32,14 @@ logger = logging.getLogger()
 
 #Where to save test set predictions
 path_to_predictions = os.path.join(os.environ['OUTPUT_FOLDER'], "predictions")
+
 #Where to pickle models
-path_to_pickles = os.path.join(os.environ['OUTPUT_FOLDER'], "pickles")
+path_to_pickled_models = os.path.join(os.environ['OUTPUT_FOLDER'], "pickled_models")
+#Where to pickle scales
+path_to_pickled_scalers = os.path.join(os.environ['OUTPUT_FOLDER'], "pickled_scalers")
+#Where to pickle imputers
+path_to_pickled_imputers = os.path.join(os.environ['OUTPUT_FOLDER'], "pickled_imputers")
+
 #Where to dump train and testing sets
 path_to_dumps = os.path.join(os.environ['OUTPUT_FOLDER'], "dumps")
 #Make directories if they don't exist
@@ -221,9 +227,17 @@ def log_results(model, config, test, predictions, feature_importances):
     dump.to_csv(os.path.join(path_to_predictions, mongo_id))
     #Pickle model
     if args.pickle:
-        path_to_file = os.path.join(path_to_pickles, mongo_id)
-        logger.info('Pickling: {}'.format(path_to_file))
-        joblib.dump(model, path_to_file) 
+        path_to_file = os.path.join(path_to_pickled_models, mongo_id)
+        logger.info('Pickling model: {}'.format(path_to_file))
+        joblib.dump(model, path_to_file)
+
+        path_to_file = os.path.join(path_to_pickled_imputers, mongo_id)
+        logger.info('Pickling imputer: {}'.format(path_to_file))
+        joblib.dump(imputer, path_to_file)
+
+        path_to_file = os.path.join(path_to_pickled_scalers, mongo_id)
+        logger.info('Pickling scaler: {}'.format(path_to_file))
+        joblib.dump(scaler, path_to_file)
 
 def main():
     config_file = args.path_to_config_file
@@ -316,7 +330,7 @@ def main():
             #Save predictions to CSV file
             #and pickle model
             log_results(model, config_raw, test, predicted,
-                feature_importances)
+                feature_importances, imputer, scaler)
 
         # generate blight probabilities for field test
         if config["prepare_field_test"]:
@@ -362,7 +376,8 @@ if __name__ == '__main__':
     parser.add_argument("-nl", "--notlog", action="store_true",
                         help="Do not log results to MongoDB")
     parser.add_argument("-p", "--pickle", action="store_true",
-                        help="Pickle model, only valid if logging is True")
+                        help="Pickle model, imputer and scaler, "
+                        "only valid if logging is True")
     parser.add_argument("-d", "--dump", action="store_true",
                         help=("Dump train and test sets (including indexes), "
                               "before imputation and scaling. "
