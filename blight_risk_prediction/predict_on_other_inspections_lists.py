@@ -12,11 +12,16 @@ EXPERIMENT_ID = '56cce760e0f48ce17743c18b'
 #Where to load list of inspections and features?
 SCHEMA = 'features_field_test_31dec2014'
 
-#Where to pickle models
-path_to_pickles = os.path.join(os.environ['OUTPUT_FOLDER'], "pickles")
+path_to_pickled_models = os.path.join(os.environ['OUTPUT_FOLDER'], "pickled_models")
+path_to_pickled_scalers = os.path.join(os.environ['OUTPUT_FOLDER'], "pickled_scalers")
+path_to_pickled_imputers = os.path.join(os.environ['OUTPUT_FOLDER'], "pickled_imputers")
 
 #load model from pickle file
-model = joblib.load(os.path.join(path_to_pickles, EXPERIMENT_ID)) 
+model = joblib.load(os.path.join(path_to_pickled_models, EXPERIMENT_ID)) 
+#load scaler
+scaler = joblib.load(os.path.join(path_to_pickled_scalers, EXPERIMENT_ID)) 
+#load imputer
+imputer = joblib.load(os.path.join(path_to_pickled_imputers, EXPERIMENT_ID)) 
 
 #Now load features that the model was trained on
 client = MongoClient(main['logger']['uri'])

@@ -195,7 +195,8 @@ def get_feature_importances(model):
                       'nor coef_ returning None'))
     return None
 
-def log_results(model, config, test, predictions, feature_importances):
+def log_results(model, config, test, predictions, feature_importances,
+    imputer, scaler):
     '''
         Log results to a MongoDB database
     '''
