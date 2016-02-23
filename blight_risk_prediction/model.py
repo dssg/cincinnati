@@ -15,6 +15,7 @@ import dataset, evaluation, util
 from features import feature_parser
 import argparse
 from sklearn import preprocessing
+from sklearn.externals import joblib
 
 from dstools.config import main as cfg_main
 from dstools.config import load
@@ -29,6 +30,15 @@ to have at least one violation.
 
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
+
+#Where to save test set predictions
+path_to_predictions = os.path.join(os.environ['OUTPUT_FOLDER'], "predictions")
+#Where to pickle models
+path_to_pickles = os.path.join(os.environ['OUTPUT_FOLDER'], "pickles")
+#Make directories if they don't exist
+for directory in [path_to_pickles, path_to_predictions]:
+    if not os.path.exists(directory):
+        os.makedirs(directory
 
 field_test_dir = "field_test_predictions/"
 
@@ -157,7 +167,7 @@ def get_feature_importances(model):
                       'nor coef_ returning None'))
     return None
 
-def log_to_mongo(config, test, predictions, feature_importances, model):
+def log_results(model, config, test, predictions, feature_importances, model):
     '''
         Log results to a MongoDB database
     '''
@@ -178,6 +188,7 @@ def log_to_mongo(config, test, predictions, feature_importances, model):
         config=config, prec_at_1=prec_at_1,
         prec_at_10=prec_at_10, cutoff_at_1=cutoff_at_1,
         cutoff_at_10=cutoff_at_10, experiment_name=experiment_name)
+
     #Dump test_labels, test_predictions and test_parcels to a csv file
     parcel_id = [record[0] for record in test.parcels]
     inspection_date = [record[1] for record in test.parcels]
@@ -185,23 +196,10 @@ def log_to_mongo(config, test, predictions, feature_importances, model):
         'inspection_date': inspection_date,
         'viol_outcome': test.y,
         'prediction': predictions})
-    dump.to_csv(os.path.join(os.environ['OUTPUT_FOLDER'], "predictions", mongo_id))
-
-def pickle_results(pkl_file, config, test, predictions, feature_importances, model):
-    '''
-        Legacy logging from the summer project, use this option if you want
-        to use the summer webapp
-    '''
-    to_save = {"config": config,
-                   "features": test.feature_names,
-                   "feature_importances": feature_importances,
-                   "test_labels": test.y,
-                   "test_predictions": predictions,
-                   "test_parcels": test.parcels}
-    #Preppend output folder to pkl_file so results are stored there
-    path_to_pkl = os.path.join(os.environ['OUTPUT_FOLDER'], "pickled_results", pkl_file)
-    with open(path_to_pkl, 'wb') as f:
-        pickle.dump(to_save, f, protocol=pickle.HIGHEST_PROTOCOL)
+    #Dump predictions to CSV
+    dump.to_csv(os.path.join(path_to_predictions, mongo_id))
+    #Pickle model
+    joblib.dump(model, os.path.join(path_to_pickles, mongo_id)) 
 
 def main():
     config_file = args.path_to_config_file
@@ -283,16 +281,14 @@ def main():
         config_raw["parameters"] = model.get_params()
         
         #Log depending on user selection
-        if args.how_to_save == 'mongo':
-            log_to_mongo(config_raw, test, predicted,
-                feature_importances, model)
-        elif args.how_to_save == 'pickle':
-            pickle_results(outfile, config_raw, test, predicted,
-                feature_importances, model)
-        elif args.how_to_save == 'none':
-            logger.info("You selected to not log results. Skipping logging...")
+        if args.notlog:
+            logger.info("You selected not to log results. Skipping...")
         else:
-            logger.info("Invalid logging option. Skipping logging...")
+            #Log parameters and metrics to MongoDB
+            #Save predictions to CSV file
+            #and pickle model
+            log_results(model, config_raw, test, predicted,
+                feature_importances, model)
 
         # generate blight probabilities for field test
         if config["prepare_field_test"]:
@@ -340,9 +336,8 @@ if __name__ == '__main__':
                             help=("n_jobs flag passed to scikit-learn models, "
                                   "fails silently if the model does not support "
                                   "such flag. Defaults to -1 (all jobs possible)"))
-    parser.add_argument("-s", "--how_to_save", type=str, choices=['mongo', 'pickle', 'none'],
-                        help="Log results to MongoDB or pickle results. Defaults to mongo",
-                        default='mongo')
+    parser.add_argument("-nl", "--notlog", action="store_true",
+                        help="Do not log results to MongoDB and pickle model")
     parser.add_argument("-d", "--dump", action="store_true",
                         help=("Dump train and test sets (including indexes), "
                               "before imputation and scaling. "
@@ -350,8 +345,5 @@ if __name__ == '__main__':
                               "$OUTPUT_FOLDER/dumps/[experiment_name]_[train/test]"))
     args = parser.parse_args()
 
-    print ('Starting modeling pipeline, configuring models using %s '
-            'configuration file. Trying with %d max jobs and '
-            'logging using %s.' % (args.path_to_config_file, args.n_jobs, 
-                args.how_to_save))
+    #print args
     main()
