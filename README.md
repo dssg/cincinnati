@@ -15,17 +15,21 @@ our project [here](http://dssg.uchicago.edu/2015/08/20/cincy-blight-prevention.h
 
 ###Select folders for the code, data and output
 
-The code relies on three environment variables, before you start running the code, decide where are you going to store the *raw data*,  *code* and *output*.
-
-Then add these three environment variables:
+The code relies on three environment variables, before you start running the code, decide where are you going to store the *raw data*,  *code* and *output*, a sample file `environment_sample.sh`, which looks like this:
 
 ```bash
-export ROOT_FOLDER="/absolute/path/to/the/repo"
-export DATA_FOLDER="/absolute/path/to/the/raw/data"
-export OUTPUT_FOLDER="/absolute/path/to/output/folder"
+#Where to store the code
+export ROOT_FOLDER="/path/to/repo/"
+#Where data is stored
+export DATA_FOLDER="/path/to/data/"
+#Where to output results from models
+export OUTPUT_FOLDER="/path/to/output/"
+
+#Add lib folder to PYTHONPATH
+export PYTHONPATH=$PYTHONPATH:$ROOT_FOLDER/lib_cinci
 ```
 
-Consider adding that to your shell profile.
+Modify the three environment variables, the `PYTHONPATH` line is also necessary since it includes many functions used across the project. Consider adding that to your shell profile, so they get loaded automatically.
 
 ###Clone the repo
 
