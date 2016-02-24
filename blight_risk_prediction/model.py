@@ -69,14 +69,6 @@ def configure_model(config_file):
     if "residential_only" not in cfg:
         cfg["residential_only"] = False
 
-    # predict parcels
-    if "prepare_field_test" in cfg:
-        if "prepare_field_test" not in cfg:
-            errmsg = "Set an inspection date to generate parcels to inspect"
-            raise ConfigError(errmsg)
-    else:
-        cfg["prepare_field_test"] = False
-
     return cfg, copy.deepcopy(cfg)
 
 def make_datasets(config):

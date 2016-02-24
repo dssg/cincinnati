@@ -11,11 +11,6 @@ start_date: '01Jan2012'    #train only on inspections after this date
 fake_today: '31Dec2015'
 validation_window: '1Year'  # Or '1Month'
 
-# Generate full parcel predictions for Cincinnati
-# Turn on after model validation/evaluation is complete
-prepare_field_test: False
-inspection_date: '01Aug2015'
-
 # only use residential parcels
 residential_only: True
 
@@ -75,8 +70,4 @@ grid_size: 'small' #small, medium or big
 # Experiment name          #
 ############################
 
-#The effecy of this will be different depending of which logger you are using
-#in both case is optional. If you are using mongo, this will just simpy add a new
-#key, this is useful for comments. If you are pickling results, this will be a prefix
-#in your pkl files
 experiment_name: 'testing'
