@@ -10,7 +10,8 @@ import copy
 from itertools import product
 import numpy as np
 from sklearn import linear_model, svm, ensemble
-import dataset, evaluation, util
+from lib_cinci import dataset
+import evaluation
 from features import feature_parser
 import argparse
 from sklearn import preprocessing

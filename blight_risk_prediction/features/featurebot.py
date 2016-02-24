@@ -14,7 +14,9 @@ from dstools.config import main as main_cfg
 from dstools.db import uri
 from dstools.config import load
 
+from lib_cinci.exceptions import MaxDateError, NoFeaturesSelected
 from feature_utils import tables_in_schema
+from lib_cinci.features import existing_feature_schemas
 
 #Features
 import ner, parcel, outcome, tax, crime_agg, census, three11
@@ -54,25 +56,6 @@ existing_features = [FeatureToGenerate("tax", tax.make_tax_features),
                          FeatureToGenerate("sales",
                                            sales.make_sales_features)]
 
-class SchemaMissing():
-    def __init__(self, schema_name):
-        self.schema_name = schema_name
-
-    def __str__(self):
-        return "Schema {} does not exist".format(self.schema_name)
-
-class MaxDateError(Exception):
-    pass
-
-class NoFeaturesSelected(Exception):
-    pass
-
-def existing_feature_schemas():
-    engine = create_engine(uri)
-    schemas = "SELECT schema_name AS schema FROM information_schema.schemata"
-    schemas = pd.read_sql(schemas, con=engine)["schema"]
-    schemas = [s for s in schemas.values if s.startswith("features")]
-    return schemas
 
 def generate_features(features_to_generate, n_months, max_dist,
                      inspection_date=None, insp_set='all_inspections'):

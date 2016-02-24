@@ -14,9 +14,8 @@ from sqlalchemy import create_engine
 from dstools.db import uri
 from dstools.config import load
 
-from features.featurebot import \
-    existing_feature_schemas, SchemaMissing
-from features.feature_parser import tables_and_columns_for_schema
+from lib_cinci.exceptions import SchemaMissing
+from lib_cinci.features import tables_and_columns_for_schema, existing_feature_schemas
 
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
