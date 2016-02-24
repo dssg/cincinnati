@@ -50,8 +50,6 @@ for directory in dirs:
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-field_test_dir = "field_test_predictions/"
-
 class ConfigError(Exception):
     pass
 
@@ -215,7 +213,7 @@ def main():
 
     # datasets
     logger.info('Loading datasets...')
-    train, test, field_train, field_test = make_datasets(config)
+    train, test  = make_datasets(config)
     logger.debug('Train x shape: {} Test x shape: {}'.format(train.x.shape,
         test.x.shape))
     # Dump datasets if dump option was selected
@@ -232,7 +230,6 @@ def main():
                 df.to_csv(os.path.join(path_to_dumps, filename))
             else:
                 logger.info('{} is None, skipping dump...'.format(name))
-
 
     #Impute missing values (mean is the only strategy for now)
     logger.info('Imputing values on train and test...')
