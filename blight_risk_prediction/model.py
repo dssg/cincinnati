@@ -135,33 +135,7 @@ def make_datasets(config):
         end_date=fake_today + validation_window,
         only_residential=only_residential)
 
-    field_train, field_test = None, None
-
-    if config["prepare_field_test"]:
-        inspection_date = datetime.datetime.strptime(config["inspection_date"],
-                                                     '%d%b%Y')
-        #To make predictions for field testing we need to create a training datasets
-        #similar to the ones used for the experiments, the start date is the same
-        #as sppecified in the configuration file but the end date must be the inspection
-        #date.
-        #Data is obtained from features schema
-        field_train = dataset.get_training_dataset(
-            features=features,
-            start_date=start_date,
-            end_date=inspection_date,
-            only_residential=only_residential)
-        #The test set is going to be used to predict in each parcel and then output
-        #results to a file that will be send to our partner. The dataset created using
-        #this function will use all parcels in cincinnati, but it will fake the inspection
-        #date for the desired date, and features will be generated according to such date
-        #Data is obtained from features_DATE schema, where DATE is the desired
-        #date of inspection
-        field_test = dataset.get_field_testing_dataset(
-            features=features,
-            fake_inspection_date=inspection_date,
-            only_residential=only_residential)
-
-    return train, test, field_train, field_test
+    return train, test
 
 def output_evaluation_statistics(test, predictions):
     logger.info("Statistics with probability cutoff at 0.5")
@@ -336,36 +310,6 @@ def main():
             log_results(model, config_raw, test, predicted,
                 feature_importances, imputer, scaler)
 
-        # generate blight probabilities for field test
-        if config["prepare_field_test"]:
-            #Impute missing values (mean is the only strategy for now)
-            logger.info('Imputing values on field_train and field_test...')
-            imputer = preprocessing.Imputer().fit(field_train.x)
-            field_train.x = imputer.transform(field_train.x)
-            field_test.x = imputer.transform(field_test.x)
-            
-            # Scale features to zero mean and unit variance
-            logger.info('Scaling field_train, field_test...')
-            scaler = preprocessing.StandardScaler().fit(field_train.x)
-            field_train.x = scaler.transform(field_train.x)
-            field_test.x = scaler.transform(field_test.x)
-
-            logger.info("Predicting for all cincinnati parcels ")
-            model.fit(field_train.x, field_train.y)
-
-            fake_inspections_probs = model.predict_proba(field_test.x)
-            # probability that label is 1
-            fake_inspections_probs = fake_inspections_probs[:, 1]
-
-            # make a csv with the predictions
-            index = pd.MultiIndex.from_tuples(
-                field_test.parcels, names=['parcel', 'inspection_date'])
-            parcels_with_probabilities = pd.Series(
-                fake_inspections_probs, index=index)
-            parcels_with_probabilities.sort(ascending=False)
-            outfile = os.path.join(field_test_dir,
-                                   "{}.csv".format(timestamp))
-            parcels_with_probabilities.to_csv(outfile)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

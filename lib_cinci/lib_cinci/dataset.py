@@ -412,25 +412,6 @@ def get_testing_dataset(features, start_date, end_date, only_residential):
     return get_dataset(schema, features, start_date, end_date,
                        only_residential)
 
-def get_field_testing_dataset(features, fake_inspection_date,
-                              only_residential):
-    """
-    :param features: Which features to load
-    :param fake_inspection_date: Date on which the inspection will take place
-    :return:
-    """
-    logger.info("Getting features and labels for field testing training data")
-
-    # random date very long ago (because actually the interval should
-    # be open-ended on the front)
-    start_date = datetime.datetime.strptime('01Jan1970', '%d%b%Y')
-
-    # features are taken from the schema specific for this inspection date
-    schema = "features_{}".format(fake_inspection_date.strftime('%d%b%Y'))
-
-    return get_dataset(schema, features, start_date, fake_inspection_date,
-                       only_residential)
-
 def get_features_for_inspections_in_schema(schema, features):
     logger.info("Getting features for all inspections in {}".format(schema))
 
