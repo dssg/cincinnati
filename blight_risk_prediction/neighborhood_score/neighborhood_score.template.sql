@@ -22,8 +22,17 @@ CREATE TABLE ${schema}.${table_name} AS(
         AND (parcels_a.inspection_date - '${n_months}'::interval) <= parcels_b.inspection_date
         AND parcels_b.inspection_date <= parcels_a.inspection_date
         AND parcels_b.viol_outcome=1
-    )
+    ),
 
     --Third: count 
-    SELECT parcel_id, inspection_date, count(*) FROM matches GROUP BY parcel_id, inspection_date
+    scores AS (
+        SELECT parcel_id, inspection_date, count(*) AS score
+        FROM matches GROUP BY parcel_id, inspection_date
+    )
+
+    --Last step, attach a column with the rank and percentile
+    SELECT score,
+    ntile(100) over (ORDER BY count) AS percentile,
+    rank() over (ORDER BY count) AS rank
+    FROM scores;
 )
