@@ -32,7 +32,7 @@ CREATE TABLE ${schema}.${table_name} AS(
 
     --Last step, attach a column with the rank and percentile
     SELECT score,
-    ntile(100) over (ORDER BY count) AS percentile,
-    rank() over (ORDER BY count) AS rank
-    FROM scores;
-)
+    ntile(100) over (ORDER BY score) AS percentile,
+    rank() over (ORDER BY score) AS rank
+    FROM scores
+);

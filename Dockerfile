@@ -82,7 +82,6 @@ RUN conda create -n py3 python=3 pandas sqlalchemy pyyaml psycopg2 pip
 RUN source activate py3
 RUN pip install dstools
 
-
 #Copy .pgpass
 COPY .pgpass /root/
 
