@@ -105,5 +105,5 @@ Once you have set up your environment, you can start usng the pipeline, the gene
 5. Evaluate experiments, [model_evaluation](model_evaluation/) folder contains notebooks to evaluate models.
 6. Prepare a new field test using the tools in [field_test_preparation](field_test_preparation/)
 
-##Notes
-* In the code you'll notice two rare packages [`dstools`](https://github.com/edublancas/dstools) and [`sklearn_evaluation`](https://github.com/edublancas/sklearn-evaluation/). The first one is just a collection of functions for loading yaml files and log models to MongoDB, the second one contains tools to evaluate scikit-learn models. While both packages are WIP, I made a release for both and published them on PyPI, so they should work without any problem.
+##Notes [WIP]
+* In the code you'll notice two rare packages [`lib_cinci`](https://github.com/edublancas/lib_cinci) and [`sklearn_evaluation`](https://github.com/edublancas/sklearn-evaluation/). The first one is just a collection of functions for loading yaml files and log models to MongoDB, the second one contains tools to evaluate scikit-learn models. While both packages are WIP, I made a release for both and published them on PyPI, so they should work without any problem.

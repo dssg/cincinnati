@@ -1,5 +1,5 @@
 import pandas as pd
-from dstools import data_folder
+from lib_cinci import data_folder
 import os
 
 path_to_data_folder = data_folder.for_file(__file__)

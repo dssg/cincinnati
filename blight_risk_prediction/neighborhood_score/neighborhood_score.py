@@ -2,7 +2,7 @@
 import argparse
 from string import Template
 import os
-from dstools.config import main as cfg
+from lib_cinci.config import main as cfg
 from sqlalchemy import create_engine
 import psycopg2
 

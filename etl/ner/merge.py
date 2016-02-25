@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from dstools import data_folder
+from lib_cinci import data_folder
 
 #Move current directory do all I/O operations take place in the corresponding
 #Data folder

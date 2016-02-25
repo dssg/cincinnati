@@ -10,9 +10,9 @@ import psycopg2
 from sqlalchemy import create_engine
 from sqlalchemy import types
 
-from dstools.config import main as main_cfg
-from dstools.db import uri
-from dstools.config import load
+from lib_cinci.config import main as main_cfg
+from lib_cinci.db import uri
+from lib_cinci.config import load
 
 from lib_cinci.exceptions import MaxDateError, NoFeaturesSelected
 from feature_utils import tables_in_schema

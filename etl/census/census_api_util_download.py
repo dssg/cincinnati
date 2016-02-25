@@ -7,7 +7,7 @@ import census_api_util as api
 from sqlalchemy import create_engine
 import pandas as pd
 #test query_census_api function
-from dstools.config import main as config
+from lib_cinci.config import main as config
 
 
 

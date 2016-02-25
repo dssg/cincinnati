@@ -4,7 +4,7 @@ import pandas as pd
 
 import dbconfig
 from sqlalchemy import create_engine
-from dstools.db import uri
+from lib_cinci.db import uri
 
 
 random.seed(1024)

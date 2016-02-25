@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 import re
-from dstools.db import uri
+from lib_cinci.db import uri
 from sqlalchemy import create_engine
 
 e = create_engine(uri)

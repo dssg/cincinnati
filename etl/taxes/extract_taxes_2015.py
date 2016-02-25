@@ -2,8 +2,8 @@
 import pandas as pd
 import numpy as np
 from sqlalchemy import create_engine
-from dstools.config import main as config
-from dstools import data_folder
+from lib_cinci.config import main as config
+from lib_cinci import data_folder
 import tax_defs
 import os
 

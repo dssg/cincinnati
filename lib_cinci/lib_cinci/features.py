@@ -1,7 +1,7 @@
-from dstools.config import main
+from lib_cinci.config import main
 from psycopg2 import connect
 from sqlalchemy import create_engine
-from dstools.db import uri
+from lib_cinci.db import uri
 import pandas as pd
 
 #Parameters in some of this functions are being passed in SQL queries,

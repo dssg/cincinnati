@@ -11,8 +11,8 @@ import pandas as pd
 
 import util
 from sqlalchemy import create_engine
-from dstools.db import uri
-from dstools.config import load
+from lib_cinci.db import uri
+from lib_cinci.config import load
 
 from lib_cinci.exceptions import SchemaMissing
 from lib_cinci.features import tables_and_columns_for_schema, existing_feature_schemas

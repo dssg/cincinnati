@@ -1,4 +1,4 @@
-from dstools.config import main
+from lib_cinci.config import main
 from psycopg2 import connect
 
 #Parameters in some of this functions are being passed in SQL queries,

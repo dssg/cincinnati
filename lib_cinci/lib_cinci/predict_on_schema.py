@@ -1,6 +1,6 @@
 import os
 from sklearn.externals import joblib
-from dstools.config import main
+from lib_cinci.config import main
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from dataset import get_features_for_inspections_in_schema

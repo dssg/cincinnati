@@ -3,8 +3,8 @@ import pandas as pd
 import numpy as np
 import yaml
 import sys
-from dstools.config import main as config
-from dstools import data_folder
+from lib_cinci.config import main as config
+from lib_cinci import data_folder
 
 input_file = sys.argv[1]
 year = int(sys.argv[2])

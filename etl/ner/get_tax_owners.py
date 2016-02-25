@@ -5,8 +5,8 @@ Perform name entity recognition for all property owners for all tax years. Store
 import pandas as pd
 from sqlalchemy import create_engine
 from NER_client import perform_NER
-from dstools.config import main as config
-from dstools import data_folder
+from lib_cinci.config import main as config
+from lib_cinci import data_folder
 import os
 
 #Move current directory do all I/O operations take place in the corresponding

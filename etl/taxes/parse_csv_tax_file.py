@@ -2,8 +2,8 @@ import os
 import pandas as pd
 import yaml
 import sys
-from dstools.config import main as config
-from dstools import data_folder
+from lib_cinci.config import main as config
+from lib_cinci import data_folder
 import numpy as np
 
 input_file = sys.argv[1]

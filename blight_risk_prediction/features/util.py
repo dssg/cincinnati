@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sqlalchemy import create_engine
 import datetime
-from dstools.db import uri
+from lib_cinci.db import uri
 
 logger = logging.getLogger()
 

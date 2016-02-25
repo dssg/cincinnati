@@ -4,7 +4,7 @@ Make a huge csv with a bunch of information about every property
 
 import sys
 from sqlalchemy import create_engine
-from dstools.db import uri
+from lib_cinci.db import uri
 import pandas as pd
 import dbconfig
 

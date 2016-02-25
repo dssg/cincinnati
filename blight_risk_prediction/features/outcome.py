@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import pandas as pd
 import numpy as np
-from dstools.db import uri
+from lib_cinci.db import uri
 from sqlalchemy import create_engine
 
 def load_inspections_from_field_test(date):

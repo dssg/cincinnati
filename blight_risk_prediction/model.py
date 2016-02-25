@@ -17,8 +17,8 @@ import argparse
 from sklearn import preprocessing
 from sklearn.externals import joblib
 
-from dstools.config import main as cfg_main
-from dstools.config import load
+from lib_cinci.config import main as cfg_main
+from lib_cinci.config import load
 from sklearn_evaluation.Logger import Logger
 from sklearn_evaluation.metrics import precision_at
 from grid_generator import grid_from_class

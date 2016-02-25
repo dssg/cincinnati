@@ -2,14 +2,14 @@ import pandas as pd
 from string import Template
 import os
 from sqlalchemy import create_engine
-from dstools.db import uri
-from dstools.config import load
+from lib_cinci.db import uri
+from lib_cinci.config import load
 import logging
 import logging.config
 import re
 import logging
 import logging.config
-from dstools.config import load
+from lib_cinci.config import load
 
 #Config logger
 logging.config.dictConfig(load('logger_config.yaml'))

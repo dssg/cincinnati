@@ -49,7 +49,6 @@ dependencies:
   - dbf==0.94.3
   - decorator==4.0.6
   - descartes==1.0.1
-  - dstools==0.3
   - engarde==0.3.1
   - fiona==1.6.3
   - flask==0.10.1
