@@ -1,9 +1,6 @@
 FROM ubuntu:trusty
 MAINTAINER Eduardo Blancas Reyes
 
-#Expose 4000 port, this is used for the evaluation webapp
-EXPOSE 4000
-
 #Run everything with bash instead of sh
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
@@ -67,14 +64,10 @@ ENV CLASSPATH=/root/$NAME/stanford-ner.jar
 ENV NER_CLASSIFIERS=/root/$NAME/classifiers
 
 #Copy the conda requirements file
-COPY requirements.conda /tmp/
-#For some reason conda is not listing pip installed packages
-#so, copy the pip requirements file too
-COPY requirements.txt /tmp/
+COPY environment.yml /tmp/
 
 #Install Python dependencies
-RUN conda install --file /tmp/requirements.conda
-RUN pip install -r /tmp/requirements.txt
+RUN conda env create --file /tmp/environment.yml
 
 #Install Python3 environment with some dependencies (this is required to run the NER code)
 #https://www.continuum.io/content/python-3-support-anaconda
@@ -83,7 +76,9 @@ RUN source activate py3
 RUN pip install dstools
 
 #Copy .pgpass
-COPY .pgpass /root/
+#COPY .pgpass /root/
 
 #Set /root as working dir
-WORKDIR /root
+#WORKDIR /root
+
+#Set cincinnati env as default?
