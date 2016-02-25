@@ -101,7 +101,6 @@ dependencies:
   - seaborn==0.7.0
   - shyaml==0.3.4
   - sklearn==0.0
-  - sklearn-evaluation==0.14
   - tabulate==0.7.5
   - toolz==0.7.4
   - werkzeug==0.11.3
