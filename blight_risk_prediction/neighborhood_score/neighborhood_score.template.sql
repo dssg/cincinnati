@@ -9,7 +9,6 @@ CREATE TABLE ${schema}.${table_name} AS(
         FROM ${schema}.parcels_inspections AS insp
         JOIN shape_files.parcels_cincy AS parcels
         ON insp.parcel_id=parcels.parcelid
-        LIMIT 100
     ),
     --Second: find inspections pairs that
     --ocurred within certain distance and time window
