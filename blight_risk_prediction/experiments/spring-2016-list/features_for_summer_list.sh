@@ -18,12 +18,11 @@ $PATH_TO_BOT/featurebot.py -d 31dec2014 -f three11,permits,crime,fire,sales -m 6
 $PATH_TO_BOT/featurebot.py -d 31dec2014 -f three11,permits,crime,fire,sales -m 9 -md 400 -s field_test
 
 #700m
-$PATH_TO_BOT/featurebot.py -d 31dec2014 -f three11,permits,crime,fire,sales -m 3 -md 700m -s field_test
-$PATH_TO_BOT/featurebot.py -d 31dec2014 -f three11,permits,crime,fire,sales -m 6 -md 700m -s field_test
-$PATH_TO_BOT/featurebot.py -d 31dec2014 -f three11,permits,crime,fire,sales -m 9 -md 700m -s field_test
+$PATH_TO_BOT/featurebot.py -d 31dec2014 -f three11,permits,crime,fire,sales -m 3 -md 700 -s field_test
+$PATH_TO_BOT/featurebot.py -d 31dec2014 -f three11,permits,crime,fire,sales -m 6 -md 700 -s field_test
+$PATH_TO_BOT/featurebot.py -d 31dec2014 -f three11,permits,crime,fire,sales -m 9 -md 700 -s field_test
 
 #1000m
-#400m
 $PATH_TO_BOT/featurebot.py -d 31dec2014 -f three11,permits,crime,fire,sales -m 3 -md 1000 -s field_test
 $PATH_TO_BOT/featurebot.py -d 31dec2014 -f three11,permits,crime,fire,sales -m 6 -md 1000 -s field_test
 $PATH_TO_BOT/featurebot.py -d 31dec2014 -f three11,permits,crime,fire,sales -m 9 -md 1000 -s field_test
