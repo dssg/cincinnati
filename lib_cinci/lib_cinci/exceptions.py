@@ -10,3 +10,6 @@ class MaxDateError(Exception):
 
 class NoFeaturesSelected(Exception):
     pass
+
+class ConfigError(Exception):
+    pass

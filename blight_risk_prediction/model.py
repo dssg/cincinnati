@@ -19,6 +19,7 @@ from sklearn.externals import joblib
 
 from lib_cinci.config import main as cfg_main
 from lib_cinci.config import load
+from lib_cinci.exceptions import MaxDateError, ConfigError
 from sklearn_evaluation.Logger import Logger
 from sklearn_evaluation.metrics import precision_at
 from grid_generator import grid_from_class
@@ -49,12 +50,6 @@ dirs = [path_to_predictions, path_to_pickled_models,
 for directory in dirs:
     if not os.path.exists(directory):
         os.makedirs(directory)
-
-class ConfigError(Exception):
-    pass
-
-class MaxDateError(Exception):
-    pass
 
 def configure_model(config_file):
     logger.info("Reading config from {}".format(config_file))
