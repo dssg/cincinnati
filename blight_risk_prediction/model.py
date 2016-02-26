@@ -16,13 +16,15 @@ from features import feature_parser
 import argparse
 from sklearn import preprocessing
 from sklearn.externals import joblib
+from sklearn_evaluation.Logger import Logger
+from sklearn_evaluation.metrics import precision_at
+from grid_generator import grid_from_class
 
 from lib_cinci.config import main as cfg_main
 from lib_cinci.config import load
 from lib_cinci.exceptions import MaxDateError, ConfigError
-from sklearn_evaluation.Logger import Logger
-from sklearn_evaluation.metrics import precision_at
-from grid_generator import grid_from_class
+from lib_cinci.folders import (path_to_predictions, path_to_pickled_models,
+    path_to_pickled_scalers, path_to_pickled_imputers, path_to_dumps) 
 
 """
 Purpose: train a binary classifier to identify those homes that are likely
@@ -31,17 +33,6 @@ to have at least one violation.
 
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
-
-#Where to save test set predictions
-path_to_predictions = os.path.join(os.environ['OUTPUT_FOLDER'], "predictions")
-#Where to pickle models
-path_to_pickled_models = os.path.join(os.environ['OUTPUT_FOLDER'], "pickled_models")
-#Where to pickle scales
-path_to_pickled_scalers = os.path.join(os.environ['OUTPUT_FOLDER'], "pickled_scalers")
-#Where to pickle imputers
-path_to_pickled_imputers = os.path.join(os.environ['OUTPUT_FOLDER'], "pickled_imputers")
-#Where to dump train and testing sets
-path_to_dumps = os.path.join(os.environ['OUTPUT_FOLDER'], "dumps")
 
 dirs = [path_to_predictions, path_to_pickled_models,
          path_to_pickled_scalers, path_to_pickled_imputers,
