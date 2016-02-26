@@ -1,3 +1,5 @@
+import os
+
 #Where to save test set predictions
 path_to_predictions = os.path.join(os.environ['OUTPUT_FOLDER'], "predictions")
 #Where to pickle models
