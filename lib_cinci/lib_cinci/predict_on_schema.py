@@ -6,7 +6,7 @@ from bson.objectid import ObjectId
 from dataset import get_features_for_inspections_in_schema
 import pandas as pd
 
-def predict_on_schema(experiment_id, schema):
+def predict_on_schema(model_id, schema):
     '''
         Use the model from a previous experiment to predict on one of the
         existing feature schemas.
@@ -18,26 +18,26 @@ def predict_on_schema(experiment_id, schema):
         For pickles to exist, use the --pickle option in model.py
 
         Example:
-        experiment_id = '56ccea5ae0f48ce44f618afe'
+        model_id = '56ccea5ae0f48ce44f618afe'
         schema = 'features_field_test_31dec2014'
-        df = predict_on_schema(experiment_id, schema)
+        df = predict_on_schema(model_id, schema)
     '''
     path_to_pickled_models = os.path.join(os.environ['OUTPUT_FOLDER'], "pickled_models")
     path_to_pickled_scalers = os.path.join(os.environ['OUTPUT_FOLDER'], "pickled_scalers")
     path_to_pickled_imputers = os.path.join(os.environ['OUTPUT_FOLDER'], "pickled_imputers")
     
     #load model from pickle file
-    model = joblib.load(os.path.join(path_to_pickled_models, experiment_id)) 
+    model = joblib.load(os.path.join(path_to_pickled_models, model_id)) 
     #load scaler
-    scaler = joblib.load(os.path.join(path_to_pickled_scalers, experiment_id)) 
+    scaler = joblib.load(os.path.join(path_to_pickled_scalers, model_id)) 
     #load imputer
-    imputer = joblib.load(os.path.join(path_to_pickled_imputers, experiment_id)) 
+    imputer = joblib.load(os.path.join(path_to_pickled_imputers, model_id)) 
     
     #Now load features that the model was trained on
     client = MongoClient(main['logger']['uri'])
     collection = client['models']['cincinnati']
     #Convert string with date and time to datetime object
-    results = collection.find_one({"_id": ObjectId(experiment_id)})
+    results = collection.find_one({"_id": ObjectId(model_id)})
     #Get table_name,feature_name tuples
     features = results['feature_mapping']
     #Mongodb returns tuples as lists, but our loading method
