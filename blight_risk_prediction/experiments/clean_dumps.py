@@ -1,5 +1,7 @@
 from pymongo import MongoClient
 from lib_cinci.config import main
+from lib_cinci.folders import (path_to_predictions, path_to_pickled_models,
+    path_to_pickled_scalers, path_to_pickled_imputers, path_to_dumps)
 
 '''
     Using the --pickle option in model.py will dump the
