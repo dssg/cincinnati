@@ -6,7 +6,7 @@ Here you will find one subfolders for each dataset that we used. For each folder
 bash etl/cagis/cagis.sh
 ```
 
-**Note:** Some ETL steps depend on others, there's no script to run them in order (ups), but running CAGIS, census, inspections, parcels first should work fine.
+**Note:** Some ETL steps depend on others, there's no script to run them in order (ups), but running inspections, parcels, CAGIS, census first should work fine.
 
 ##Before running ETL scripts setup the database
 
