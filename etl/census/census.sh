@@ -54,7 +54,11 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/process_census_tables.sq
 python "$CODE_FOLDER/census_api_util_download.py"
 
 #Map parcels to tracts
+#Create shape_files.parcels_cincy table which is a subset of Hamilton parcels
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/map_parcels_to_tracts_geocode.sql"  
+
+#Add latitude and longitude columns to parcels_cincy table (point on centroid)
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/add_lat_long_to_parcels_cincy.sql"
 
 #Create features
 python "$CODE_FOLDER/census_features.py"
