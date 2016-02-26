@@ -269,9 +269,9 @@ def main():
         timestamp = datetime.datetime.now().isoformat()
 
         # train
-        logger.info("{} out of {} - Training {}".format(model,
-                                                        idx+1,
-                                                        len(models)))
+        logger.info("{} out of {} - Training {}".format(idx+1,
+                                                        len(models)),
+                                                        model)
         model.fit(train.x, train.y)
 
         # predict
