@@ -234,4 +234,4 @@ def precision_at_percentages(test_labels, test_predictions,
     ax.set_title(title)
     ax.set_ylabel('Precision')
     ax.set_xlabel('Percentage')
-    return fig
+    return ax
