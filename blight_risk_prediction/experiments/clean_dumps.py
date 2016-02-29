@@ -52,7 +52,7 @@ for experiment_name in experiments:
                         {'_id':1})
     ids_to_del = [obj['_id'] for obj in object_ids_to_del]
     result = collection.delete_many({ '_id': { '$in': ids_to_del }})
-    logger.info("{} documents removed...".format(result.deleted_count))
+    logger.info("{} documents removed from MongoDB...".format(result.deleted_count))
     #add ids to keep to list
     ids_to_keep.extend(ids)
 

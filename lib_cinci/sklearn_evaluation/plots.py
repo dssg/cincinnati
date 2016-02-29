@@ -218,16 +218,18 @@ def feature_importances_from_list(features, feature_importances, top_n=None):
     ax.set_xlim([-1, 10])
     return fig
 
-def precision_at_percentages(test_labels, test_predictions, title='Precision at various percentages'):
+def precision_at_percentages(test_labels, test_predictions,
+    title='Precision at various percentages', ax=None):
     '''
         Plots precision for various percent values
     '''
     percents = [0.01 * i for i in range(1, 101)]
     precs_and_cutoffs = [precision_at(test_labels, test_predictions, percent=p) for p in percents]
     precs, cutoffs = zip(*precs_and_cutoffs)
-    fig = Figure()
-    canvas = FigureCanvas(fig)
-    ax = fig.add_subplot(111)
+    if ax is None:
+        fig = Figure()
+        canvas = FigureCanvas(fig)
+        ax = fig.add_subplot(111)
     ax.plot(percents, precs)
     ax.set_title(title)
     ax.set_ylabel('Precision')
