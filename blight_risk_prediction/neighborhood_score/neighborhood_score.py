@@ -10,13 +10,12 @@ def main():
     table_name = 'neighborhood_score_{}m_{}months'.format(args.maxdist,
       args.months)
     print 'Creating {} table...'.format(table_name)
-    #Convert meters to US survey foot
     #Load template
     path_to_template = os.path.join(os.environ['ROOT_FOLDER'],
         'blight_risk_prediction', 'neighborhood_score',
         'neighborhood_score.template.sql')
     with open(path_to_template, 'r') as f:
-            sql_script = Template(f.read())
+        sql_script = Template(f.read())
     #Convert max_dist to survey foot, since those are the units in the
     #database
     max_dist_foot = args.maxdist * 3.281
