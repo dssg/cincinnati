@@ -5,8 +5,6 @@ from sqlalchemy import create_engine
 from lib_cinci.db import uri
 import pandas as pd
 
-from string import Template
-
 '''
     This file provides utility functions to evaluate
     model predictions
@@ -62,7 +60,7 @@ def load_violations_for(start_year, end_year):
         inspections done.
     '''
     e = create_engine(uri)
-    q=Template('''
+    q='''
         SELECT
             insp.parcel_id, insp.inspection_date,
             parc.latitude, parc.longitude
@@ -70,8 +68,10 @@ def load_violations_for(start_year, end_year):
         JOIN shape_files.parcels_cincy AS parc
         ON insp.parcel_id=parc.parcelid
         WHERE viol_outcome=1
-        AND EXTRACT(YEAR FROM inspection_date)>=${start_year}
-        AND EXTRACT(YEAR FROM inspection_date)<=${end_year}
-    ''').substitute(start_year=start_year, end_year=end_year)
-    viol = pd.read_sql(q, e, columns=['latitude', 'longitude'])
+        AND EXTRACT(YEAR FROM inspection_date)>=%(start_year)s
+        AND EXTRACT(YEAR FROM inspection_date)<=%(end_year)s
+    '''
+    viol = pd.read_sql(q, e,
+        columns=['latitude', 'longitude'],
+        params={'start_year':start_year, 'end_year':end_year})
     return viol
