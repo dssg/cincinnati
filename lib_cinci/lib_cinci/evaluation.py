@@ -61,7 +61,7 @@ def load_violations_for(start_year, end_year=None):
     '''
     #If only one parameter is passed, set end_year
     #to the value of start_year
-    end_year = start_year if end_year is None
+    end_year = start_year if end_year is None else end_year
     e = create_engine(uri)
     q='''
         SELECT
