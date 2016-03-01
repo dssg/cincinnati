@@ -14,7 +14,13 @@ CREATE TABLE ${schema}.${table_name} AS(
     --ocurred within certain distance and time window
     --store the status of the second parcel
     matches AS (
-        SELECT parcels_a.parcel_id, parcels_a.inspection_date, parcels_b.viol_outcome
+        --grab parcel_id and inspection_date for both
+        --parcels, but only the outcome for the second one
+        SELECT parcels_a.parcel_id AS parcel_id,
+               parcels_a.inspection_date AS inspection_date,
+               parcels_b.parcel_id AS parcel_id_b,
+               parcels_b.inspection_date AS inspection_date_b,
+               parcels_b.viol_outcome AS viol_outcome,
         FROM inspections_location AS parcels_a
         JOIN inspections_location AS parcels_b
         ON ST_DWithin(parcels_a.geom, parcels_b.geom, ${max_dist_foot})
@@ -36,12 +42,42 @@ CREATE TABLE ${schema}.${table_name} AS(
         FROM matches
         GROUP BY parcel_id, inspection_date
     ),
+
+    --Using matches, do the counting again, but this time
+    --count events in the same parcel_id_b as one
+    --this way we can avoid overcounting parcels that have been
+    --inspected more than once for the given period
+    --order by viol_outcome, so in case a parcel had multiple inspections
+    --with different viol_outcome it's going to be counted as one
+    --violation
+
+    --Get unique matches
+    unique_matches AS (
+        SELECT
+            DISTINCT ON (parcel_id, inspection_date, parcels_b, viol_outcome) *
+            FROM matches
+            ORDER BY viol_outcome DESC
+    ),
+
+    --Do the counting
+    unique_counts AS (
+        SELECT
+            parcel_id,
+            inspection_date,
+            SUM(CASE WHEN viol_outcome = 1 THEN 1 ELSE 0 END) unique_violations,
+            SUM(CASE WHEN viol_outcome = 0 THEN 1 ELSE 0 END) unique_non_violations,
+            COUNT(*) AS unique_inspections
+        FROM matches
+        GROUP BY parcel_id, inspection_date
+    ),
     
     --select * from counts
         
     --Get geometric column for the unique parcels in counts
     parcels_cincy_subset AS(
-        SELECT parcelid, geom FROM shape_files.parcels_cincy WHERE parcelid IN (SELECT DISTINCT parcel_id  FROM counts)
+        SELECT parcelid, geom
+            FROM shape_files.parcels_cincy
+            WHERE parcelid IN (SELECT DISTINCT parcel_id  FROM counts)
     ),
 
     --for those parcels, count the number of parcels nearby using
@@ -55,19 +91,26 @@ CREATE TABLE ${schema}.${table_name} AS(
         GROUP BY parcel_id
     ),
     
-    --join with the counts table
+    --join with the both counting tables
     scores AS (
-        SELECT counts.*, parcels_nearby.houses
+        SELECT counts.*, unique_counts.*, parcels_nearby.houses
         FROM counts
         JOIN parcels_nearby
-        USING (parcel_id)
+        USING(parcel_id)
+        JOIN unique_counts
+        USING(parcel_id)
     )
     
     --Last step, attach a column with ranks for each column
     SELECT scores.*,
     rank() OVER (ORDER BY violations) AS violations_rank,
     rank() OVER (ORDER BY non_violations) AS non_violations_rank,
-    rank() OVER (ORDER BY houses) AS houses_rank,
-    rank() OVER (ORDER BY inspections) AS inspections_rank
+    rank() OVER (ORDER BY inspections) AS inspections_rank,
+
+    rank() OVER (ORDER BY unique_violations) AS unique_violations_rank,
+    rank() OVER (ORDER BY unique_non_violations) AS unique_non_violations_rank,
+    rank() OVER (ORDER BY unique_inspections) AS unique_inspections_rank,
+
+    rank() OVER (ORDER BY houses) AS houses_rank
     FROM scores
 );
