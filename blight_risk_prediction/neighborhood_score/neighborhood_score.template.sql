@@ -20,7 +20,7 @@ CREATE TABLE ${schema}.${table_name} AS(
                parcels_a.inspection_date AS inspection_date,
                parcels_b.parcel_id AS parcel_id_b,
                parcels_b.inspection_date AS inspection_date_b,
-               parcels_b.viol_outcome AS viol_outcome,
+               parcels_b.viol_outcome AS viol_outcome
         FROM inspections_location AS parcels_a
         JOIN inspections_location AS parcels_b
         ON ST_DWithin(parcels_a.geom, parcels_b.geom, ${max_dist_foot})
@@ -54,7 +54,7 @@ CREATE TABLE ${schema}.${table_name} AS(
     --Get unique matches
     unique_matches AS (
         SELECT
-            DISTINCT ON (parcel_id, inspection_date, parcels_b, viol_outcome) *
+            DISTINCT ON (parcel_id, inspection_date, parcel_id_b, viol_outcome) *
             FROM matches
             ORDER BY viol_outcome DESC
     ),
@@ -93,7 +93,11 @@ CREATE TABLE ${schema}.${table_name} AS(
     
     --join with the both counting tables
     scores AS (
-        SELECT counts.*, unique_counts.*, parcels_nearby.houses
+        SELECT counts.*,
+	       unique_counts.unique_violations,
+	       unique_counts.unique_non_violations,
+	       unique_counts.unique_inspections,
+	       parcels_nearby.houses
         FROM counts
         JOIN parcels_nearby
         USING(parcel_id)
