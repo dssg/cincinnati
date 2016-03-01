@@ -52,13 +52,16 @@ def add_latlong_to_df(df):
     parcels.index.rename('parcel_id', inplace=True)
     return df.join(parcels)
 
-def load_violations_for(start_year, end_year):
+def load_violations_for(start_year, end_year=None):
     '''
         Load violations that happened between start_year and end_year,
         returns a DataFrame with parcel_id, inspection_date, latitude, 
         longitude. Takes data from features schema, which has all
         inspections done.
     '''
+    #If only one parameter is passed, set end_year
+    #to the value of start_year
+    end_year = start_year if end_year is None
     e = create_engine(uri)
     q='''
         SELECT
