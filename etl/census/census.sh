@@ -55,7 +55,10 @@ python "$CODE_FOLDER/census_api_util_download.py"
 
 #Map parcels to tracts
 #Create shape_files.parcels_cincy table which is a subset of Hamilton parcels
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/map_parcels_to_tracts_geocode.sql"  
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/map_parcels_to_tracts_geocode.sql"
+
+#Remove duplicates in shape_files.parcels_cincy
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/remove_parcels_duplicates.sql"
 
 #Add latitude and longitude columns to parcels_cincy table (point on centroid)
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/add_lat_long_to_parcels_cincy.sql"
