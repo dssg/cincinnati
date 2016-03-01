@@ -5,6 +5,8 @@ from sqlalchemy import create_engine
 from lib_cinci.db import uri
 import pandas as pd
 
+from string import Template
+
 '''
     This file provides utility functions to evaluate
     model predictions
@@ -52,3 +54,24 @@ def add_latlong_to_df(df):
     parcels.index.rename('parcel_id', inplace=True)
     return df.join(parcels)
 
+def load_violations_for(start_year, end_year):
+    '''
+        Load violations that happened between start_year and end_year,
+        returns a DataFrame with parcel_id, inspection_date, latitude, 
+        longitude. Takes data from features schema, which has all
+        inspections done.
+    '''
+    e = create_engine(uri)
+    q=Template('''
+        SELECT
+            insp.parcel_id, insp.inspection_date,
+            parc.latitude, parc.longitude
+        FROM features.parcels_inspections AS insp
+        JOIN shape_files.parcels_cincy AS parc
+        ON insp.parcel_id=parc.parcelid
+        WHERE viol_outcome=1
+        AND EXTRACT(YEAR FROM inspection_date)>=${start_year}
+        AND EXTRACT(YEAR FROM inspection_date)<=${end_year}
+    ''').substitute(start_year=start_year, end_year=end_year)
+    viol = pd.read_sql(q, e, columns=['latitude', 'longitude'])
+    return viol
