@@ -219,9 +219,9 @@ def feature_importances_from_list(features, feature_importances, top_n=None):
     return fig
 
 def precision_at_percentages(test_labels, test_predictions,
-    title='Precision at various percentages', ax=None):
+    title='Precision at various proportions', ax=None):
     '''
-        Plots precision for various percent values
+        Plots precision for various proportion values
     '''
     percents = [0.01 * i for i in range(1, 101)]
     precs_and_cutoffs = [precision_at(test_labels, test_predictions, percent=p) for p in percents]
@@ -233,5 +233,5 @@ def precision_at_percentages(test_labels, test_predictions,
     ax.plot(percents, precs)
     ax.set_title(title)
     ax.set_ylabel('Precision')
-    ax.set_xlabel('Percentage')
+    ax.set_xlabel('Proportion')
     return ax
