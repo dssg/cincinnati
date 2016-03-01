@@ -1,6 +1,10 @@
 from sklearn_evaluation.metrics import precision_at
 from copy import deepcopy
 
+from sqlalchemy import create_engine
+from lib_cinci.db import uri
+import pandas as pd
+
 '''
     This file provides utility functions to evaluate
     model predictions
@@ -30,9 +34,21 @@ def add_flags_to_predictions_df(df):
     df['fp_top_10'] = df.top_10 & ~df.viol_outcome
     return df
 
-def geocode_predictions_df(df):
+def add_latlong_to_df(df):
     '''
         Return a predictions data frame with latitude and longitude columns
-        for each parcel
+        for each parcel. The DatFrame passed as parameter is expected to
+        have a parcel_id index.
+
+        This method is not memory efficient since it loads
+        all parcels into memory, but it makes easier to retrieve lat,long.
+        Use it responsibly.
     '''
-    pass
+    e = create_engine(uri)
+    parcels = pd.read_sql_table('parcels_cincy', e,
+        schema='shape_files',
+        columns=['latitude', 'longitude'],
+        index_col='parcelid')
+    parcels.index.rename('parcel_id', inplace=True)
+    return df.join(parcels)
+
