@@ -4,6 +4,7 @@ from copy import deepcopy
 from sqlalchemy import create_engine
 from lib_cinci.db import uri
 import pandas as pd
+from scipy import stats
 
 '''
     This file provides utility functions to evaluate
@@ -78,3 +79,15 @@ def load_violations_for(start_year, end_year=None):
         columns=['latitude', 'longitude'],
         params={'start_year':start_year, 'end_year':end_year})
     return viol
+
+def add_percentile_column(df, column_name):
+    '''
+        Given a DataFrame and a column_name
+	return a new DataFrame with a new column including
+	the percentile for the value in column_name 
+    '''
+    df = deepcopy(df)
+    col_vals = df[column_name]
+    perc_col_name = '{}_percentile'.format(column_name)
+    df[perc_col_name] = [stats.percentileofscore(col_vals, value, 'rank') for value in col_vals]
+    return df
