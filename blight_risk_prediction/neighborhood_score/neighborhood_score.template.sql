@@ -67,7 +67,7 @@ CREATE TABLE ${schema}.${table_name} AS(
             SUM(CASE WHEN viol_outcome = 1 THEN 1 ELSE 0 END) unique_violations,
             SUM(CASE WHEN viol_outcome = 0 THEN 1 ELSE 0 END) unique_non_violations,
             COUNT(*) AS unique_inspections
-        FROM matches
+        FROM unique_matches
         GROUP BY parcel_id, inspection_date
     ),
     
@@ -102,7 +102,7 @@ CREATE TABLE ${schema}.${table_name} AS(
         JOIN parcels_nearby
         USING(parcel_id)
         JOIN unique_counts
-        USING(parcel_id)
+        USING(parcel_id, inspection_date)
     )
     
     --Last step, attach a column with ranks for each column
