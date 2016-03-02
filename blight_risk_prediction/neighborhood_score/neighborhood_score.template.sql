@@ -99,10 +99,10 @@ CREATE TABLE ${schema}.${table_name} AS(
 	       unique_counts.unique_inspections,
 	       parcels_nearby.houses
         FROM counts
-        JOIN parcels_nearby
-        USING(parcel_id)
         JOIN unique_counts
         USING(parcel_id, inspection_date)
+	JOIN parcels_nearby
+	USING(parcel_id)
     )
     
     --Last step, attach a column with ranks for each column
