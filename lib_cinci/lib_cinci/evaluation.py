@@ -77,7 +77,8 @@ def load_violations_for(start_year, end_year=None):
     '''
     viol = pd.read_sql(q, e,
         columns=['latitude', 'longitude'],
-        params={'start_year':start_year, 'end_year':end_year})
+        params={'start_year':start_year
+        , 'end_year':end_year})
     return viol
 
 def add_percentile_column(df, column_name):

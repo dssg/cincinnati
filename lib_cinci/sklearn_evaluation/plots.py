@@ -218,20 +218,30 @@ def feature_importances_from_list(features, feature_importances, top_n=None):
     ax.set_xlim([-1, 10])
     return fig
 
-def precision_at_percentages(test_labels, test_predictions,
-    title='Precision at various proportions', ax=None):
+def precision_at_percentages(test_labels, test_predictions, ax=None):
     '''
-        Plots precision for various proportion values
+        This functions is just to avoid breaking legacy code,
+        use precision_at_proportions instead.
+
     '''
+    return precision_at_percentages(test_labels, test_predictions, ax)
+
+def precision_at_proportions(test_labels, test_predictions, ax=None, **kwargs):
+    '''
+        Plots precision for proportions between 0.1 and 1.0
+    '''
+    #If not Axes object is passed use the current one in pyplot
+    if ax is None:
+        ax = plt.gca()
+
+    #Calculate points
     percents = [0.01 * i for i in range(1, 101)]
     precs_and_cutoffs = [precision_at(test_labels, test_predictions, percent=p) for p in percents]
     precs, cutoffs = zip(*precs_and_cutoffs)
-    if ax is None:
-        fig = Figure()
-        canvas = FigureCanvas(fig)
-        ax = fig.add_subplot(111)
-    ax.plot(percents, precs)
-    ax.set_title(title)
+
+    #Plot and set nice defaults for title and axis labels
+    ax.plot(percents, precs, **kwargs)
+    ax.set_title('Precision at various proportions')
     ax.set_ylabel('Precision')
     ax.set_xlabel('Proportion')
     return ax
