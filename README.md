@@ -104,6 +104,3 @@ Once you have set up your environment, you can start usng the pipeline, the gene
 4. Run some experiments. Use `model.py` inside [blight_risk_prediction](blight_risk_prediction/) to train models. `model.py` requires you to provide a configuration file, see `default.yaml` in this folder for reference.  [experiments](blight_risk_prediction/experiments) folder contains more examples.
 5. Evaluate experiments, [model_evaluation](model_evaluation/) folder contains notebooks to evaluate models.
 6. Prepare a new field test using the tools in [field_test_preparation](field_test_preparation/)
-
-##Notes [WIP]
-* In the code you'll notice two rare packages [`lib_cinci`](https://github.com/edublancas/lib_cinci) and [`sklearn_evaluation`](https://github.com/edublancas/sklearn-evaluation/). The first one is just a collection of functions for loading yaml files and log models to MongoDB, the second one contains tools to evaluate scikit-learn models. While both packages are WIP, I made a release for both and published them on PyPI, so they should work without any problem.
