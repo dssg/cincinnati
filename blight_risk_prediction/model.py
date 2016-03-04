@@ -256,8 +256,8 @@ def main():
 
         # train
         logger.info("{} out of {} - Training {}".format(idx+1,
-                                                        len(models)),
-                                                        model)
+                                                        len(models),
+                                                        model))
         model.fit(train.x, train.y)
 
         # predict
