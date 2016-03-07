@@ -300,7 +300,7 @@ if __name__ == '__main__':
                         help="Do not log results to MongoDB")
     parser.add_argument("-p", "--pickle", action="store_true",
                         help="Pickle model, imputer and scaler, "
-                        "only valid if logging is True")
+                        "only valid if logging is activated")
     parser.add_argument("-d", "--dump", action="store_true",
                         help=("Dump train and test sets (including indexes), "
                               "before imputation and scaling. "
