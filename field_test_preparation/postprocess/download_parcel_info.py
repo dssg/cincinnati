@@ -1,15 +1,21 @@
 """
 Make a huge csv with a bunch of information about every property
 """
-
 import sys
 from sqlalchemy import create_engine
 from lib_cinci.db import uri
 import pandas as pd
-import dbconfig
+import os
 
+output_folder = os.environ['OUTPUT_FOLDER']
 engine = create_engine(uri)
 
+#paths to store output files
+path_to_postprocess = os.path.join(output_folder, "postprocess")
+path_to_neighborhoods = os.path.join(path_to_postprocess, "hoods.csv")
+path_to_inspections = os.path.join(path_to_postprocess, "inspections.csv")
+path_to_type = os.path.join(path_to_postprocess, "type.csv")
+path_to_parcel_info = os.path.join(path_to_postprocess, "parcel_info.csv")
 
 def get_neighbourhood():
     def make_address(row):
@@ -33,7 +39,7 @@ def get_neighbourhood():
     hoods = hoods.set_index("parcel_id")
     hoods["address"] = hoods.apply(make_address, axis=1)
     hoods = hoods.drop(["addrno", "addrst", "addrsf"], axis=1)
-    hoods.to_csv("postprocess/hoods.csv")
+    hoods.to_csv(path_to_neighborhoods)
     return hoods
 
 
@@ -47,9 +53,8 @@ def get_last_inspection():
                    "ORDER BY parcel_no, date DESC; ")
     inspections = pd.read_sql(inspections, con=engine)
     inspections = inspections.set_index("parcel_id")
-    inspections.to_csv("postprocess/inspections.csv")
+    inspections.to_csv(path_to_inspections)
     return inspections
-
 
 def get_any_interaction():
     inspections_cases = "SELECT DISTINCT(parcel_no) AS parcel_id FROM inspections_raw.t_dssg_apd_par"
@@ -57,7 +62,6 @@ def get_any_interaction():
     inspections_cases = inspections_cases.set_index("parcel_id")
     inspections_cases["any_interaction"] = pd.Series(True, index=inspections_cases.index)
     return inspections_cases
-
 
 def get_type():
     def is_residential(property_class):
@@ -71,11 +75,14 @@ def get_type():
     use_type = pd.read_sql(use_type, con=engine)
     use_type["residential"] = use_type["class"].apply(is_residential)
     use_type = use_type.set_index("parcel_id")
-    use_type.to_csv("postprocess/type.csv")
+    use_type.to_csv(path_to_type)
     return use_type["residential"]
 
+#Create folder postprocess if it doesn't exist
+if not os.path.exists(path_to_postprocess):
+    os.makedirs(path_to_postprocess)
 
 dataset = get_type()
 dataset = pd.merge(dataset, get_neighbourhood(), how='left', left_index=True, right_index=True)
 dataset = pd.merge(dataset, get_last_inspection(), how='left', left_index=True, right_index=True)
-dataset.to_csv("parcel_info.csv")
+dataset.to_csv(path_to_parcel_info)
