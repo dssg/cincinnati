@@ -76,10 +76,35 @@ def load_violations_for(start_year, end_year=None):
         AND EXTRACT(YEAR FROM inspection_date)<=%(end_year)s
     '''
     viol = pd.read_sql(q, e,
-        columns=['latitude', 'longitude'],
+        #columns=['latitude', 'longitude'],
         params={'start_year':start_year
         , 'end_year':end_year})
     return viol
+
+def load_inspections_for(start_year, end_year=None):
+    '''
+        Load inspections that happened between start_year and end_year,
+        returns a DataFrame with parcel_id, inspection_date, latitude, 
+        longitude. Takes data from features schema, which has all
+        inspections done.
+    '''
+    #If only one parameter is passed, set end_year
+    #to the value of start_year
+    end_year = start_year if end_year is None else end_year
+    e = create_engine(uri)
+    q='''
+        SELECT
+            insp.parcel_id, insp.inspection_date, insp.viol_outcome,
+            parc.latitude, parc.longitude
+        FROM features.parcels_inspections AS insp
+        JOIN shape_files.parcels_cincy AS parc
+        ON insp.parcel_id=parc.parcelid
+        AND EXTRACT(YEAR FROM inspection_date)>=%(start_year)s
+        AND EXTRACT(YEAR FROM inspection_date)<=%(end_year)s
+    '''
+    inspections = pd.read_sql(q, e,
+        params={'start_year':start_year, 'end_year':end_year})
+    return inspections
 
 def add_percentile_column(df, column_name):
     '''
