@@ -1,7 +1,7 @@
+import pandas as pd
+
 predictions = "2015-08-25T04:15:44.220467.csv"
 output = "2015-08-25T04:15:44.220467_details.csv"
-
-import pandas as pd
 
 to_inspect = pd.read_csv(predictions, header=None,
                          names={"parcel_id", "inspection_date", "probability"}, index_col=0)
