@@ -12,7 +12,7 @@ fake_today: '31Dec2013'
 validation_window: '1Year'  # Or '1Month'
 
 # only use residential parcels
-residential_only: False
+residential_only: True
 
 ############################
 # Feature selection        #
@@ -59,4 +59,4 @@ grid_size: 'big'
 #in both case is optional. If you are using mongo, this will just simpy add a new
 #key, this is useful for comments. If you are pickling results, this will be a prefix
 #in your pkl files
-experiment_name: 'spring_2016_only_aggregated_and_parcel_features_12_13_all_parcels'
+experiment_name: 'spring_2016_only_agg_and_parcel_features_12_13'
