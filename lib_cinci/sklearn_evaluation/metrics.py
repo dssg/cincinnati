@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.metrics import precision_score
 
 
-def precision_at(labels, scores, percent=0.01):
+def precision_at(labels, scores, percent=0.01, ignore_nas=False):
     '''
     Calculates precision at a given percent.
     Only supports binary classification.
@@ -19,7 +19,10 @@ def precision_at(labels, scores, percent=0.01):
     #Convert scores to binary, by comparing them with the cutoff value
     scores_binary = map(lambda x: int(x>=cutoff_value), scores)
     #Calculate precision using sklearn function
-    precision = precision_score(labels, scores_binary)
+    if ignore_nas:
+        precision = __precision(labels, scores_binary)
+    else:
+        precision = precision_score(labels, scores_binary)
 
     return precision, cutoff_value
 
