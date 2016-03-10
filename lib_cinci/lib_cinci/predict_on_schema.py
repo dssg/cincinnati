@@ -54,7 +54,7 @@ def predict_on_schema(model_id, schema):
     dataset.x = scaler.transform(dataset.x)
     #Predict
     preds_proba = model.predict_proba(dataset.x)[:, 1]
-    #Return a dataframe with parcel_id, inspection_date, viol_outcome and preds
+    #Convert to Dataset to DataFrame and subselect only the viol_outcome column
     df = dataset.to_df()[['viol_outcome']]
     df['prediction'] = preds_proba
     return df

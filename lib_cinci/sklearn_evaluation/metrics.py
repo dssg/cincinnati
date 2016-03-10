@@ -22,3 +22,13 @@ def precision_at(labels, scores, percent=0.01):
 
     return precision, cutoff_value
 
+
+def __threshold_at_percent(y_true, y_score, percent):
+    #Sort scores in descending order    
+    scores_sorted = np.sort(y_score)[::-1]
+    #Based on the percent, get the index to split the data
+    #if value is negative, return 0
+    cutoff_index = max(int(len(y_true) * percent) - 1, 0)
+    #Get the cutoff value
+    cutoff_value = scores_sorted[cutoff_index]
+    return cutoff_value
