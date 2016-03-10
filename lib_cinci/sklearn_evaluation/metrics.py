@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.metrics import precision_score
 
+
 def precision_at(labels, scores, percent=0.01):
     '''
     Calculates precision at a given percent.
@@ -37,3 +38,19 @@ def __binarize_scores_at_percent(y_true, y_score, percent):
     threshold_value = __threshold_at_percent(y_true, y_score, percent)
     y_score_binary = map(lambda x: int(x>=threshold_value), y_score)
     return y_score_binary
+
+def __precision(y_true, y_pred):
+    '''
+        Precision metric tolerant to unlabeled data in y_true,
+        NA values are ignored for the precision calculation
+    '''
+    #precision = tp/(tp+fp)
+    #True nehatives do not affect precision value, so for every missing
+    #value in y_true, replace it with 0 and also replace the value
+    #in y_pred with 0
+    is_nan = np.isnan(y_true)
+    y_true[is_nan] = 0
+    y_pred[is_nan] = 0
+    precision = precision_score(y_true, y_pred)
+    return precision
+
