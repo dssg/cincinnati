@@ -28,7 +28,12 @@ def __threshold_at_percent(y_true, y_score, percent):
     scores_sorted = np.sort(y_score)[::-1]
     #Based on the percent, get the index to split the data
     #if value is negative, return 0
-    cutoff_index = max(int(len(y_true) * percent) - 1, 0)
+    threshold_index = max(int(len(y_true) * percent) - 1, 0)
     #Get the cutoff value
-    cutoff_value = scores_sorted[cutoff_index]
-    return cutoff_value
+    threshold_value = scores_sorted[threshold_index]
+    return threshold_value
+
+def __binarize_scores_at_percent(y_true, y_score, percent):
+    threshold_value = __threshold_at_percent(y_true, y_score, percent)
+    y_score_binary = map(lambda x: int(x>=threshold_value), y_score)
+    return y_score_binary
