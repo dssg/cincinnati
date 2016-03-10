@@ -79,6 +79,7 @@ def load_violations_for(start_year, end_year=None):
         #columns=['latitude', 'longitude'],
         params={'start_year':start_year
         , 'end_year':end_year})
+    viol.set_index(['parcel_id', 'inspection_date'], inplace=True)
     return viol
 
 def load_inspections_for(start_year, end_year=None):
@@ -104,6 +105,7 @@ def load_inspections_for(start_year, end_year=None):
     '''
     inspections = pd.read_sql(q, e,
         params={'start_year':start_year, 'end_year':end_year})
+    inspections.set_index(['parcel_id', 'inspection_date'], inplace=True)
     return inspections
 
 def load_most_recent_inspection_for(start_year, end_year=None):
@@ -128,6 +130,7 @@ def load_most_recent_inspection_for(start_year, end_year=None):
     '''
     most_recent = pd.read_sql(q, e,
         params={'start_year':start_year, 'end_year':end_year})
+    most_recent.set_index(['parcel_id', 'inspection_date'], inplace=True)
     return most_recent
 
 def add_percentile_column(df, column_name):
