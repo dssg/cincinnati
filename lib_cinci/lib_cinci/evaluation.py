@@ -106,6 +106,30 @@ def load_inspections_for(start_year, end_year=None):
         params={'start_year':start_year, 'end_year':end_year})
     return inspections
 
+def load_most_recent_inspection_for(start_year, end_year=None):
+    '''
+        Returns a DataFrame with the last inspection for every inspection in
+        features.parcels_inspections.
+    '''
+    end_year = start_year if end_year is None else end_year
+    e = create_engine(uri)
+    q = '''
+        WITH most_recent AS (
+            SELECT *,
+                   ROW_NUMBER() OVER(PARTITION BY insp.parcel_id ORDER BY insp.inspection_date DESC) AS rn
+            FROM features.parcels_inspections AS insp
+        )
+    
+        SELECT mr.parcel_id, mr.inspection_date, mr.viol_outcome
+            FROM most_recent AS mr
+            WHERE rn = 1
+            AND EXTRACT(YEAR FROM mr.inspection_date)>=%(start_year)s
+            AND EXTRACT(YEAR FROM mr.inspection_date)<=%(end_year)s
+    '''
+    most_recent = pd.read_sql(q, e,
+        params={'start_year':start_year, 'end_year':end_year})
+    return most_recent
+
 def add_percentile_column(df, column_name):
     '''
         Given a DataFrame and a column_name
