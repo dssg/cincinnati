@@ -17,7 +17,7 @@ def precision_at(labels, scores, percent=0.01, ignore_nas=False):
     cutoff_value = scores_sorted[cutoff_index]
 
     #Convert scores to binary, by comparing them with the cutoff value
-    scores_binary = map(lambda x: int(x>=cutoff_value), scores)
+    scores_binary = np.array(map(lambda x: int(x>=cutoff_value), scores))
     #Calculate precision using sklearn function
     if ignore_nas:
         precision = __precision(labels, scores_binary)
@@ -39,7 +39,7 @@ def __threshold_at_percent(y_true, y_score, percent):
 
 def __binarize_scores_at_percent(y_true, y_score, percent):
     threshold_value = __threshold_at_percent(y_true, y_score, percent)
-    y_score_binary = map(lambda x: int(x>=threshold_value), y_score)
+    y_score_binary = np.array(map(lambda x: int(x>=threshold_value), y_score))
     return y_score_binary
 
 def __precision(y_true, y_pred):
