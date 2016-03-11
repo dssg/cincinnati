@@ -22,7 +22,7 @@ from grid_generator import grid_from_class
 
 from lib_cinci.config import main as cfg_main
 from lib_cinci.config import load
-from lib_cinci.exceptions import MaxDateError, ConfigError
+from lib_cinci.exceptions import MaxDateError, ConfigError, ExperimentExists
 from lib_cinci.folders import (path_to_predictions, path_to_pickled_models,
     path_to_pickled_scalers, path_to_pickled_imputers, path_to_dumps) 
 
@@ -196,6 +196,16 @@ def log_results(model, config, test, predictions, feature_importances,
 def main():
     config_file = args.path_to_config_file
     config, config_raw = configure_model(config_file)
+
+    #If logging is enable, check that there are no records for
+    #the selected experiment
+    if not args.notlog:
+        logger_uri = cfg_main['logger']['uri']
+        logger_db = cfg_main['logger']['db']
+        logger_collection = cfg_main['logger']['collection']
+        mongo_logger = Logger(logger_uri, logger_db, logger_collection)
+        if mongo_logger.experiment_exists(config['experiment_name']):
+            raise ExperimentExists(config['experiment_name'])
 
     # datasets
     logger.info('Loading datasets...')

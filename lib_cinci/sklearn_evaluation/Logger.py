@@ -7,6 +7,7 @@ class Logger:
         #Start connection
         client = MongoClient(host)
         self.collection = client[db][collection]
+
     def log_model(self, model, **keywords):
         params = model.get_params()
         name = get_model_name(model)
@@ -15,3 +16,8 @@ class Logger:
         model.update(keywords)
         inserted_id = self.collection.insert_one(model).inserted_id
         return str(inserted_id)
+
+    def experiment_exists(self, experiment_name):
+        model = {'experiment_name':experiment_name}
+        model_count = self.collection.find(model).count()
+        return model_count > 0
