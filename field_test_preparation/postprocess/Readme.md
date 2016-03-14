@@ -13,4 +13,3 @@ were inspected on some specific date. This directory contains the sourcecode nec
 2. Select your inspections list file and add the parcel data (file must have a parcel_id as its first column)
 
    ./add_parcel_info PATH_TO_INSPECTIONS_LIST
- 

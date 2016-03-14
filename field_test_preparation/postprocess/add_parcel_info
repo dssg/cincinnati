@@ -7,7 +7,6 @@ def main():
     path_to_postprocess = os.path.join(os.environ['OUTPUT_FOLDER'], 'postprocess')
     path_to_parcel_info = os.path.join(path_to_postprocess, "parcel_info.csv")
     predictions = args.predictions_file
-    output = '{}_details.csv'.format(predictions.replace('.csv', ''))
 
     try:
         parcel_info = pd.read_csv(path_to_parcel_info, index_col=0)
@@ -18,7 +17,7 @@ def main():
     to_inspect = pd.read_csv(predictions, header=None, index_col=0)
     to_inspect = pd.merge(to_inspect, parcel_info, how='left', left_index=True, right_index=True)
     to_inspect["last_inspection"] = pd.to_datetime(to_inspect["last_inspection"])
-    to_inspect.to_csv(output)
+    to_inspect.to_csv(args.output_file)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=("Adds parcel info to a csv file with "
@@ -26,7 +25,10 @@ if __name__ == '__main__':
         "first to download parcel data from the database."))
     parser.add_argument("predictions_file",
                         help=("Path to file containing predictions, must "
-                              "contain parcel_id and should be the first column"),
+                              "contain parcel_id and should be the first column."),
+                        type=str)
+    parser.add_argument("output_file",
+                        help="Where to save the results.",
                         type=str)
     args = parser.parse_args()
     main()
