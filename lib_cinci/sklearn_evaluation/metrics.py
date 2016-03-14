@@ -60,17 +60,25 @@ def __precision(y_true, y_pred):
     precision = precision_score(y_true, y_pred)
     return precision
 
-def tp_and_fp_at_percent(y_true, y_score, percent):
+def tp_at_percent(y_true, y_score, percent):
     y_pred = __binarize_scores_at_percent(y_true, y_score, percent)
     tp = (y_pred == 1) & (y_true == 1)
-    fp = (y_pred == 1) & (y_true == 0)
-    return tp.sum(), fp.sum()
+    return tp.sum()
 
-def tn_and_fn_at_percent(y_true, y_score, percent):
+def fp_at_percent(y_true, y_score, percent):
+    y_pred = __binarize_scores_at_percent(y_true, y_score, percent)
+    fp = (y_pred == 1) & (y_true == 0)
+    return fp.sum()
+
+def tn_at_percent(y_true, y_score, percent):
     y_pred = __binarize_scores_at_percent(y_true, y_score, percent)
     tn = (y_pred == 0) & (y_true == 0)
+    return tn.sum()
+
+def fn_at_percent(y_true, y_score, percent):
+    y_pred = __binarize_scores_at_percent(y_true, y_score, percent)
     fn = (y_pred == 0) & (y_true == 1)
-    return tn.sum(), fn.sum()
+    return fn.sum()
 
 def labels_at_percent(y_true, y_score, percent, normalize=False):
     '''
