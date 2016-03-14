@@ -108,27 +108,67 @@ def load_inspections_for(start_year, end_year=None):
     inspections.set_index(['parcel_id', 'inspection_date'], inplace=True)
     return inspections
 
-def load_most_recent_inspection_for(start_year, end_year=None):
+def load_one_inspection_for(start_year, end_year=None, which='last'):
     '''
-        Returns a DataFrame with the last inspection for every inspection in
-        features.parcels_inspections.
+        Returns a DataFrame with one inspection for every parcel in
+        features.parcels_inspections for the period given between start_year
+        and end_year.
+
+        'which' parameter determines how to select the inspection. Possible 
+        values are first or last.
     '''
-    end_year = start_year if end_year is None else end_year
-    e = create_engine(uri)
-    q = '''
+    #SQL queries to load inspections
+    #load last inspection
+    query_last = '''
+        --group inspections by parcel_id, then order them using inspection_date
+        --in descending order, for each group select the first row
+        --(most recent inspection)
         WITH most_recent AS (
             SELECT *,
                    ROW_NUMBER() OVER(PARTITION BY insp.parcel_id ORDER BY insp.inspection_date DESC) AS rn
             FROM features.parcels_inspections AS insp
         )
-    
+        --from the inspections list, select only the ones that happened
+        --between start_year and end_year
         SELECT mr.parcel_id, mr.inspection_date, mr.viol_outcome
             FROM most_recent AS mr
             WHERE rn = 1
             AND EXTRACT(YEAR FROM mr.inspection_date)>=%(start_year)s
             AND EXTRACT(YEAR FROM mr.inspection_date)<=%(end_year)s
     '''
-    most_recent = pd.read_sql(q, e,
+
+    #load first inspection
+    query_first = '''
+        --group inspections by parcel_id, then order them using inspection_date
+        --in descending order, for each group select the first row
+        --(most recent inspection)
+        WITH first_inspection AS (
+            SELECT *,
+                   ROW_NUMBER() OVER(PARTITION BY insp.parcel_id ORDER BY insp.inspection_date ASC) AS rn
+            FROM features.parcels_inspections AS insp
+        )
+        --from the inspections list, select only the ones that happened
+        --between start_year and end_year
+        SELECT mr.parcel_id, mr.inspection_date, mr.viol_outcome
+            FROM first_inspection AS mr
+            WHERE rn = 1
+            AND EXTRACT(YEAR FROM mr.inspection_date)>=%(start_year)s
+            AND EXTRACT(YEAR FROM mr.inspection_date)<=%(end_year)s
+    '''
+    #Map which value to its conrresponding query
+    queries_dic = {'first': query_first, 'last': query_last}
+
+    #Get corresponding query based on user selection
+    try:
+        query = queries_dic[which]
+    except:
+        raise ValueError("Values for 'which' are 'first' and 'last'.")
+
+    #if end_year is not provided, use the same value as start_year
+    end_year = start_year if end_year is None else end_year
+    e = create_engine(uri)
+
+    most_recent = pd.read_sql(query, e,
         params={'start_year':start_year, 'end_year':end_year})
     most_recent.set_index(['parcel_id', 'inspection_date'], inplace=True)
     return most_recent
