@@ -8,9 +8,9 @@ were inspected on some specific date. This directory contains the sourcecode nec
 
 1. Download all additional property info from the database by running
 
-    python -m postprocess/download_parcel_info
+    ./download_parcel_info
     
-2. Add name of your predictions file and desired output file to `merge.py` and run
+2. Select your inspections list file and add the parcel data (file must have a parcel_id as its first column)
 
-   python -m postprocess/merge
+   ./add_parcel_info PATH_TO_INSPECTIONS_LIST
  
