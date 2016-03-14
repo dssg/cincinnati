@@ -39,7 +39,7 @@ def get_neighbourhood():
     hoods = hoods.rename(columns={"parcelid": "parcel_id"})
     hoods = hoods.set_index("parcel_id")
     hoods["address"] = hoods.apply(make_address, axis=1)
-    hoods = hoods.drop(["addrno", "addrst", "addrsf"], axis=1)
+    hoods = hoods.drop(["addrno", "addrst", "addrsf", "geom"], axis=1)
     hoods.to_csv(path_to_neighborhoods)
     return hoods
 
@@ -77,13 +77,18 @@ def get_type():
     use_type["residential"] = use_type["class"].apply(is_residential)
     use_type = use_type.set_index("parcel_id")
     use_type.to_csv(path_to_type)
-    return use_type["residential"]
+    return pd.DataFrame(use_type["residential"])
 
 #Create folder postprocess if it doesn't exist
 if not os.path.exists(path_to_postprocess):
     os.makedirs(path_to_postprocess)
 
-dataset = get_type()
-dataset = pd.merge(dataset, get_neighbourhood(), how='left', left_index=True, right_index=True)
-dataset = pd.merge(dataset, get_last_inspection(), how='left', left_index=True, right_index=True)
-dataset.to_csv(path_to_parcel_info)
+df = get_type()
+
+neigh = get_neighbourhood()
+df = df.join(neigh)
+
+insp = get_last_inspection()
+df = df.join(insp)
+
+df.to_csv(path_to_parcel_info)
