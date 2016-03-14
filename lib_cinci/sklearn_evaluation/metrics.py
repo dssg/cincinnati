@@ -72,4 +72,24 @@ def tn_and_fn_at_percent(y_true, y_score, percent):
     fn = (y_pred == 0) & (y_true == 1)
     return tn.sum(), fn.sum()
 
+def labels_at_percent(y_true, y_score, percent, normalize=False):
+    '''
+        Return the number of labels encountered in the top  X percent
+    '''
+    #Get indexes of scores sorted in descending order
+    indexes = np.argsort(y_score)[::-1]
 
+    #Sort true values in the same order
+    y_true_sorted = y_true[indexes]
+
+    #Grab top x percent of true values
+    cutoff_index = max(int(len(y_true_sorted) * percent) - 1, 0)
+    y_true_top = y_true_sorted[:cutoff_index]
+
+    #Count the number of non-nas in the top x percent
+    values = (~np.isnan(y_true_top)).sum()
+
+    if normalize:
+        values = float(values)/(~np.isnan(y_true)).sum()
+        
+    return values
