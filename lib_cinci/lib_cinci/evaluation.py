@@ -115,7 +115,12 @@ def load_one_inspection_for(start_year, end_year=None, which='last'):
         and end_year.
 
         'which' parameter determines how to select the inspection. Possible 
-        values are first or last.
+        values are first, last or any.
+
+        first - load inspections for a given period and select the first one
+        last - load inspections for a given period and select the last one
+        any - inspections for a given period and label viol_outcome if there was
+            at least one violation, use earliest inspection_date
     '''
     #SQL queries to load inspections
     #load last inspection
@@ -155,23 +160,49 @@ def load_one_inspection_for(start_year, end_year=None, which='last'):
             AND EXTRACT(YEAR FROM mr.inspection_date)>=%(start_year)s
             AND EXTRACT(YEAR FROM mr.inspection_date)<=%(end_year)s
     '''
+
+    #Load inspections for a parcel in the given period,
+    #and assign viol_outcome as 1 if there was at least one violation,
+    #use the first inspection date from all inspections as the inspection_date
+    #value
+    query_any= '''
+        WITH count_last AS(
+            SELECT *,
+               ROW_NUMBER() OVER(PARTITION BY insp.parcel_id ORDER BY insp.inspection_date ASC) AS rn,
+               SUM(viol_outcome) OVER(PARTITION BY insp.parcel_id) AS viol_count
+            FROM features.parcels_inspections AS insp
+        ),
+        
+        any_last AS(
+            SELECT parcel_id, inspection_date, rn, viol_count,
+                   --replace viol_outcome
+                   CASE WHEN viol_count > 0 THEN 1 ELSE 0 END AS viol_outcome
+            FROM count_last
+        )
+        
+        SELECT mr.parcel_id, mr.inspection_date, mr.viol_outcome, mr.viol_count
+            FROM any_last AS mr
+            WHERE rn = 1
+            AND EXTRACT(YEAR FROM mr.inspection_date)>=%(start_year)s
+            AND EXTRACT(YEAR FROM mr.inspection_date)<=%(end_year)s
+    '''
     #Map which value to its conrresponding query
-    queries_dic = {'first': query_first, 'last': query_last}
+    queries_dic = {'first': query_first, 'last': query_last, 'any': query_any}
 
     #Get corresponding query based on user selection
     try:
         query = queries_dic[which]
     except:
-        raise ValueError("Values for 'which' are 'first' and 'last'.")
+        raise ValueError("Values for 'which' are 'first', 'last' and 'any'.")
 
     #if end_year is not provided, use the same value as start_year
     end_year = start_year if end_year is None else end_year
     e = create_engine(uri)
 
-    most_recent = pd.read_sql(query, e,
+    inspections_df = pd.read_sql(query, e,
         params={'start_year':start_year, 'end_year':end_year})
-    most_recent.set_index(['parcel_id', 'inspection_date'], inplace=True)
-    return most_recent
+    inspections_df.set_index(['parcel_id', 'inspection_date'], inplace=True)
+    return inspections_df
 
 def add_percentile_column(df, column_name):
     '''
