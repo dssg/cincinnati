@@ -125,40 +125,52 @@ def load_one_inspection_for(start_year, end_year=None, which='last'):
     #SQL queries to load inspections
     #load last inspection
     query_last = '''
+        --subselect inspections that happened between start_year and end_year
+        WITH sub AS(
+            SELECT *
+            FROM features.parcels_inspections AS insp
+            WHERE
+                EXTRACT(YEAR FROM insp.inspection_date)>=%(start_year)s
+            AND 
+                EXTRACT(YEAR FROM insp.inspection_date)<=%(end_year)s 
+        ),
         --group inspections by parcel_id, then order them using inspection_date
         --in descending order, for each group select the first row
         --(most recent inspection)
-        WITH most_recent AS (
+        most_recent AS (
             SELECT *,
-                   ROW_NUMBER() OVER(PARTITION BY insp.parcel_id ORDER BY insp.inspection_date DESC) AS rn
-            FROM features.parcels_inspections AS insp
+                   ROW_NUMBER() OVER(PARTITION BY sub.parcel_id ORDER BY sub.inspection_date DESC) AS rn
+            FROM sub
         )
-        --from the inspections list, select only the ones that happened
-        --between start_year and end_year
-        SELECT mr.parcel_id, mr.inspection_date, mr.viol_outcome
-            FROM most_recent AS mr
+        
+        SELECT insp.parcel_id, insp.inspection_date, insp.viol_outcome
+            FROM most_recent AS insp
             WHERE rn = 1
-            AND EXTRACT(YEAR FROM mr.inspection_date)>=%(start_year)s
-            AND EXTRACT(YEAR FROM mr.inspection_date)<=%(end_year)s
     '''
 
     #load first inspection
     query_first = '''
-        --group inspections by parcel_id, then order them using inspection_date
-        --in descending order, for each group select the first row
-        --(most recent inspection)
-        WITH first_inspection AS (
-            SELECT *,
-                   ROW_NUMBER() OVER(PARTITION BY insp.parcel_id ORDER BY insp.inspection_date ASC) AS rn
+        --subselect inspections that happened between start_year and end_year
+        WITH sub AS(
+            SELECT *
             FROM features.parcels_inspections AS insp
+            WHERE
+                EXTRACT(YEAR FROM insp.inspection_date)>=%(start_year)s
+            AND 
+                EXTRACT(YEAR FROM insp.inspection_date)<=%(end_year)s 
+        ),
+        --group inspections by parcel_id, then order them using inspection_date
+        --in ascending order, for each group select the first row
+        --(earliest inspection)
+        earliest AS (
+            SELECT *,
+                   ROW_NUMBER() OVER(PARTITION BY sub.parcel_id ORDER BY sub.inspection_date ASC) AS rn
+            FROM sub
         )
-        --from the inspections list, select only the ones that happened
-        --between start_year and end_year
-        SELECT mr.parcel_id, mr.inspection_date, mr.viol_outcome
-            FROM first_inspection AS mr
+        
+        SELECT insp.parcel_id, insp.inspection_date, insp.viol_outcome
+            FROM earliest AS insp
             WHERE rn = 1
-            AND EXTRACT(YEAR FROM mr.inspection_date)>=%(start_year)s
-            AND EXTRACT(YEAR FROM mr.inspection_date)<=%(end_year)s
     '''
 
     #Load inspections for a parcel in the given period,
@@ -166,25 +178,32 @@ def load_one_inspection_for(start_year, end_year=None, which='last'):
     #use the first inspection date from all inspections as the inspection_date
     #value
     query_any= '''
-        WITH count_last AS(
-            SELECT *,
-               ROW_NUMBER() OVER(PARTITION BY insp.parcel_id ORDER BY insp.inspection_date ASC) AS rn,
-               SUM(viol_outcome) OVER(PARTITION BY insp.parcel_id) AS viol_count
+        WITH sub AS(
+            SELECT *
             FROM features.parcels_inspections AS insp
+            WHERE
+                EXTRACT(YEAR FROM insp.inspection_date)>=%(start_year)s
+            AND 
+                EXTRACT(YEAR FROM insp.inspection_date)<=%(end_year)s 
+        ),
+
+        earliest AS(
+            SELECT *,
+               ROW_NUMBER() OVER(PARTITION BY sub.parcel_id ORDER BY sub.inspection_date ASC) AS rn,
+               SUM(viol_outcome) OVER(PARTITION BY sub.parcel_id) AS viol_count
+            FROM sub
         ),
         
         any_last AS(
             SELECT parcel_id, inspection_date, rn, viol_count,
                    --replace viol_outcome
                    CASE WHEN viol_count > 0 THEN 1 ELSE 0 END AS viol_outcome
-            FROM count_last
+            FROM earliest
         )
         
-        SELECT mr.parcel_id, mr.inspection_date, mr.viol_outcome, mr.viol_count
-            FROM any_last AS mr
+        SELECT insp.parcel_id, insp.inspection_date, insp.viol_outcome, insp.viol_count
+            FROM any_last AS insp
             WHERE rn = 1
-            AND EXTRACT(YEAR FROM mr.inspection_date)>=%(start_year)s
-            AND EXTRACT(YEAR FROM mr.inspection_date)<=%(end_year)s
     '''
     #Map which value to its conrresponding query
     queries_dic = {'first': query_first, 'last': query_last, 'any': query_any}
