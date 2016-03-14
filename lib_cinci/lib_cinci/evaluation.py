@@ -226,8 +226,8 @@ def load_one_inspection_for(start_year, end_year=None, which='last'):
 def add_percentile_column(df, column_name):
     '''
         Given a DataFrame and a column_name
-	return a new DataFrame with a new column including
-	the percentile for the value in column_name 
+	   return a new DataFrame with a new column including
+	   the percentile for the value in column_name 
     '''
     df = deepcopy(df)
     col_vals = df[column_name]
