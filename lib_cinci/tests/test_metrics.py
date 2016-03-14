@@ -1,6 +1,6 @@
 from unittest import TestCase
 from sklearn_evaluation.metrics import (precision_at, labels_at_percent,
-    tp_at_percent)
+    tp_at_percent, fp_at_percent)
 import numpy as np
 from numpy import nan
 
@@ -99,7 +99,10 @@ class Test_labels_at_percent(TestCase):
 
 class Test_tp_at_percent(TestCase):
     def test_with_nas(self):
-        pass
+        y_true = np.array([1, nan, 1, 1, 1, 1, 1, 1, 1, nan])
+        y_score = np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1])
+        tps = tp_at_percent(y_true, y_score, percent=0.1)
+        self.assertEqual(tps, 1)
 
     def test_all_tp_at_10(self):
         y_true = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
@@ -148,3 +151,58 @@ class Test_tp_at_percent(TestCase):
         y_score = np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1])
         tps = tp_at_percent(y_true, y_score, percent=1.0)
         self.assertEqual(tps, 4)
+
+class Test_fp_at_percent(TestCase):
+    def test_with_nas(self):
+        y_true = np.array([0, nan, 1, 1, 1, 1, 1, 1, 1, nan])
+        y_score = np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1])
+        fps = fp_at_percent(y_true, y_score, percent=0.1)
+        self.assertEqual(fps, 1)
+
+    def test_all_fp_at_10(self):
+        y_true = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        y_score = np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1])
+        fps = fp_at_percent(y_true, y_score, percent=0.1)
+        self.assertEqual(fps, 1)
+
+    def test_all_fp_at_50(self):
+        y_true = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        y_score = np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1])
+        fps = fp_at_percent(y_true, y_score, percent=0.5)
+        self.assertEqual(fps, 5)
+
+    def test_all_fp_at_100(self):
+        y_true = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        y_score = np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1])
+        fps = fp_at_percent(y_true, y_score, percent=1.0)
+        self.assertEqual(fps, 10)
+
+    def test_no_fp_at_50(self):
+        y_true = np.array([1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
+        y_score = np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1])
+        fps = fp_at_percent(y_true, y_score, percent=0.5)
+        self.assertEqual(fps, 0)
+
+    def test_no_fp_at_100(self):
+        y_true = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        y_score = np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1])
+        fps = fp_at_percent(y_true, y_score, percent=1.0)
+        self.assertEqual(fps, 0)
+
+    def test_some_fp_at_10(self):
+        y_true = np.array([0, 0, 0, 0, 0, 0, 0, 1, 1, 1])
+        y_score = np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1])
+        fps = fp_at_percent(y_true, y_score, percent=0.1)
+        self.assertEqual(fps, 1)
+
+    def test_some_fp_at_50(self):
+        y_true = np.array([1, 1, 0, 0, 1, 0, 0, 1, 1, 0])
+        y_score = np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1])
+        fps = fp_at_percent(y_true, y_score, percent=0.5)
+        self.assertEqual(fps, 2)
+
+    def test_some_fp_at_100(self):
+        y_true = np.array([0, 0, 0, 0, 1, 0, 0, 1, 1, 1])
+        y_score = np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1])
+        fps = fp_at_percent(y_true, y_score, percent=1.0)
+        self.assertEqual(fps, 6)
