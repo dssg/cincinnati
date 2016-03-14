@@ -6,17 +6,33 @@ from numpy import nan
 
 class Test_precision_at(TestCase):
     def test_perfect_precision(self):
-        labels = [1  ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,0 ,0]
-        scores = [100,90,80,70,60,50,40,30,20,10]
-        prec, cutoff = precision_at(labels, scores, 0.10)
+        labels = np.array([1  ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,0 ,0])
+        scores = np.array([100,90,80,70,60,50,40,30,20,10])
+        prec, cutoff = precision_at(labels, scores, percent=0.10)
         self.assertEqual(prec, 1.0)
         self.assertEqual(cutoff, 100)
+
+    def test_perfect_precision_with_nas(self):
+        labels = np.array([1, nan, 1, 1, 1 , nan, 0, 0, 0, 0])
+        scores = np.array([100,90,80,70,60,50,40,30,20,10])
+        prec, cutoff = precision_at(labels, scores, percent=0.10, ignore_nas=True)
+        self.assertEqual(prec, 1.0)
+        self.assertEqual(cutoff, 100)
+
     def test_baseline_precision(self):
-        labels = [1  ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,0 ,0]
-        scores = [100,90,80,70,60,50,40,30,20,10]
-        prec, cutoff = precision_at(labels, scores, 1.0)
+        labels = np.array([1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
+        scores = np.array([100,90,80,70,60,50,40,30,20,10])
+        prec, cutoff = precision_at(labels, scores, percent=1.0)
         self.assertEqual(prec, 0.5)
         self.assertEqual(cutoff, 10)
+
+    def test_baseline_precision_with_nas(self):
+        labels = np.array([nan, 1, nan, 1, 1, nan, nan, 0, 0, 0])
+        scores = np.array([100,90,80,70,60,50,40,30,20,10])
+        prec, cutoff = precision_at(labels, scores, percent=1.0, ignore_nas=True)
+        self.assertEqual(prec, 0.5)
+        self.assertEqual(cutoff, 10)
+
 
 class Test_labels_at_percent(TestCase):
     def test_no_labels_at_1(self):
