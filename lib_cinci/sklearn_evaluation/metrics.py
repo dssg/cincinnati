@@ -92,10 +92,12 @@ def labels_at_percent(y_true, y_score, percent, normalize=False):
 
     #Grab top x percent of true values
     cutoff_index = max(int(len(y_true_sorted) * percent) - 1, 0)
-    y_true_top = y_true_sorted[:cutoff_index]
+    #add one to index to grab values including that index
+    y_true_top = y_true_sorted[:cutoff_index+1]
 
     #Count the number of non-nas in the top x percent
-    values = (~np.isnan(y_true_top)).sum()
+    #cast to int
+    values = int((~np.isnan(y_true_top)).sum())
 
     if normalize:
         values = float(values)/(~np.isnan(y_true)).sum()
