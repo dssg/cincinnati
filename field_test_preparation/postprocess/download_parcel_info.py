@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Make a huge csv with a bunch of information about every property
 """
