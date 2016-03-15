@@ -32,7 +32,7 @@ class Test_binarize_scores_at_percent(TestCase):
 
     def test_at_10(self):
         binary_scores = binarize_scores_at_percent(self.scores, 0.1)
-        expected = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        expected = np.array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0])
         np.testing.assert_equal(binary_scores, expected)
 
     def test_at_50(self):
