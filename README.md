@@ -1,6 +1,6 @@
 #Cincinnati
 
-This is the continuation of the Cincinnati [summer project](https://github.com/dssg/cincinnati2015) done during DSSG 2015.
+This is the continuation of the Cincinnati [summer project](https://github.com/dssg/cincinnati2015-public) done during DSSG 2015.
 
 ##About
 
@@ -97,10 +97,10 @@ Note that we are passing our three environment variables, and linking them to th
 Once you have set up your environment, you can start usng the pipeline, the general procedure is the following (specific instructions for each step are available inside each subfolder):
 
 1. Load data into the database 
-   1. Use the [ETL folder](etl/) to upload all the data to the database, also check the [docs folder ](docs/) for some information on the data
+   1. Use the [ETL folder](etl/) to upload all the data to the database
    2. Perform geocoding on some datasets. Use the [bulk_geocode](bulk_geocoder/) for this.
-2. [Explore](exploration/) the data
+2. Explore the data
 3. [Generate features](blight_risk_prediction/features) from the data
 4. Run some experiments. Use `model.py` inside [blight_risk_prediction](blight_risk_prediction/) to train models. `model.py` requires you to provide a configuration file, see `default.yaml` in this folder for reference.  [experiments](blight_risk_prediction/experiments) folder contains more examples.
-5. Evaluate experiments, [model_evaluation](model_evaluation/) folder contains notebooks to evaluate models.
+5. Evaluate experiments
 6. Prepare a new field test using the tools in [field_test_preparation](field_test_preparation/)
