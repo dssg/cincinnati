@@ -26,18 +26,18 @@ def precision_at(labels, scores, percent=0.01, ignore_nas=False):
     return precision, cutoff_value
 
 
-def __threshold_at_percent(y_true, y_score, percent):
+def __threshold_at_percent(y_score, percent):
     #Sort scores in descending order    
     scores_sorted = np.sort(y_score)[::-1]
     #Based on the percent, get the index to split the data
     #if value is negative, return 0
-    threshold_index = max(int(len(y_true) * percent) - 1, 0)
+    threshold_index = max(int(len(y_score) * percent) - 1, 0)
     #Get the cutoff value
     threshold_value = scores_sorted[threshold_index]
     return threshold_value
 
-def __binarize_scores_at_percent(y_true, y_score, percent):
-    threshold_value = __threshold_at_percent(y_true, y_score, percent)
+def __binarize_scores_at_percent(y_score, percent):
+    threshold_value = __threshold_at_percent(y_score, percent)
     y_score_binary = np.array(map(lambda x: int(x>=threshold_value), y_score))
     return y_score_binary
 
@@ -61,22 +61,22 @@ def __precision(y_true, y_pred):
     return precision
 
 def tp_at_percent(y_true, y_score, percent):
-    y_pred = __binarize_scores_at_percent(y_true, y_score, percent)
+    y_pred = __binarize_scores_at_percent(y_score, percent)
     tp = (y_pred == 1) & (y_true == 1)
     return tp.sum()
 
 def fp_at_percent(y_true, y_score, percent):
-    y_pred = __binarize_scores_at_percent(y_true, y_score, percent)
+    y_pred = __binarize_scores_at_percent(y_score, percent)
     fp = (y_pred == 1) & (y_true == 0)
     return fp.sum()
 
 def tn_at_percent(y_true, y_score, percent):
-    y_pred = __binarize_scores_at_percent(y_true, y_score, percent)
+    y_pred = __binarize_scores_at_percent(y_score, percent)
     tn = (y_pred == 0) & (y_true == 0)
     return tn.sum()
 
 def fn_at_percent(y_true, y_score, percent):
-    y_pred = __binarize_scores_at_percent(y_true, y_score, percent)
+    y_pred = __binarize_scores_at_percent(y_score, percent)
     fn = (y_pred == 0) & (y_true == 1)
     return fn.sum()
 
@@ -96,7 +96,7 @@ def labels_at_percent(y_true, y_score, percent, normalize=False):
     y_true_top = y_true_sorted[:cutoff_index+1]
 
     #Count the number of non-nas in the top x percent
-    #cast to int
+    #we are returning a count so it should be an int
     values = int((~np.isnan(y_true_top)).sum())
 
     if normalize:

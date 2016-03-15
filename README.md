@@ -15,7 +15,7 @@ our project [here](http://dssg.uchicago.edu/2015/08/20/cincy-blight-prevention.h
 
 ###Select folders for the code, data and output
 
-The code relies on three environment variables, before you start running the code, decide where are you going to store the *raw data*,  *code* and *output*, a sample file `environment_sample.sh`, which looks like this:
+The code relies on three environment variables, before you start running the code, decide where are you going to store the *raw data*,  *code* and *output*, a sample file `env_sample.sh`, which looks like this:
 
 ```bash
 #Where to store the code

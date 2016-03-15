@@ -3,7 +3,7 @@ from numpy.testing import assert_array_equal
 from nose.tools import raises
 import unittest
 
-from blight_risk_prediction import evaluation
+import evaluation
 
 
 class TestFiftyFiftySplit(unittest.TestCase):
