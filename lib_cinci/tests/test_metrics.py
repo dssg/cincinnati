@@ -1,8 +1,33 @@
 from unittest import TestCase
 from sklearn_evaluation.metrics import (precision_at, labels_at_percent,
     tp_at_percent, fp_at_percent)
+
+from sklearn_evaluation.metrics import __threshold_at_percent as threshold_at_percent
+
 import numpy as np
 from numpy import nan
+from random import shuffle
+
+class Test_threshold_at_percent(TestCase):
+    def setUp(self):
+        self.values = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
+        shuffle(self.values)
+
+    def test_at_10(self):
+        scores = np.array(self.values)
+        threshold = threshold_at_percent(scores, 0.1)
+        self.assertEqual(threshold, 1.0)
+
+    def test_at_50(self):
+        scores = np.array(self.values)
+        threshold = threshold_at_percent(scores, 0.6)
+        self.assertEqual(threshold, 0.5)
+
+    def test_at_100(self):
+        scores = np.array(self.values)
+        threshold = threshold_at_percent(scores, 1.0)
+        self.assertEqual(threshold, 0.1)
+
 
 class Test_precision_at(TestCase):
     def test_perfect_precision(self):
