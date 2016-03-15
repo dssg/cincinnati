@@ -5,17 +5,11 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_equal
 import pandas as pd
 
-from features import crime
+from features import crime_agg
 from lib_cinci.test_utils import RawDatabase, date, timestamp, assert_frame_equal
 
 
-class TestCrime(unittest.TestCase):
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
+class TestCrimeAgg(unittest.TestCase):
 
     def make_crimerate_df(self, crimes):
         crimes = pd.DataFrame(crimes, columns=["date_reported", "agg_area", "count"])
@@ -54,7 +48,7 @@ class TestCrime(unittest.TestCase):
 
         expected = [("parcelA", date("01Dec2014"), 3 / float(1234))]
 
-        actual =crime.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
+        actual = crime_agg.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
                                        self.make_population_df(population), window)
         actual = actual.reset_index()[["parcel_id", "inspection_date", "crime_rate"]].values
 
@@ -68,7 +62,7 @@ class TestCrime(unittest.TestCase):
 
         expected = [("parcelA", date("01Dec2014"), np.nan)]
 
-        actual =crime.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
+        actual = crime_agg.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
                                        self.make_population_df(population), window)
         actual = actual.reset_index()[["parcel_id", "inspection_date", "crime_rate"]].values
 
@@ -83,7 +77,7 @@ class TestCrime(unittest.TestCase):
 
         expected = [("parcelA", date("01Dec2014"), 4 / float(1234))]
 
-        actual =crime.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
+        actual = crime_agg.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
                                        self.make_population_df(population), window)
         actual = actual.reset_index()[["parcel_id", "inspection_date", "crime_rate"]].values
 
@@ -97,7 +91,7 @@ class TestCrime(unittest.TestCase):
 
         expected = [("parcelA", timestamp("01Dec2014"), 0.0)]
 
-        actual =crime.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
+        actual = crime_agg.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
                                        self.make_population_df(population), window)
         actual = actual.reset_index()[["parcel_id", "inspection_date", "crime_rate"]].values
 
@@ -112,7 +106,7 @@ class TestCrime(unittest.TestCase):
 
         expected = [("parcelA", date("01Dec2014"), 0)]
 
-        actual =crime.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
+        actual = crime_agg.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
                                        self.make_population_df(population), window)
         actual = actual.reset_index()[["parcel_id", "inspection_date", "crime_rate"]].values
 
@@ -129,7 +123,7 @@ class TestCrime(unittest.TestCase):
         expected = [("parcelA", timestamp("01Dec2014"), 4 / float(1234)),
                     ("parcelA", timestamp("18Nov2014"), 4 / float(1234))]
 
-        actual =crime.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
+        actual = crime_agg.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
                                        self.make_population_df(population), window)
         actual = actual.reset_index()[["parcel_id", "inspection_date", "crime_rate"]].values
 
@@ -146,7 +140,7 @@ class TestCrime(unittest.TestCase):
         expected = [("parcelA", timestamp("01Dec2014"), 3 / float(1234)),
                     ("parcelA", timestamp("18Nov2014"), 3 / float(1234))]
 
-        actual =crime.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
+        actual = crime_agg.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
                                        self.make_population_df(population), window)
         actual = actual.reset_index()[["parcel_id", "inspection_date", "crime_rate"]].values
 
@@ -163,7 +157,7 @@ class TestCrime(unittest.TestCase):
         expected = [("parcelA", timestamp("01Dec2014"), 3 / float(1234)),
                     ("parcelA", timestamp("18Oct2014"), 4 / float(1234))]
 
-        actual =crime.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
+        actual = crime_agg.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
                                        self.make_population_df(population), window)
         actual = actual.reset_index()[["parcel_id", "inspection_date", "crime_rate"]].values
 
@@ -180,7 +174,7 @@ class TestCrime(unittest.TestCase):
         expected = [("parcelA", timestamp("01Dec2014"), 4 / float(1234)),
                     ("parcelB", timestamp("18Nov2014"), 4 / float(1234))]
 
-        actual =crime.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
+        actual = crime_agg.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
                                        self.make_population_df(population), window)
         actual = actual.reset_index()[["parcel_id", "inspection_date", "crime_rate"]].values
 
@@ -199,7 +193,7 @@ class TestCrime(unittest.TestCase):
         expected = [("parcelA", timestamp("01Dec2014"), 3 / float(1234)),
                     ("parcelB", timestamp("18Nov2014"), 7 / float(234))]
 
-        actual =crime.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
+        actual = crime_agg.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
                                        self.make_population_df(population), window)
         actual = actual.reset_index()[["parcel_id", "inspection_date", "crime_rate"]].values
 
@@ -218,7 +212,7 @@ class TestCrime(unittest.TestCase):
         expected = [("parcelA", timestamp("01Dec2014"), 3 / float(1234)),
                     ("parcelB", timestamp("18Apr2014"), 6 / float(234))]
 
-        actual =crime.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
+        actual = crime_agg.crimerate_in_aggregation_area(self.make_parcels_df(parcels), self.make_crimerate_df(crimes),
                                        self.make_population_df(population), window)
         actual = actual.reset_index()[["parcel_id", "inspection_date", "crime_rate"]].values
 
