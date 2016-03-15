@@ -5,8 +5,8 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_equal
 import pandas as pd
 
-from blight_risk_prediction.features import crime
-from tests.util import RawDatabase, date, timestamp, assert_frame_equal
+from features import crime
+from lib_cinci.test_utils import RawDatabase, date, timestamp, assert_frame_equal
 
 
 class TestCrime(unittest.TestCase):

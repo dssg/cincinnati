@@ -7,8 +7,8 @@ import pandas as pd
 import numpy as np
 from nose.tools import raises
 
-from tests.util import FeatureDatabase, iso_date, date, assert_frame_equal
-from blight_risk_prediction import dataset, util
+from test_utils import FeatureDatabase, iso_date, date, assert_frame_equal
+from lib_cinci import dataset, util
 
 
 class TestLabels(unittest.TestCase):

@@ -3,7 +3,7 @@ from pandas.util.testing import assert_frame_equal
 import numpy as np
 from nose.tools import raises
 
-from blight_risk_prediction.util import get_dummies
+from lib_cinci.util import get_dummies
 
 
 
