@@ -35,6 +35,23 @@ def add_flags_to_predictions_df(df):
     df['fp_top_10'] = df.top_10 & ~df.viol_outcome
     return df
 
+def add_parcel_type(df):
+    '''
+        Returns a copy of the original DataFrame with one extra column
+        indicating if the parcel is residential
+    '''
+    def is_residential(property_class):
+        if int(property_class) == 423 or 500 <= int(property_class) <= 599:
+            return True
+        return False
+
+    e = create_engine(uri)
+    query = ("SELECT parcels.parcelid AS parcel_id, parcels.class "
+            "FROM shape_files.parcels_cincy AS parcels")
+    parcel_type = pd.read_sql(query, e, index_col='parcel_id')
+    parcel_type["is_residential"] = parcel_type["class"].apply(is_residential)
+    return df.join(parcel_type[['is_residential']])
+
 def add_latlong_to_df(df):
     '''
         Return a predictions data frame with latitude and longitude columns
