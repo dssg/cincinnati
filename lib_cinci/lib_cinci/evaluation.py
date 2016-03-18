@@ -52,6 +52,34 @@ def add_parcel_type(df):
     parcel_type["is_residential"] = parcel_type["class"].apply(is_residential)
     return df.join(parcel_type[['is_residential']])
 
+def add_inspections_results_for(df, start_year, end_year):
+    '''
+        Returns a copy of the original data frame with three new columns
+        inspections, violations and nonviolations which is the count for
+        such events between start_year and end_year
+    '''
+    e = create_engine(uri)
+    query = '''
+        WITH sub AS(
+            SELECT *
+            FROM features.parcels_inspections AS insp
+            WHERE
+                EXTRACT(YEAR FROM insp.inspection_date)>=%(start_year)s
+            AND
+                EXTRACT(YEAR FROM insp.inspection_date)<=%(end_year)s
+        )
+
+        SELECT  parcel_id,
+            SUM(CASE WHEN viol_outcome = 1 THEN 1 ELSE 0 END) violations,
+            SUM(CASE WHEN viol_outcome = 0 THEN 1 ELSE 0 END) non_violations,
+            COUNT(*) AS inspections
+        FROM sub GROUP BY parcel_id;
+    '''
+    insp_results = pd.read_sql(query, e, index_col='parcel_id',
+        params={'start_year':start_year, 'end_year':end_year})
+    return df.join(insp_results)
+
+
 def add_latlong_to_df(df):
     '''
         Return a predictions data frame with latitude and longitude columns
