@@ -63,6 +63,8 @@ def make_datasets(config):
         validation_window = datetime.timedelta(days=365)
     elif config["validation_window"] == "1Month":
         validation_window = datetime.timedelta(days=30)
+    elif config["validation_window"] == "None":
+        validation_window = None
     else:
         raise ConfigError("Unsupported validation window: {}".format(
                           config["validation_window"]))
