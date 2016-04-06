@@ -64,25 +64,25 @@ def make_datasets(config):
     elif config["validation_window"] == "1Month":
         validation_window = datetime.timedelta(days=30)
     elif config["validation_window"] == "None":
-        validation_window = None
+        validation_window = datetime.timedelta(days=0)
     else:
         raise ConfigError("Unsupported validation window: {}".format(
                           config["validation_window"]))
 
     #Before proceeding, make sure dates for training and testing are 
-    #December 31, 2014 at most. Further dates won't work since you don't
+    #May 05, 2015 at most. Further dates won't work since you don't
     #have data.
     #Check start date
-    max_date = datetime.datetime.strptime('31Dec2014', '%d%b%Y')
+    max_date = datetime.datetime.strptime('05May2015', '%d%b%Y')
     if start_date > max_date:
         raise MaxDateError('Error: Your start_date exceeds '
-             'December 31, 2014.  There\'s no data for 2015. Udpate '
+             'May 05, 2015.  There\'s no data after that date. Udpate '
              'data and change the date limit to prevent this message from '
              'appearing')
     #Check fake today + validation window
     if fake_today + validation_window > max_date:
         raise MaxDateError('Error: your fake_today + validation_window exceeds '
-             'December 31, 2014.  There\'s no data for 2015. Udpate '
+             'May 05, 2015.  There\'s no data after that date. Udpate '
              'data and change the date limit to prevent this message from '
              'appearing')
 
@@ -216,16 +216,19 @@ def main():
         test.x.shape))
     # Dump datasets if dump option was selected
     if args.dump:
-        logger.info('Dumping train, test, field_train and field_test')
+        logger.info('Dumping train and tests sets')
         datasets = [(train, 'train'), 
-                    (test, 'test'),
-                    (field_train, 'field_train'),
-                    (field_test, 'field_test')]
+                    (test, 'test')]
         for data, name in datasets:
             if data is not None:
                 filename = '{}_{}.csv'.format(config["experiment_name"], name)
-                df = data.to_df()
-                df.to_csv(os.path.join(path_to_dumps, filename))
+                try:
+                    #Try to convert to dataframe, it will fail if data is empty
+                    df = data.to_df()
+                except Exception, e:
+                    logger.info('Error saving {} as csv: {}'.format(filename, e))
+                finally:
+                    df.to_csv(os.path.join(path_to_dumps, filename))
             else:
                 logger.info('{} is None, skipping dump...'.format(name))
 
