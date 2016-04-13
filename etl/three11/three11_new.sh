@@ -25,7 +25,6 @@ echo 'Uploading data...'
 #Upload data to the database
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.three11_2 FROM $TMP_FOLDER/diff_three11_2_clean.csv WITH CSV HEADER DELIMITER ',';"
 
-
 # echo 'Almost done, creating indexes, unique id and geometry column...'
 # psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/process_table.sql"  
 
