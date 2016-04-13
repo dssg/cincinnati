@@ -1,0 +1,7 @@
+source:
+  filename: salesinfo-feb2016.csv
+  column: date_of_sale
+storage:
+  schema: public
+  table: sales
+  column: datesale
