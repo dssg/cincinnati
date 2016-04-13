@@ -13,7 +13,10 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE SCHEMA inspections_raw;"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE SCHEMA inspections_views;"
 
 echo 'Creating address table...'
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/address.sql"  
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/bulk_geocoder/address.sql"  
+
+echo 'Creating last_updated_record table...'
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/last_updated_record.sql"  
 
 echo 'Remember to install PostGIS in the database...'
 
