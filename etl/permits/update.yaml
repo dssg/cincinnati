@@ -1,0 +1,7 @@
+source:
+  url: https://data.cincinnati-oh.gov/api/views/uhjb-xac9/rows.csv?accessType=DOWNLOAD
+  column: ISSUEDDATE
+storage:
+  schema: public
+  table: permits
+  column: issueddate
