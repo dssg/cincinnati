@@ -1,0 +1,10 @@
+source:
+  #URL is optional. If present, script will download it every time and saved using
+  #filename value. Otherwise, script will load file named as filename value
+  #url: https://data.cincinnati-oh.gov/api/views/4cjh-bm8b/rows.csv?accessType=DOWNLOAD
+  filename: data.csv
+  column: REQUESTED_DATETIME
+storage:
+  schema: public
+  table: three11_tmp
+  column: requested_datetime
