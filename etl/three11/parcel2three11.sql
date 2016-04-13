@@ -12,5 +12,5 @@ CREATE TABLE parcel2three11 AS (
     ON ST_DWithin(parcels.geom, three11.geom, 3281)
 );
 
-CREATE INDEX ON parcel2three11 (parcel_id);
-CREATE INDEX ON parcel2three11 (three11_id);
+CREATE INDEX three11_parcel_id_index ON parcel2three11 (parcel_id);
+CREATE INDEX three11_event_id_index ON parcel2three11 (three11_id);
