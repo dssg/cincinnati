@@ -22,8 +22,11 @@ csvsql -i postgresql --tables three11_2 --db-schema public -d ',' "$TMP_FOLDER/d
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/three11_2.sql"  
 
 echo 'Uploading data...'
+#Get list of columns to cpy, this is necessary since we have a PRIMARY KEY
+#and we want postgres to take care of those values
+COLS="$(head -n 1 $TMP_FOLDER/diff_three11_2_clean.csv)"
 #Upload data to the database
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.three11_2 FROM $TMP_FOLDER/diff_three11_2_clean.csv WITH CSV HEADER DELIMITER ',';"
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.three11_2($COLS) FROM $TMP_FOLDER/diff_three11_2_clean.csv WITH CSV HEADER DELIMITER ',';"
 
 echo 'Processing table: creating indexes, unique id and geometry column...'
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/process_table.sql"  
