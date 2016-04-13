@@ -1,6 +1,7 @@
 import pandas as pd
 from lib_cinci import data_folder
 import os
+import sys
 
 path_to_data_folder = data_folder.for_file(__file__)
 
@@ -13,6 +14,10 @@ output_filename = "diff_three11_2_clean.csv"
 #Load csv file
 df = pd.read_csv(input_filename, parse_dates=['REQUESTED_DATETIME'], dtype={'ZIPCODE': str})
 print 'Raw file has {:,d} rows and {:,d} columns'.format(*df.shape)
+
+if df.shape[0] == 0:
+    print 'File has 0 rows, terminating...'
+    sys.exit()
 
 #Lowercase column names
 df.columns = df.columns.map(lambda s: s.lower())

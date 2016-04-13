@@ -18,6 +18,6 @@ python "$ROOT_FOLDER/etl/three11/clean.py"
 #Generate CREATE TABLE statement
 csvsql -i postgresql --tables three11_2 --db-schema public -d ',' "$TMP_FOLDER/diff_three11_2_clean.csv" > "$TMP_FOLDER/three11_2.sql"
 #Create table
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/three11.sql"  
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/three11_2.sql"  
 #Upload data to the database
-cat "$TMP_FOLDER/three11_clean.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.three11 FROM STDIN  WITH CSV HEADER DELIMITER ',';"
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.three11_2 FROM $TMP_FOLDER/diff_three11_2_clean.csv WITH CSV HEADER DELIMITER ',';"
