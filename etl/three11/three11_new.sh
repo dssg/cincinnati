@@ -15,9 +15,24 @@ $UPDATE_SCRIPT $ROOT_FOLDER/etl/three11/update.yaml
 #Clean diff file
 python "$ROOT_FOLDER/etl/three11/clean.py"
 
+echo 'Generating CREATE TABLE statement...'
 #Generate CREATE TABLE statement
 csvsql -i postgresql --tables three11_2 --db-schema public -d ',' "$TMP_FOLDER/diff_three11_2_clean.csv" > "$TMP_FOLDER/three11_2.sql"
 #Create table
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/three11_2.sql"  
+
+echo 'Uploading data...'
 #Upload data to the database
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.three11_2 FROM $TMP_FOLDER/diff_three11_2_clean.csv WITH CSV HEADER DELIMITER ',';"
+
+
+# echo 'Almost done, creating indexes, unique id and geometry column...'
+# psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/process_table.sql"  
+
+# echo 'Done creating three11 table!'
+
+# #Match parcels to events (add indexes on parcel_id and event_id)
+# echo 'Matching every parcel in cincinnati with every event in the three11 table (up to 3KM), this may take a while...'
+# psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/parcel2three11.sql"
+
+echo 'Done.'

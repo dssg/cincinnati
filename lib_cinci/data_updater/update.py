@@ -50,14 +50,14 @@ if __name__ == '__main__':
     #Step two: check most recent entry in the database
     db = dataset.connect(uri)
     table_name = params['storage']['table']
-    table = db[table_name]
     
-    #Query the database, if returns None, the table doesn't exist
-    most_recent_row = table.find_one(order_by='-'+db_column)
-    if most_recent_row is None:
+    #Check if table exists
+    if table_name not in db:
         db_most_recent = None
         logger.info('Table does not exist, diff file will be a copy of source file')
     else:
+        table = db[table_name]
+        most_recent_row = table.find_one(order_by='-'+db_column)
         db_most_recent = most_recent_row[db_column]
         logger.info('Most recent record in database is: {}'.format(db_most_recent))
     
