@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS parcel2three11_2 (
     dist_m float8 NOT NULL
 );
 --Create indexes on parcel_id and three11_id
-CREATE INDEX three11_parcel_id_index ON parcel2three11 (parcel_id);
-CREATE INDEX three11_event_id_index ON parcel2three11 (three11_id);
+CREATE INDEX three11_parcel_id_index ON parcel2three11_2 (parcel_id);
+CREATE INDEX three11_event_id_index ON parcel2three11_2 (event_id);
     
 --Insert new rows into table
 INSERT INTO parcel2three11_2(
@@ -33,7 +33,7 @@ WITH new_records AS (
 SELECT parcels.parcelid AS parcel_id, new_records.id AS event_id, ST_Distance(parcels.geom, new_records.geom)/3.281 AS dist_m
 FROM shape_files.parcels_cincy AS parcels
 JOIN new_records
-ON ST_DWithin(parcels.geom, new_records.geom, 3281)
+ON ST_DWithin(parcels.geom, new_records.geom, 3281);
 
 --Update last_updated_event table
 UPDATE last_updated_event
