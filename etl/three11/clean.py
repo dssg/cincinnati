@@ -15,17 +15,14 @@ output_filename = "diff_three11_2_clean.csv"
 df = pd.read_csv(input_filename, parse_dates=['REQUESTED_DATETIME'], dtype={'ZIPCODE': str})
 print 'Raw file has {:,d} rows and {:,d} columns'.format(*df.shape)
 
-if df.shape[0] == 0:
-    print 'File has 0 rows, terminating...'
-    sys.exit()
-
 #Lowercase column names
 df.columns = df.columns.map(lambda s: s.lower())
 
 #We are only using data starting from 2005
-indexes = [i.year >= 2005 for i in df.requested_datetime]
-df = df[indexes]
-print 'Subset from 2005 has {:,d} rows and {:,d} columns'.format(*df.shape)
+#Disabled since the open data portal version has date starting in 2012
+#indexes = [i.year >= 2005 for i in df.requested_datetime]
+#df = df[indexes]
+#print 'Subset from 2005 has {:,d} rows and {:,d} columns'.format(*df.shape)
 
 #Check how many rows have empty addresses
 print '{:,d} rows with empty address, removing those'.format(df.address.isnull().sum())
