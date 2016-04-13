@@ -7,8 +7,11 @@ path_to_data_folder = data_folder.for_file(__file__)
 os.chdir(os.path.join(path_to_data_folder, 'tmp'))
 print 'Working in folder: %s' % path_to_data_folder
 
+input_filename = "diff_three11_2.csv"
+output_filename = "diff_three11_2_clean.csv"
+
 #Load csv file
-df = pd.read_csv("od_cinc_311_service_reqs.csv", parse_dates=['REQUESTED_DATETIME'], dtype={'ZIPCODE': str})
+df = pd.read_csv(input_filename, parse_dates=['REQUESTED_DATETIME'], dtype={'ZIPCODE': str})
 print 'Raw file has {:,d} rows and {:,d} columns'.format(*df.shape)
 
 #Lowercase column names
@@ -44,7 +47,11 @@ df.drop('service_notice', axis=1, inplace=True)
 #The rest of the columns have similar problems
 df.address = df.address.map(lambda s: s.replace('"', ''))
 df.drop('address_id', axis=1, inplace=True)
-df.drop('media_url', axis=1, inplace=True)
+
+#this is not longer needed since open data portal version does not contain
+#this column
+#df.drop('media_url', axis=1, inplace=True)
+
 #Thse columns have many repeated values, not sure
 #whay they are
 df.drop('requested_date', axis=1, inplace=True)
@@ -60,4 +67,4 @@ df.address = df.address.map(lambda x: x.split(' - ')[0].replace(', CINC', ''))
 
 #Save data frame
 print 'Cleaned file has {:,d} rows and {:,d} columns. Saving on three11_clean.csv'.format(*df.shape)
-df.to_csv('three11_clean.csv', index=False)
+df.to_csv(output_filename, index=False)

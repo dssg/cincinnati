@@ -6,5 +6,5 @@ source:
   column: REQUESTED_DATETIME
 storage:
   schema: public
-  table: three11_tmp
+  table: three11_2
   column: requested_datetime

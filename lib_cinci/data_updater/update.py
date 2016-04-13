@@ -62,6 +62,7 @@ if __name__ == '__main__':
         logger.info('Most recent record in database is: {}'.format(db_most_recent))
     
     #Step three: load and subset the file to include new entries
+    #TO DO: avoid loading if most_recent_row is None
     logger.info('Loading {}'.format(params['source']['filename']))
     df = pd.read_csv(params['source']['filename'])
     df[file_column] = pd.to_datetime(df[file_column])
@@ -71,6 +72,6 @@ if __name__ == '__main__':
     logger.info('{:,d} new enties'.format(new_entries.shape[0]))
     
     #Step four: save new entries in a csv file
-    diff_file = 'tmp/diff.csv'
+    diff_file = 'tmp/diff_{}.csv'.format(table_name)
     new_entries.to_csv(diff_file, index=False)
     logger.info('New entries saved in {}'.format(os.path.join(folder, diff_file)))
