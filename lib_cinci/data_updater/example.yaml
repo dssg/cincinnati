@@ -1,0 +1,7 @@
+source:
+  url: http://open-data.org/dataset.csv
+  column: DATE
+storage:
+  schema: public
+  table: dataset
+  column: date

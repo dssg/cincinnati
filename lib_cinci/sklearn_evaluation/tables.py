@@ -24,8 +24,8 @@ def _compute_feature_importances(model, feature_list):
     f = [{'name':feature_list[i], 'importance':importances[i], 'std': std[i]} for i in indices]
     return f
 
-def feature_importances(model, feature_list):
-    data =  _compute_feature_importances(model, feature_list)
+def feature_importances(model=None, feature_importances=None feature_names):
+    data =  _compute_feature_importances(model, feature_names)
     #Convert list of dictionaries to list of tuples
     #that's to show the columns in the correct order: name, importance, std
     rows = [(dic['name'], dic['importance'], dic['std']) for dic in data]
