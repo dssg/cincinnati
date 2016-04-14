@@ -31,18 +31,14 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY address(address, zip, latitud
 #with a NULL value in geom column
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/update_geoms.sql"
 
-
-###TODO: FIX CODE BELOW. IT WONT WORK WHEN UPDATING
-
 #Using the address table (which contains unique addresses),
-#add a new column in fire, crime and sales with the corresponding address_id
+#add a new column in fire if it doesn't exist and
+#udpate crime, fire and sales tables with the corresponding address_id
+#in rows that have NULL values in address_id
 echo 'Mapping addresses in addreess table with events in fire, crime and sales'
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/match_events_with_address.sql"
 
-
-#Creates already_computed_addresses table which keeps track of addresses
-#that were already used for calculating distances to parcels
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/already_computed_addresses.sql"
+###TODO: FIX CODE BELOW. IT WONT WORK WHEN UPDATING
 
 #This script computes the distance for each parcel in  parcels_cincy (Note that this includes ALL
 #parcels in the city)
