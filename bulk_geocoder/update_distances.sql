@@ -7,28 +7,32 @@
 --1000 m ~ 3281 US survey foot
 -- X [US Survey foot] / 3.281 ~ Y m
 
---Get pending addresses
---http://stackoverflow.com/questions/22702388/improve-postgresql-set-difference-efficiency
-WITH pending_addresses AS (
-    SELECT * FROM address WHERE id NOT IN (SELECT address_id FROM already_computed_addresses) AND geom IS NOT NULL
-),
+--Insert a record in last_updated_event in case it doesn't exist
+INSERT INTO last_updated_event
+    (table_name, event_id)
+    SELECT 'address', 0
+WHERE NOT EXISTS (
+    SELECT table_name FROM last_updated_event WHERE table_name = 'address'
+);
 
-computed_distances AS (
-    SELECT parcels.parcelid AS parcel_id,
-           address.id AS address_id,
-           ST_Distance(parcels.geom, address.geom)/3.281 AS dist_m
-    FROM shape_files.parcels_cincy AS parcels
-    JOIN pending_addresses AS address ON ST_DWithin(parcels.geom, address.geom, 3281)
+--Insert new records in parcel2address table
+INSERT INTO parcel2address(
+    parcel_id,
+    address_id,
+    dist_m
 )
+WITH new_addresses AS(
+    --Subselect addresses that have not been used
+    --using the last updated address
+    SELECT * FROM address WHERE id > (SELECT event_id FROM last_updated_event WHERE table_name='address')
+)
+--Compute distances for new addresses
+SELECT parcels.parcelid AS parcel_id, address.id AS address_id, ST_Distance(parcels.geom, address.geom)/3.281 AS dist_m
+FROM shape_files.parcels_cincy AS parcels
+JOIN new_addresses
+ON ST_DWithin(parcels.geom, new_records.geom, 3281);
 
---Add computed addresses ids
-INSERT INTO parcel2address
-    SELECT * FROM computed_distances;
-
---Add ids
---we need this since we cannot rely only on the ids in computed_distances
---it may be the case that some events are close to zero parcels,
---I don't think there are many (maybe the one outside cincinnati)
---but this is a simple solution
-INSERT INTO already_computed_addresses
-    SELECT address_id FROM pending_addresses;
+--Update last updated address id
+UPDATE last_updated_event
+    SET event_id = (SELECT MAX(id) FROM address)
+    WHERE table_name = 'address';
