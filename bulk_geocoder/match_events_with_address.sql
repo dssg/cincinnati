@@ -1,50 +1,48 @@
 --CRIME
-CREATE TEMPORARY TABLE new_crime AS(
-    SELECT event.*, addr.id AS address_id
-    FROM crime AS event
-    LEFT JOIN address AS addr
-    USING (address)
-);
+--Create address_id column
+ALTER TABLE crime
+    ADD COLUMN address_id int4
 
-DROP TABLE IF EXISTS crime;
+--Update rows that do not have an address_id value
+--with the corresponding one in address table
+UPDATE crime
+    SET address_id = address.id
+    FROM address
+    WHERE crime.address = address.address
+    AND crime.address_id IS NULL;
 
-CREATE TABLE crime AS(
-    SELECT * FROM new_crime
-);
-
-CREATE INDEX ON crime (date_reported);
-CREATE INDEX ON crime (address_id);
+--Create indexes
+CREATE INDEX crime_date_index ON crime (date_reported);
+CREATE INDEX crime_id_index ON crime (address_id);
 
 --FIRE
-CREATE TEMPORARY TABLE new_fire AS(
-    SELECT event.*, addr.id AS address_id
-    FROM fire AS event
-    LEFT JOIN address AS addr
-    USING (address)
-);
+--Create address_id column
+ALTER TABLE fire
+    ADD COLUMN address_id int4
 
-DROP TABLE IF EXISTS fire;
+--Update rows that do not have an address_id value
+--with the corresponding one in address table
+UPDATE fire
+    SET address_id = address.id
+    FROM address
+    WHERE fire.address = address.address
+    AND fire.address_id IS NULL;
 
-CREATE TABLE fire AS(
-    SELECT * FROM new_fire
-);
-
-CREATE INDEX ON fire (date);
-CREATE INDEX ON fire (address_id);
+CREATE INDEX fire_date_index ON fire (date);
+CREATE INDEX fire_address_index ON fire (address_id);
 
 --SALES
-CREATE TEMPORARY TABLE new_sales AS(
-    SELECT event.*, addr.id AS address_id
-    FROM sales AS event
-    LEFT JOIN address AS addr
-    USING (address)
-);
+--Create address_id column
+ALTER TABLE sales
+    ADD COLUMN address_id int4
 
-DROP TABLE IF EXISTS sales;
+--Update rows that do not have an address_id value
+--with the corresponding one in address table
+UPDATE sales
+    SET address_id = address.id
+    FROM address
+    WHERE sales.address = address.address
+    AND sales.address_id IS NULL;
 
-CREATE TABLE sales AS(
-    SELECT * FROM new_sales
-);
-
-CREATE INDEX ON sales (datesale);
-CREATE INDEX ON sales (address_id);
+CREATE INDEX sales_date_index ON sales (datesale);
+CREATE INDEX sales_address_index ON sales (address_id);

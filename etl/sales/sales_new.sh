@@ -10,6 +10,11 @@ DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
 #mkdir if not exists
 mkdir -p $TMP_FOLDER
 
+#Path to update script
+UPDATE_SCRIPT=$ROOT_FOLDER/lib_cinci/data_updater/update.py
+#Create diff file with entries to upload to the database
+$UPDATE_SCRIPT $ROOT_FOLDER/etl/sales/update.yaml
+
 #Convert raw data to tsv
 #REMOVE THIS extract.py and transform.py
 #python "$ROOT_FOLDER/etl/sales/extract.py" "$SALES_FOLDER/salesinfo.txt" > "$TMP_FOLDER/salesinfo.tsv"
@@ -17,10 +22,15 @@ mkdir -p $TMP_FOLDER
 #python "$ROOT_FOLDER/etl/sales/transform.py" "$TMP_FOLDER/salesinfo.tsv" "$TMP_FOLDER/salesinfo.csv"
 
 #Clean dataset
+echo 'Cleaninng data...'
 python "$ROOT_FOLDER/etl/sales/clean.py"
-echo 'Geocoding dataset, this may take a while...'
+
+#Geocode
+echo 'Geocoding data, this may take a while...'
 python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/sales_clean.csv" "$TMP_FOLDER/sales_geocoded.csv"
+
 #Process geocoded file
+echo 'Final processing...'
 python "$ROOT_FOLDER/bulk_geocoder/process_geocoded_csv.py" "$TMP_FOLDER/sales_geocoded.csv" "$TMP_FOLDER/sales_db.csv"
 
 # #Generate CREATE TABLE statement

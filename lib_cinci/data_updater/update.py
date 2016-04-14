@@ -69,7 +69,7 @@ if __name__ == '__main__':
 
     #Subset only if db_most_recent has a value    
     new_entries = df[df[file_column] > db_most_recent] if db_most_recent else df
-    logger.info('{:,d} new enties'.format(new_entries.shape[0]))
+    logger.info('{:,d} new entries'.format(new_entries.shape[0]))
     
     #Step four: save new entries in a csv file
     diff_file = 'tmp/diff_{}.csv'.format(table_name)
