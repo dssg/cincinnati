@@ -1,0 +1,67 @@
+#!/usr/bin/env python
+import argparse
+import pandas as pd
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("path_to_file", help="Path to csv file")
+    args = parser.parse_args()
+
+    #http://pandas.pydata.org/pandas-docs/stable/generated/pandas.set_option.html
+    pd.set_option('display.large_repr', 'truncate')
+    pd.set_option('display.max_columns', 0)
+    
+    def color_print(df):
+        #get column to color dictionary
+        def __str_for_value(value):
+            if value == 0:
+                return 'green'
+            elif value >= 0.6:
+                return 'red'
+            elif value >= 0.4:
+                return 'yellow'
+            else:
+                return 'none'
+    
+        col2color = dict(df.missing.apply(__str_for_value))
+    
+        colors = {
+            'red': '\033[91m{}\033[0m',
+            'yellow': '\033[93m{}\033[0m',
+            'green': '\033[92m{}\033[0m',
+            'none': '{}'
+        }
+        #Iterate over every line and print with color
+        for line in str(df).split('\n'):
+            prefix = line.split()[0]
+            color = col2color.get(prefix, 'none')
+            print colors[color].format(line)
+    
+    
+    def add_missing(df):
+        df['missing'] = 1 - df['count']/rows
+    
+    
+    df = pd.read_csv(args.path_to_file)
+    rows, cols = df.shape
+
+    print '\n'
+    print 'File shape: {:,d} rows and {:,d} columns'.format(rows, cols)
+    print '{:,d} duplicated values'.format(df.duplicated().sum()/rows)
+    print '-'*10+'\n'
+
+    #Describe objects
+    des_obj = df.select_dtypes(include=['object']).describe().transpose()
+    add_missing(des_obj)
+    
+    print 'Object columns:'
+    color_print(des_obj)
+    print '-'*10+'\n'
+    
+    #Describe the rest
+    des_num = df.select_dtypes(exclude=['object']).describe().transpose()
+    add_missing(des_num)
+    
+    print 'Numeric columns:'
+    color_print(des_num)
+    print '-'*10+'\n'
