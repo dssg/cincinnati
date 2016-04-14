@@ -11,8 +11,8 @@ CREATE TABLE address (
     latitude float8,
     longitude float8,
     --coordinates, make sure they are in the 3735 SRID
-    x_coord int4,
-    y_coord int4,
+    --x_coord int4,
+    --y_coord int4,
     --geometry
     geom geometry
 );

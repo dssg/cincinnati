@@ -11,7 +11,8 @@ DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/address.sql"
 
 #Join addresses in the different datasets and filter them
-#to get the unique ones
+#to get the unique ones. If you incorporate a new dataset
+#with addresses, you must add it manually to get_unique_addresses.py
 python "$ROOT_FOLDER/bulk_geocoder/get_unique_addresses.py"
 
 #Upload data to the database
@@ -21,12 +22,14 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY address(address, zip, latitud
 #with a NULL value in geom column
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/update_geoms.sql"
 
-#Match addresses to events with a unique id
+#Using the address table (which contains unique addresses),
+#add a new column in fire, crime and sales with the corresponding address_id
 echo 'Mapping addresses in addreess table with events in fire, crime and sales'
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/match_events_with_address.sql"
 
-#Creates parcel2address table, which contains records for each parcel to its
-#addresses nearby
+#Creates parcel2address table, which will store records for each parcel to its
+#addresses nearby. This script only creates the table and does not perform any
+#computation
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/parcel_to_address.sql"
 
 #Creates already_computed_addresses table which keeps track of addresses

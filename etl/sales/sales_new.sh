@@ -22,10 +22,15 @@ $UPDATE_SCRIPT $ROOT_FOLDER/etl/sales/update.yaml
 #python "$ROOT_FOLDER/etl/sales/transform.py" "$TMP_FOLDER/salesinfo.tsv" "$TMP_FOLDER/salesinfo.csv"
 
 #Clean dataset
+echo 'Cleaninng data...'
 python "$ROOT_FOLDER/etl/sales/clean.py"
-echo 'Geocoding dataset, this may take a while...'
+
+#Geocode
+echo 'Geocoding data, this may take a while...'
 python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/sales_clean.csv" "$TMP_FOLDER/sales_geocoded.csv"
+
 #Process geocoded file
+echo 'Final processing...'
 python "$ROOT_FOLDER/bulk_geocoder/process_geocoded_csv.py" "$TMP_FOLDER/sales_geocoded.csv" "$TMP_FOLDER/sales_db.csv"
 
 # #Generate CREATE TABLE statement
