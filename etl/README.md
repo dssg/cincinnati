@@ -1,9 +1,9 @@
 ##ETL
 
-Here you will find one subfolders for each dataset that we used. For each folder, a shell script (with the same name as the parent folder) is provided which performs the etl for that dataset (it also contains an explanation on each step performed). For example, to load the CAGIS data, run:
+Here you will find one subfolders for each dataset that we used. For each folder, a shell script named `run` is provided which performs the etl for that dataset (it also contains an explanation on each step performed). For example, to load the CAGIS data, run:
 
 ```bash
-bash etl/cagis/cagis.sh
+./etl/cagis/run
 ```
 
 **Note:** Some ETL steps depend on others, there's no script to run them in order (ups), but running inspections, parcels, CAGIS, census first should work fine.
