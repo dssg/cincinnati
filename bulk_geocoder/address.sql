@@ -1,7 +1,7 @@
 --This table is going to be used to store ALL different addresses
 --in the different datasets we have, this way we will significantly reduce
 --the number of distance computations
-CREATE TABLE address (
+CREATE TABLE IF NOT EXISTS address (
     --Create an unique id
     id SERIAL PRIMARY KEY,
     --address: number and street name
@@ -17,5 +17,5 @@ CREATE TABLE address (
     geom geometry
 );
 
-CREATE INDEX ON address (id);
-CREATE INDEX ON address USING GIST (geom);
+CREATE INDEX address_id_index ON address (id);
+CREATE INDEX address_geom_index ON address USING GIST (geom);

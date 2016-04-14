@@ -7,7 +7,7 @@ DB_HOST=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.host)
 DB_USER=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.user)
 DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
 
-#Create address table
+#Create address table if it doesn't exist, also create indexes
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/address.sql"
 
 #Join addresses in the different datasets and filter them
@@ -15,8 +15,12 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/address.sql"
 #with addresses, you must add it manually to get_unique_addresses.py
 python "$ROOT_FOLDER/bulk_geocoder/get_unique_addresses.py"
 
+#Find the difference between the unique addresses file and the addresses
+#in the database
+python "$ROOT_FOLDER/bulk_geocoder/update.py"
+
 #Upload data to the database
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY address(address, zip, latitude, longitude) FROM '$ETL_FOLDER/unique_addresses.csv' WITH CSV HEADER DELIMITER ',';"
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY address(address, zip, latitude, longitude) FROM '$ETL_FOLDER/diff_unique_addresses.csv' WITH CSV HEADER DELIMITER ',';"
 
 #This script creates a geometric point in each address with latitude and longitude
 #with a NULL value in geom column
