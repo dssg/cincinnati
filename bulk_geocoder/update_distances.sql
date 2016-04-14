@@ -27,10 +27,10 @@ WITH new_addresses AS(
     SELECT * FROM address WHERE id > (SELECT event_id FROM last_updated_event WHERE table_name='address')
 )
 --Compute distances for new addresses
-SELECT parcels.parcelid AS parcel_id, address.id AS address_id, ST_Distance(parcels.geom, address.geom)/3.281 AS dist_m
+SELECT parcels.parcelid AS parcel_id, new_addresses.id AS address_id, ST_Distance(parcels.geom, new_addresses.geom)/3.281 AS dist_m
 FROM shape_files.parcels_cincy AS parcels
 JOIN new_addresses
-ON ST_DWithin(parcels.geom, new_records.geom, 3281);
+ON ST_DWithin(parcels.geom, new_addresses.geom, 3281);
 
 --Update last updated address id
 UPDATE last_updated_event

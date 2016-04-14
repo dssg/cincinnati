@@ -14,9 +14,8 @@ def main():
         raise IOError(("Couldn't load parcels info file from {}. Make sure you run "
             "download_parcel_info.py first to generate the file ".format(path_to_parcel_info)))
 
-    to_inspect = pd.read_csv(predictions, header=None, index_col=0)
+    to_inspect = pd.read_csv(predictions, index_col=0)
     to_inspect = pd.merge(to_inspect, parcel_info, how='left', left_index=True, right_index=True)
-    to_inspect["last_inspection"] = pd.to_datetime(to_inspect["last_inspection"])
     to_inspect.to_csv(args.output_file)
 
 if __name__ == '__main__':

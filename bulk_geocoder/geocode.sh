@@ -38,11 +38,7 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/update_geoms.s
 echo 'Mapping addresses in addreess table with events in fire, crime and sales'
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/match_events_with_address.sql"
 
-###TODO: FIX CODE BELOW. IT WONT WORK WHEN UPDATING
-
 #This script computes the distance for each parcel in  parcels_cincy (Note that this includes ALL
-#parcels in the city)
-#with each row in address. Once finished, it saves the records, so the next
-#time only computes distances for the new addresses. Results are store in parcel2address
-#table
+#parcels in the city).Results are store in parcel2address table
+#subsequent runs will unly compute distances for new addresses
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/update_distances.sql"

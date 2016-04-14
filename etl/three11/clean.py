@@ -8,8 +8,8 @@ path_to_data_folder = data_folder.for_file(__file__)
 os.chdir(os.path.join(path_to_data_folder, 'tmp'))
 print 'Working in folder: %s' % path_to_data_folder
 
-input_filename = "diff_three11_2.csv"
-output_filename = "diff_three11_2_clean.csv"
+input_filename = "diff_three11.csv"
+output_filename = "diff_three11_clean.csv"
 
 #Load csv file
 df = pd.read_csv(input_filename, parse_dates=['REQUESTED_DATETIME'], dtype={'ZIPCODE': str})
