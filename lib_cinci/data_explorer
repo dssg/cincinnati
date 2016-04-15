@@ -14,9 +14,9 @@ if __name__ == '__main__':
     def color_print(df):
         #get column to color dictionary
         def __str_for_value(value):
-            if value == 0:
-                return 'green'
-            elif value >= 0.6:
+            #if value == 0:
+            #    return 'green'
+            if value >= 0.6:
                 return 'red'
             elif value >= 0.4:
                 return 'yellow'
@@ -33,10 +33,13 @@ if __name__ == '__main__':
         }
         #Iterate over every line and print with color
         for line in str(df).split('\n'):
-            prefix = line.split()[0]
-            color = col2color.get(prefix, 'none')
-            print colors[color].format(line)
-    
+            try:
+	        prefix = line.split()[0]
+            except Exception, e:
+	        print line
+	    else:
+	        color = col2color.get(prefix, 'none')
+                print colors[color].format(line)
     
     def add_missing(df):
         df['missing'] = 1 - df['count']/rows
