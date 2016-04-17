@@ -8,8 +8,7 @@ os.chdir(os.path.join(path_to_data_folder, 'tmp'))
 print 'Working in folder: %s' % path_to_data_folder
 
 #Load csv file
-df = pd.read_csv("diff_sales.csv", parse_dates=['date_of_sale'],
-                dtype={'house_number': int})
+df = pd.read_csv("diff_sales.csv", parse_dates=['date_of_sale'])
 print 'Raw file has {:,d} rows and {:,d} columns'.format(*df.shape)
 
 #We are only using data starting from 2012
