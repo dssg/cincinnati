@@ -4,7 +4,7 @@ import os
 path_to_etl = os.path.join(os.environ['DATA_FOLDER'], 'etl')
 path_to_fire = os.path.join(path_to_etl, 'fire', 'tmp', 'fire_db.csv')
 path_to_crime = os.path.join(path_to_etl, 'crime', 'tmp', 'crime_db.csv')
-path_to_sales = os.path.join(path_to_etl, 'sales', 'tmp', 'sales_db.csv')
+path_to_sales = os.path.join(path_to_etl, 'sales', 'tmp', 'diff_sales_db.csv')
 
 def process_df(df):
     print '    Dataset has {:,d} rows and {:,d} columns'.format(*df.shape)

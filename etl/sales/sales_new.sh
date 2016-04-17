@@ -21,11 +21,11 @@ python "$ROOT_FOLDER/etl/sales/clean.py"
 
 #Geocode
 echo 'Geocoding data, this may take a while...'
-python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/sales_clean.csv" "$TMP_FOLDER/sales_geocoded.csv"
+python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/diff_sales_clean.csv" "$TMP_FOLDER/diff_sales_clean_geocoded.csv"
 
 #Process geocoded file
 echo 'Final processing...'
-python "$ROOT_FOLDER/bulk_geocoder/process_geocoded_csv.py" "$TMP_FOLDER/sales_geocoded.csv" "$TMP_FOLDER/sales_db.csv"
+python "$ROOT_FOLDER/bulk_geocoder/process_geocoded_csv.py" "$TMP_FOLDER/diff_sales_clean_geocoded.csv" "$TMP_FOLDER/diff_sales_db.csv"
 
 #Generate CREATE TABLE statement
 csvsql -i postgresql --tables sales --db-schema public -d ',' "$TMP_FOLDER/sales_db.csv" > "$TMP_FOLDER/sales.sql"
