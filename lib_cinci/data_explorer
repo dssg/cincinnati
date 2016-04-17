@@ -34,11 +34,11 @@ if __name__ == '__main__':
         #Iterate over every line and print with color
         for line in str(df).split('\n'):
             try:
-	        prefix = line.split()[0]
+                prefix = line.split()[0]
             except Exception, e:
-	        print line
-	    else:
-	        color = col2color.get(prefix, 'none')
+                print line
+            else:
+                color = col2color.get(prefix, 'none')
                 print colors[color].format(line)
     
     def add_missing(df):

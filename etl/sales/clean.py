@@ -9,23 +9,25 @@ print 'Working in folder: %s' % path_to_data_folder
 
 #Load csv file
 df = pd.read_csv("diff_sales.csv", parse_dates=['date_of_sale'],
-                dtype={'st_number': int})
+                dtype={'house_number': int})
 print 'Raw file has {:,d} rows and {:,d} columns'.format(*df.shape)
 
-#Lowercase column names
-df.columns = df.columns.map(lambda s: s.lower())
+#We are only using data starting from 2012
+indexes = [i.year >= 2012 for i in df.date_of_sale]
+df = df[indexes]
+print 'Subset from 2012 has {:,d} rows and {:,d} columns'.format(*df.shape)
 
 #Parse address data
 def format_address(x):
-    number = str(x.st_number) if str(x.st_number) != 'nan' else ''
-    dir_ = str(x.st_dir)  if str(x.st_dir) != 'nan' else ''
-    name = str(x.st_name) if str(x.st_name) != 'nan' else ''
+    number = str(x.house_number) if str(x.house_number) != 'nan' else ''
+    dir_ = str(x.street_direction)  if str(x.street_direction) != 'nan' else ''
+    name = str(x.street_name) if str(x.street_name) != 'nan' else ''
     non_empty = [e for e in [number, dir_, name] if e != '']
     addr = reduce(lambda x,y: x+' '+y, non_empty) if len(non_empty) else ''
     return addr
 
 df['address'] = [format_address(x) for x in df.itertuples()]
-df.drop(['st_dir', 'st_name', 'st_name'], axis=1, inplace=True)
+df.drop(['street_direction', 'street_name', 'house_number'], axis=1, inplace=True)
 
 #Add columns for geocoding
 df['city'] = 'CINCINNATI'
