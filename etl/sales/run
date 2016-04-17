@@ -29,12 +29,16 @@ python "$ROOT_FOLDER/bulk_geocoder/process_geocoded_csv.py" "$TMP_FOLDER/diff_sa
 
 #Generate CREATE TABLE statement
 csvsql -i postgresql --tables sales --db-schema public -d ',' "$TMP_FOLDER/diff_sales_db.csv" > "$TMP_FOLDER/sales.sql"
-#Drop table if exists
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS sales;"  
 #Create table
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/sales.sql"  
+#Add index on date column
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE INDEX sales_date_index ON sales(date_of_sale);"  
 
+echo 'Uploading data...'
+#Get list of columns to cpy, this is necessary since we have a PRIMARY KEY
+#and we want postgres to take care of those values
+COLS="$(head -n 1 $TMP_FOLDER/diff_sales_db.csv)"
 #Upload data to the database
-cat "$TMP_FOLDER/sales_db.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.sales FROM STDIN  WITH CSV HEADER DELIMITER ',';"
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.sales($COLS) FROM $TMP_FOLDER/diff_sales_db.csv WITH CSV HEADER DELIMITER ',';"
 
 echo 'Done.'
