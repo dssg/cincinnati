@@ -7,7 +7,8 @@
 --This script is intended to be used as a template for various tables
 --Example for three11
 CREATE TABLE ${TABLE_NAME} AS (
-    SELECT insp.parcel_id, insp.inspection_date, p2e.dist_m, event.*
+    SELECT insp.parcel_id, insp.inspection_date, p2e.dist_m,
+            event.id --columns to select from event
     FROM features.parcels_inspections AS insp
     JOIN public.parcel2${DATASET} AS p2e
     USING (parcel_id)
