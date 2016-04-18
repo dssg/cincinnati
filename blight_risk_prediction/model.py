@@ -12,7 +12,7 @@ import numpy as np
 from sklearn import linear_model, svm, ensemble
 from lib_cinci import dataset
 import evaluation
-from features import feature_parser
+from features import feature_parser, check_nas_threshold
 import argparse
 from sklearn import preprocessing
 from sklearn.externals import joblib
@@ -30,6 +30,11 @@ from lib_cinci.folders import (path_to_predictions, path_to_pickled_models,
 Purpose: train a binary classifier to identify those homes that are likely
 to have at least one violation.
 """
+
+#NAs proportion threshold, when loading the training and test sets,
+#the script will check the proportion of NAs and will raise an Exception
+#when at least one column has a higher value than the threshold
+NAS_PROPORTION_THRESHOLD = 0.5
 
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
@@ -199,7 +204,7 @@ def main():
     config_file = args.path_to_config_file
     config, config_raw = configure_model(config_file)
 
-    #If logging is enable, check that there are no records for
+    #If logging is enabled, check that there are no records for
     #the selected experiment
     if not args.notlog:
         logger_uri = cfg_main['logger']['uri']
@@ -214,6 +219,17 @@ def main():
     train, test  = make_datasets(config)
     logger.debug('Train x shape: {} Test x shape: {}'.format(train.x.shape,
         test.x.shape))
+
+    #Check percentage of NAs for every feature,
+    #raise an error if at least one feature has more NAs than the
+    #acceptable threshold
+    logger.info('Checking training set NAs...')
+    prop = check_nas_threshold(train, NAS_PROPORTION_THRESHOLD)
+    logger.debug(prop)
+    logger.info('Checking testing set NAs...')
+    prop = check_nas_threshold(test, NAS_PROPORTION_THRESHOLD)
+    logger.debug(prop)
+
     # Dump datasets if dump option was selected
     if args.dump:
         logger.info('Dumping train and tests sets')

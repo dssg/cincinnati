@@ -2,6 +2,7 @@
 .ipynb_checkpoints
 env.sh
 config.yaml
+logger_config.yaml
 .pgpass
 
 #### github defaults below
