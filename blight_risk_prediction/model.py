@@ -12,7 +12,7 @@ import numpy as np
 from sklearn import linear_model, svm, ensemble
 from lib_cinci import dataset
 import evaluation
-from features import feature_parser, check_nas_threshold
+from features import feature_parser
 import argparse
 from sklearn import preprocessing
 from sklearn.externals import joblib
@@ -25,6 +25,7 @@ from lib_cinci.config import load
 from lib_cinci.exceptions import MaxDateError, ConfigError, ExperimentExists
 from lib_cinci.folders import (path_to_predictions, path_to_pickled_models,
     path_to_pickled_scalers, path_to_pickled_imputers, path_to_dumps) 
+from lib_cinci.features import check_nas_threshold
 
 """
 Purpose: train a binary classifier to identify those homes that are likely
