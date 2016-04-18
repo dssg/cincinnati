@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from lib_cinci.db import uri
 import pandas as pd
 
-#Parameters in some of this functions are being passed in SQL queries,
+#Parameters in some of these functions are being passed in SQL queries,
 #this makes them vulverable to SQL injection, if this goes into production
 #local SQL verification will be needed
 
@@ -66,3 +66,11 @@ def tables_and_columns_for_schema(schema):
     cur.close()
     conn.close()
     return results
+
+def check_nas_threshold(df, threshold):
+    nas_count = df.apply(pd.isnull).sum()
+    nas_prop = nas_count/df.shape[0]
+    above_threshold = nas_prop[nas_prop > threshold]
+    if not above_threshold.empty:
+        raise Exception(('The following columns have higher NAs proportion '
+            'than allowed:\n{}'.format(above_threshold)))
