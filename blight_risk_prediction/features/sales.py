@@ -20,7 +20,7 @@ def make_sales_features(con, n_months, max_dist):
     A pandas dataframe, with one row per inspection and one column per feature.
     """
     dataset = 'sales'
-    date_column = 'datesale'
+    date_column = 'date_of_sale'
 
     make_inspections_address_nmonths_table(con, dataset, date_column,
                                                 n_months=n_months,
