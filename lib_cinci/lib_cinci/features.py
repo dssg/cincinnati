@@ -74,3 +74,4 @@ def check_nas_threshold(df, threshold):
     if not above_threshold.empty:
         raise Exception(('The following columns have higher NAs proportion '
             'than allowed:\n{}'.format(above_threshold)))
+    return nas_prop

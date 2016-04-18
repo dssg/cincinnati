@@ -224,9 +224,11 @@ def main():
     #raise an error if at least one feature has more NAs than the
     #acceptable threshold
     logger.info('Checking training set NAs...')
-    check_nas_threshold(train, NAS_PROPORTION_THRESHOLD)
+    prop = check_nas_threshold(train, NAS_PROPORTION_THRESHOLD)
+    logger.debug(prop)
     logger.info('Checking testing set NAs...')
-    check_nas_threshold(test, NAS_PROPORTION_THRESHOLD)
+    prop = check_nas_threshold(test, NAS_PROPORTION_THRESHOLD)
+    logger.debug(prop)
 
     # Dump datasets if dump option was selected
     if args.dump:
