@@ -1,7 +1,7 @@
 --CRIME
 --Create address_id column
 ALTER TABLE crime
-    ADD COLUMN address_id int4
+    ADD COLUMN address_id int4;
 
 --Update rows that do not have an address_id value
 --with the corresponding one in address table
@@ -18,7 +18,7 @@ CREATE INDEX crime_id_index ON crime (address_id);
 --FIRE
 --Create address_id column
 ALTER TABLE fire
-    ADD COLUMN address_id int4
+    ADD COLUMN address_id int4;
 
 --Update rows that do not have an address_id value
 --with the corresponding one in address table
@@ -34,7 +34,7 @@ CREATE INDEX fire_address_index ON fire (address_id);
 --SALES
 --Create address_id column
 ALTER TABLE sales
-    ADD COLUMN address_id int4
+    ADD COLUMN address_id int4;
 
 --Update rows that do not have an address_id value
 --with the corresponding one in address table
@@ -44,5 +44,5 @@ UPDATE sales
     WHERE sales.address = address.address
     AND sales.address_id IS NULL;
 
-CREATE INDEX sales_date_index ON sales (datesale);
+CREATE INDEX sales_date_index ON sales (date_of_sale);
 CREATE INDEX sales_address_index ON sales (address_id);
