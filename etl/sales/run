@@ -31,8 +31,9 @@ python "$ROOT_FOLDER/bulk_geocoder/process_geocoded_csv.py" "$TMP_FOLDER/diff_sa
 csvsql -i postgresql --tables sales --db-schema public -d ',' "$TMP_FOLDER/diff_sales_db.csv" > "$TMP_FOLDER/sales.sql"
 #Create table
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/sales.sql"  
-#Add index on date column
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE INDEX sales_date_index ON sales(date_of_sale);"  
+#Final processing for table
+echo 'Processing table: adding index and unique id...'
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/sales/process_table.sql"  
 
 echo 'Uploading data...'
 #Get list of columns to cpy, this is necessary since we have a PRIMARY KEY
