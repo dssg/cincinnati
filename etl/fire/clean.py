@@ -8,16 +8,13 @@ os.chdir(os.path.join(path_to_data_folder, 'tmp'))
 print 'Working in folder: {}'.format(path_to_data_folder)
 
 #Load csv file, parse DATE column
-df = pd.read_csv("fire_1997_2014_CFS.csv", parse_dates=['DATE'])
+df = pd.read_csv("fire.csv", parse_dates=['incident_date'])
 print 'Raw file has {:,d} rows and {:,d} columns'.format(*df.shape)
 
 #Lowercase column names
-df.columns = df.columns.map(lambda s: s.lower().replace('#', ''))
+df.columns = df.columns.map(lambda s: s.lower())
 
-#We are only using data starting from 2005
-indexes = [i.year >= 2005 for i in df.date]
-df = df[indexes]
-print 'Subset from 2005 has {:,d} rows and {:,d} columns'.format(*df.shape)
+df.rename(columns={'street_address': 'address'}, inplace=True)
 
 #Check how many rows have empty addresses
 print '{:,d} rows with empty address, removing those'.format(df.address.isnull().sum())
@@ -35,9 +32,6 @@ df = df[~duplicates]
 #correct length in the CREATE TABLE script
 #if strings have leading/trailing spaces
 print 'Removing leading and trailing spaces from some columns'
-df.incident = df.incident.map(lambda s: s.strip())
-df.pc = df.pc.map(lambda s: str(s).strip())
-df.signal = df.signal.map(lambda s: s.strip())
 df.address = df.address.map(lambda s: s.strip())
 
 #Add necessary columns for the geocoding script
