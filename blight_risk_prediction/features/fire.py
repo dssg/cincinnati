@@ -20,7 +20,7 @@ def make_fire_features(con, n_months, max_dist):
     A pandas dataframe, with one row per inspection and one column per feature.
     """
     dataset = 'fire'
-    date_column = 'date'
+    date_column = 'incident_date'
 
     make_inspections_address_nmonths_table(con, dataset, date_column,
                                                 n_months=n_months,
