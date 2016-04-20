@@ -33,8 +33,7 @@ csvsql -i postgresql --tables permits --db-schema public -d ',' "$TMP_FOLDER/dif
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/permits.sql"  
 #Final processing for table
 echo 'Processing table: adding index and unique id...'
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/permits/process_table.sql"  #STILL NEEDS CHANGES
-
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/permits/process_table.sql"
 
 echo 'Uploading data...'
 #Get list of columns to cpy, this is necessary since we have a PRIMARY KEY
@@ -43,8 +42,3 @@ COLS="$(head -n 1 $TMP_FOLDER/diff_permits_db.csv)"
 #Upload data to the database
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.permits($COLS) FROM $TMP_FOLDER/diff_permits_db.csv WITH CSV HEADER DELIMITER ',';"
 echo 'Done.'
-
-#Match parcels to events (add indexes on parcel_id and event_id)
-#echo 'Matching every parcel in cincinnati with every event in the permits table (up to 3KM), this may take a while...'
-#psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/permits/parcel2permits.sql"
-
