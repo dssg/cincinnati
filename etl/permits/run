@@ -7,8 +7,15 @@ DB_HOST=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.host)
 DB_USER=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.user)
 DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
 
-#mkdir if not exists
+#create folder if not exists
 mkdir -p $TMP_FOLDER
+
+#Path to update script
+UPDATE_SCRIPT=$ROOT_FOLDER/lib_cinci/data_updater/update.py
+#Create diff file with entries to upload to the database
+$UPDATE_SCRIPT $ROOT_FOLDER/etl/permits/update.yaml
+
+#OLD SCRIPT BELOW
 
 #Convert xls file
 ssconvert "$PERMITS_DATA/od_cinc_building_permits.xls" "$TMP_FOLDER/od_cinc_building_permits.csv"
