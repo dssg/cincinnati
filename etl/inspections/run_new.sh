@@ -54,6 +54,7 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/inspections.tables.sql"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/inspections.data.sql"
 
 #Part 3: Create inspections views
+echo 'Creating views, subsetting inspections starting from 2012...'
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/inspections/events_timeline.sql"
 
 echo 'Done uploading inspections data to postgres!'

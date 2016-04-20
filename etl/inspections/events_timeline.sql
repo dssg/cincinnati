@@ -20,91 +20,94 @@
 
 -- #################
 
-CREATE VIEW inspections_views.events
-AS (
-SELECT number_key, comp_type, date_a AS date, 'Reported' AS event
-FROM inspections_raw.t_dssg_apd_base
-WHERE comp_type = 'CBHCODE' AND date_a IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_b AS date, 'Initial inspection' AS event
-FROM inspections_raw.t_dssg_apd_base
-WHERE comp_type = 'CBHCODE' AND date_b IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_c AS date, 'Orders issued' AS event
-FROM inspections_raw.t_dssg_apd_base
-WHERE comp_type = 'CBHCODE' AND date_c IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_174 AS date, 'Final notice' AS event
-FROM inspections_raw.t_dssg_APD_NUM1
-WHERE comp_type = 'CBHCODE' AND date_174 IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_i AS date, 'Pre-prosecution status' AS event
-FROM inspections_raw.t_dssg_apd_base
-WHERE comp_type = 'CBHCODE' AND date_i IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_h AS date, 'Civil 1' AS event
-FROM inspections_raw.t_dssg_apd_base
-WHERE comp_type = 'CBHCODE' AND date_h IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_072 AS date, 'Civil 2' AS event
-FROM inspections_raw.t_dssg_APD_NUM0
-WHERE comp_type = 'CBHCODE' AND date_072 IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_026 AS date, 'Prosecutor approves' AS event
-FROM inspections_raw.t_dssg_APD_NUM0
-WHERE comp_type = 'CBHCODE' AND date_026 IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_a AS date, 'Case created' AS event
-FROM inspections_raw.t_dssg_apd_base
-WHERE comp_type = 'CBHBARRI' AND date_a IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_e AS date, 'Specification prepared' AS event
-FROM inspections_raw.t_dssg_apd_base
-WHERE comp_type = 'CBHBARRI' AND date_e IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_i AS date, 'Barricade completed' AS event
-FROM inspections_raw.t_dssg_apd_base
-WHERE comp_type = 'CBHBARRI' AND date_i IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_j AS date, 'Billed' AS event
-FROM inspections_raw.t_dssg_apd_base
-WHERE comp_type = 'CBHBARRI' AND date_j IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_m AS date, 'Case closed' AS event
-FROM inspections_raw.t_dssg_apd_base
-WHERE comp_type = 'CBHBARRI' AND date_m IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_b AS date, 'Initial inspection' AS event
-FROM inspections_raw.t_dssg_apd_base
-WHERE comp_type = 'LTTR-PR' AND date_b IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_d AS date, 'Citation litter' AS event
-FROM inspections_raw.t_dssg_apd_base
-WHERE comp_type = 'LTTR-PR' AND date_d IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_h AS date, 'Civil 1' AS event
-FROM inspections_raw.t_dssg_apd_base
-WHERE comp_type = 'LTTR-PR' AND date_h IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_j AS date, 'Civil 2' AS event
-FROM inspections_raw.t_dssg_apd_base
-WHERE comp_type = 'LTTR-PR' AND date_j IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_n AS date, 'Closed or transferred' AS event
-FROM inspections_raw.t_dssg_apd_base
-WHERE comp_type = 'LTTR-PR' AND date_n IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_a AS date, 'Intake' AS event
-FROM inspections_raw.t_dssg_apd_base
-WHERE comp_type = 'CBHHAZ_R' AND date_a IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_221 AS date, 'Nuisance hearing' AS event
-FROM inspections_raw.t_dssg_APD_NUM2
-WHERE comp_type = 'CBHHAZ_R' AND date_221 IS NOT NULL
-UNION
-SELECT number_key, comp_type, date_d AS date, 'Demolition' AS event
-FROM inspections_raw.t_dssg_apd_base
-WHERE comp_type = 'CBHHAZ_R' AND date_d IS NOT NULL
+CREATE VIEW inspections_views.events AS (
+  WITH timeline AS(
+    SELECT number_key, comp_type, date_a AS date, 'Reported' AS event
+    FROM inspections_raw.t_dssg_apd_base
+    WHERE comp_type = 'CBHCODE' AND date_a IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_b AS date, 'Initial inspection' AS event
+    FROM inspections_raw.t_dssg_apd_base
+    WHERE comp_type = 'CBHCODE' AND date_b IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_c AS date, 'Orders issued' AS event
+    FROM inspections_raw.t_dssg_apd_base
+    WHERE comp_type = 'CBHCODE' AND date_c IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_174 AS date, 'Final notice' AS event
+    FROM inspections_raw.t_dssg_APD_NUM1
+    WHERE comp_type = 'CBHCODE' AND date_174 IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_i AS date, 'Pre-prosecution status' AS event
+    FROM inspections_raw.t_dssg_apd_base
+    WHERE comp_type = 'CBHCODE' AND date_i IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_h AS date, 'Civil 1' AS event
+    FROM inspections_raw.t_dssg_apd_base
+    WHERE comp_type = 'CBHCODE' AND date_h IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_072 AS date, 'Civil 2' AS event
+    FROM inspections_raw.t_dssg_APD_NUM0
+    WHERE comp_type = 'CBHCODE' AND date_072 IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_026 AS date, 'Prosecutor approves' AS event
+    FROM inspections_raw.t_dssg_APD_NUM0
+    WHERE comp_type = 'CBHCODE' AND date_026 IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_a AS date, 'Case created' AS event
+    FROM inspections_raw.t_dssg_apd_base
+    WHERE comp_type = 'CBHBARRI' AND date_a IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_e AS date, 'Specification prepared' AS event
+    FROM inspections_raw.t_dssg_apd_base
+    WHERE comp_type = 'CBHBARRI' AND date_e IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_i AS date, 'Barricade completed' AS event
+    FROM inspections_raw.t_dssg_apd_base
+    WHERE comp_type = 'CBHBARRI' AND date_i IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_j AS date, 'Billed' AS event
+    FROM inspections_raw.t_dssg_apd_base
+    WHERE comp_type = 'CBHBARRI' AND date_j IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_m AS date, 'Case closed' AS event
+    FROM inspections_raw.t_dssg_apd_base
+    WHERE comp_type = 'CBHBARRI' AND date_m IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_b AS date, 'Initial inspection' AS event
+    FROM inspections_raw.t_dssg_apd_base
+    WHERE comp_type = 'LTTR-PR' AND date_b IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_d AS date, 'Citation litter' AS event
+    FROM inspections_raw.t_dssg_apd_base
+    WHERE comp_type = 'LTTR-PR' AND date_d IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_h AS date, 'Civil 1' AS event
+    FROM inspections_raw.t_dssg_apd_base
+    WHERE comp_type = 'LTTR-PR' AND date_h IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_j AS date, 'Civil 2' AS event
+    FROM inspections_raw.t_dssg_apd_base
+    WHERE comp_type = 'LTTR-PR' AND date_j IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_n AS date, 'Closed or transferred' AS event
+    FROM inspections_raw.t_dssg_apd_base
+    WHERE comp_type = 'LTTR-PR' AND date_n IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_a AS date, 'Intake' AS event
+    FROM inspections_raw.t_dssg_apd_base
+    WHERE comp_type = 'CBHHAZ_R' AND date_a IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_221 AS date, 'Nuisance hearing' AS event
+    FROM inspections_raw.t_dssg_APD_NUM2
+    WHERE comp_type = 'CBHHAZ_R' AND date_221 IS NOT NULL
+    UNION
+    SELECT number_key, comp_type, date_d AS date, 'Demolition' AS event
+    FROM inspections_raw.t_dssg_apd_base
+    WHERE comp_type = 'CBHHAZ_R' AND date_d IS NOT NULL
+  )
+
+  SELECT * FROM timeline WHERE EXTRACT(YEAR FROM DATE)>=2012
 );
 
 -- #################
