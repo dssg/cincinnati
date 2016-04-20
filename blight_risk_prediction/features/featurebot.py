@@ -111,7 +111,7 @@ def generate_features(features_to_generate, n_months, max_dist,
     logger.info(('Starting feature generation in {}. '
                  'n_monts={}. max_dist={}').format(current_schema, n_months, max_dist))
     #Get existing tables
-    existing_tables =  tables_in_schema(con, schema)
+    existing_tables =  tables_in_schema(schema)
     
     # make a new table that contains one row for every parcel in Cincinnati
     # this table has three columns: parcel_id, inspection_date, viol_outcome
