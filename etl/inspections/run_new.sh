@@ -22,6 +22,9 @@ docker run -d -p 49160:22 -p 49161:1521 -v $DATA_FOLDER/etl/inspections:/root/da
 #password: admin
 ssh root@localhost -p 49160
 
+#For some reason this is not getting installed whe building
+#perl -MCPAN -e 'install DBD::Oracle'
+
 #Part 1: Export Oracle dump to SQL
 #Create schema to upload dmp file
 sqlplus -s $ORACLE_USER/$ORACLE_PWD@localhost <<< "create user inspections_raw identified by password default tablespace users;"
