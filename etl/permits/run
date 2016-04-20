@@ -15,30 +15,37 @@ UPDATE_SCRIPT=$ROOT_FOLDER/lib_cinci/data_updater/update.py
 #Create diff file with entries to upload to the database
 $UPDATE_SCRIPT $ROOT_FOLDER/etl/permits/update.yaml
 
-#OLD SCRIPT BELOW
-
-#Convert xls file
-ssconvert "$PERMITS_DATA/od_cinc_building_permits.xls" "$TMP_FOLDER/od_cinc_building_permits.csv"
-
 #Clean data
 python "$ROOT_FOLDER/etl/permits/clean.py"
 
+#Geocode
+echo 'Geocoding data, this may take a while...'
+python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/diff_permits_clean.csv" "$TMP_FOLDER/diff_permits_clean_geocoded.csv"
+
+#Process geocoded file
+echo 'Final processing...'
+python "$ROOT_FOLDER/bulk_geocoder/process_geocoded_csv.py" "$TMP_FOLDER/diff_permits_clean_geocoded.csv" "$TMP_FOLDER/diff_permits_db.csv"
+
+echo 'Generating CREATE TABLE statement...'
 #Generate CREATE TABLE statement
-csvsql -i postgresql --tables permits --db-schema public -d ',' "$TMP_FOLDER/permits_clean.csv" > "$TMP_FOLDER/permits.sql"
-#Drop table if exists
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS permits;"  
+csvsql -i postgresql --tables three11 --db-schema public -d ',' "$TMP_FOLDER/diff_permits_db.csv" > "$TMP_FOLDER/permits.sql"
 #Create table
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/permits.sql"  
+#Final processing for table
+echo 'Processing table: adding index and unique id...'
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/permits/process_table.sql"  #STILL NEEDS CHANGES
 
+
+echo 'Uploading data...'
+#Get list of columns to cpy, this is necessary since we have a PRIMARY KEY
+#and we want postgres to take care of those values
+COLS="$(head -n 1 $TMP_FOLDER/diff_permits_db.csv)"
 #Upload data to the database
-cat "$TMP_FOLDER/permits_clean.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.permits FROM STDIN  WITH CSV HEADER DELIMITER ',';"
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.permits($COLS) FROM $TMP_FOLDER/diff_permits_db.csv WITH CSV HEADER DELIMITER ',';"
+echo 'Done.'
 
-echo 'Almost done, creating indexes, unique id and geometry column...'
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/permits/process_table.sql"  
-
-echo 'Done creating permits table!'
 
 #Match parcels to events (add indexes on parcel_id and event_id)
-echo 'Matching every parcel in cincinnati with every event in the permits table (up to 3KM), this may take a while...'
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/permits/parcel2permits.sql"
+#echo 'Matching every parcel in cincinnati with every event in the permits table (up to 3KM), this may take a while...'
+#psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/permits/parcel2permits.sql"
 

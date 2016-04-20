@@ -8,7 +8,7 @@ os.chdir(os.path.join(path_to_data_folder, 'tmp'))
 print 'Working in folder: %s' % path_to_data_folder
 
 #Load csv file
-df = pd.read_csv("od_cinc_building_permits.csv")
+df = pd.read_csv("diff_permits.csv")
 print 'Raw file has {:,d} rows and {:,d} columns'.format(*df.shape)
 
 #Lowercase column names
@@ -26,4 +26,4 @@ df.pin = df.pin.map(lambda s: s.replace('"', ''), na_action='ignore')
 df.proposeduse = df.proposeduse.map(lambda s: s.replace('"', ''))
 
 #Save data frame
-df.to_csv('permits_clean.csv', index=False)
+df.to_csv('diff_permits_clean.csv', index=False)

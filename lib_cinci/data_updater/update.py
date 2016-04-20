@@ -56,9 +56,11 @@ if __name__ == '__main__':
         db_most_recent = None
         logger.info('Table does not exist, diff file will be a copy of source file')
     else:
-        table = db[table_name]
-        most_recent_row = table.find_one(order_by='-'+db_column)
-        db_most_recent = most_recent_row[db_column]
+        #table = db[table_name]
+        #most_recent_row = table.find_one(order_by='-'+db_column)
+        #db_most_recent = most_recent_row[db_column]
+        query = 'SELECT MAX({}) FROM {}'.format(db_column, table_name) #TMP FIX
+        db_most_recent = db.engine.execute(query).fetchone()[0]
         logger.info('Most recent record in database is: {}'.format(db_most_recent))
     
     #Step three: load and subset the file to include new entries
