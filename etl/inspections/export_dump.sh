@@ -4,6 +4,7 @@
 # username: system
 # password: oracle
 
+#WIP: this should be a Dockerfle + bash script
 
 #https://github.com/dssg/cincinnati2015-public/tree/master/etl/inspections 
 
@@ -37,8 +38,6 @@ export LD_LIBRARY_PATH=$ORACLE_HOME/lib
 perl -MCPAN -e 'install DBD::Oracle'
 #yes
 
-
-
 #List tables in the dmp file (see the created logfile)
 #imp SYSTEM/ file=inspections.dmp SHOW=Y log=inspections.info FULL=Y
 
@@ -50,12 +49,8 @@ perl -MCPAN -e 'install DBD::Oracle'
 
 imp SYSTEM/oracle file=/root/data/inspections.dmp fromuser=DBADLS touser=cinci
 
-ora2pg -c /root/data/ora2pg.conf -t TABLE -n cinci -o /root/data/testing.tables.sql
-
-#ora2pg -c ../oracle_export/export.conf -t TABLE -n cincinnati_violations -o /mnt/oracle_data/cincinnati/raw_vendor_tables.tables.sql
-
-# nohup ora2pg -c ../oracle_export/export.conf -t COPY -n cincinnati_violations -o /mnt/oracle_data/cincinnati/raw_vendor_tables.data.sql
-
+ora2pg -c /root/data/ora2pg.conf -t TABLE -n cinci -o /root/data/tmp/inspections.tables.sql
+nohup ora2pg -c /root/data/ora2pg.conf -t COPY -n cinci -o /root/data/tmp/inspections.data.sql
 
 #Shut down container
 #docker kill drunk_kilby
