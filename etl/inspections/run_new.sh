@@ -46,7 +46,9 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP VIEW  IF EXISTS inspections_vi
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP VIEW  IF EXISTS inspections_views.events;"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP VIEW  IF EXISTS inspections_views.number_key2parcel_no;"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$LOCAL_CODE_FOLDER/drop_inspections_tables.sql"
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP SCHEMA  IF EXISTS inspections_raw;"
+#Add schema
+sed -i -e "1iSET SCHEMA 'inspections_raw';\\" "$TMP_FOLDER/inspections.tables.sql"
+sed -i -e "1iSET SCHEMA 'inspections_raw';\\" "$TMP_FOLDER/inspections.data.sql"
 #Upload data
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/inspections.tables.sql"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/inspections.data.sql"
