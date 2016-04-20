@@ -53,7 +53,7 @@ if __name__ == '__main__':
     table_name = params['storage']['table']
     
     #Check if table exists
-    if table_name in tables_in_schema(schema):
+    if table_name not in tables_in_schema(schema):
         db_most_recent = None
         logger.info('Table does not exist, diff file will be a copy of source file')
     else:
