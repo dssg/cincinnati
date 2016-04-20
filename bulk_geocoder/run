@@ -33,9 +33,9 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/update_geoms.s
 
 #Using the address table (which contains unique addresses),
 #add a new column in fire if it doesn't exist and
-#udpate crime, fire and sales tables with the corresponding address_id
+#udpate permits, crime, fire and sales tables with the corresponding address_id
 #in rows that have NULL values in address_id
-echo 'Mapping addresses in addreess table with events in fire, crime and sales'
+echo 'Mapping addresses in addreess table with events in permits, fire, crime and sales'
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$BULK_GEOCODER_FOLDER/match_events_with_address.sql"
 
 #This script computes the distance for each parcel in  parcels_cincy (Note that this includes ALL

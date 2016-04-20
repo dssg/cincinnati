@@ -81,6 +81,8 @@ def tables_in_schema(schema):
     cur.execute(q, [schema])
     tuples = cur.fetchall()
     names = [t[0] for t in tuples]
+    cur.close()
+    con.close()
     return names
 
 def columns_for_table_in_schema(table, schema):
@@ -90,13 +92,15 @@ def columns_for_table_in_schema(table, schema):
         WHERE table_schema = %s
         AND table_name   = %s;
     '''
-    conn = connect(host=main['db']['host'], user=main['db']['user'],
+    con = connect(host=main['db']['host'], user=main['db']['user'],
                    password=main['db']['password'], database=main['db']['database'],
                    port=main['db']['port'])
     cur = con.cursor()
     cur.execute(q, [schema, table])
     tuples = cur.fetchall()
     #names = [t[0] for t in tuples]
+    cur.close()
+    con.close()
     return tuples
 
 def check_nas_threshold(df, threshold):
