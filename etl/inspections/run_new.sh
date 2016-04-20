@@ -40,15 +40,13 @@ nohup ora2pg -t COPY -n inspections_raw -o /root/data/tmp/inspections.data.sql
 #Kill container
 
 #Part 2: Upload inspections data
-#Add SET SCHEMA LINE to SQL files
-sed -i -e "1iSET SCHEMA 'inspections_raw';\\" "$TMP_FOLDER/inspections.tables.sql"
-sed -i -e "1iSET SCHEMA 'inspections_raw';\\" "$TMP_FOLDER/inspections.data.sql"
 #Drop everything in case it already exists
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP VIEW  IF EXISTS inspections_views.events_and_lat_long;"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP VIEW  IF EXISTS inspections_views.events_parcel_id;"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP VIEW  IF EXISTS inspections_views.events;"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP VIEW  IF EXISTS inspections_views.number_key2parcel_no;"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$LOCAL_CODE_FOLDER/drop_inspections_tables.sql"
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP SCHEMA  IF EXISTS inspections_raw;"
 #Upload data
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/inspections.tables.sql"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/inspections.data.sql"

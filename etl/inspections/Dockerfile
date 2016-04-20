@@ -14,7 +14,7 @@ RUN perl Makefile.PL
 RUN make && make install
 
 #Install DBD::Oracle
-#ENV LD_LIBRARY_PATH=$ORACLE_HOME/lib
+ENV LD_LIBRARY_PATH=$ORACLE_HOME/lib
 RUN perl -MCPAN -e 'install DBD::Oracle'
 
 #Copy conf file
