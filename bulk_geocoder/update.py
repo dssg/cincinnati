@@ -22,8 +22,6 @@ table = pd.read_sql_table('address', e)
 #we can expect the address format to be the same
 diff = file[~file.address.isin(table.address)]
 
-print '{:,d} new addresses found'.format(diff.shape[0])
-
-
 output_path = os.path.join(os.environ['DATA_FOLDER'], 'etl/diff_unique_addresses.csv')
+print '{:,d} new addresses found. Saved to {}'.format(diff.shape[0], output_path)
 diff.to_csv(output_path, index=False)

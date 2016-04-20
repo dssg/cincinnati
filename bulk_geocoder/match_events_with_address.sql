@@ -1,3 +1,20 @@
+--Permits
+--Create address_id column
+ALTER TABLE permits
+    ADD COLUMN address_id int4;
+
+--Update rows that do not have an address_id value
+--with the corresponding one in address table
+UPDATE permits
+    SET address_id = address.id
+    FROM address
+    WHERE permits.address = address.address
+    AND permits.address_id IS NULL;
+
+--Create indexes
+CREATE INDEX permits_date_index ON permits (issueddate);
+CREATE INDEX permits_id_index ON permits (address_id);
+
 --CRIME
 --Create address_id column
 ALTER TABLE crime
