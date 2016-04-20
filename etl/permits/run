@@ -44,7 +44,6 @@ COLS="$(head -n 1 $TMP_FOLDER/diff_permits_db.csv)"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.permits($COLS) FROM $TMP_FOLDER/diff_permits_db.csv WITH CSV HEADER DELIMITER ',';"
 echo 'Done.'
 
-
 #Match parcels to events (add indexes on parcel_id and event_id)
 #echo 'Matching every parcel in cincinnati with every event in the permits table (up to 3KM), this may take a while...'
 #psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/permits/parcel2permits.sql"

@@ -15,8 +15,7 @@ from lib_cinci.db import uri
 from lib_cinci.config import load
 
 from lib_cinci.exceptions import MaxDateError, NoFeaturesSelected
-from feature_utils import tables_in_schema
-from lib_cinci.features import existing_feature_schemas
+from lib_cinci.features import existing_feature_schemas, tables_in_schema
 
 #Features
 import ner, parcel, outcome, tax, crime_agg, census, three11

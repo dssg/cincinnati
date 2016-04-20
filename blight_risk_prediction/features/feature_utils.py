@@ -10,6 +10,7 @@ import re
 import logging
 import logging.config
 from lib_cinci.config import load
+from lib_cinci.features import tables_in_schema, columns_for_table_in_schema
 
 #Config logger
 logging.config.dictConfig(load('logger_config.yaml'))
@@ -24,32 +25,6 @@ def format_column_names(columns, prefix=None):
     names = columns.map(f)
     names = pd.Series(names).map(lambda s: '{}_{}'.format(prefix, s)) if prefix else names
     return names
-
-#Utility function to see which tables already exist in schema
-def tables_in_schema(con, schema):
-    q = '''
-        SELECT table_name 
-        FROM information_schema.tables 
-        WHERE table_schema=%s;
-    '''
-    cur = con.cursor()
-    cur.execute(q, [schema])
-    tuples = cur.fetchall()
-    names = [t[0] for t in tuples]
-    return names
-
-def columns_for_table_in_schema(con, table, schema):
-    q = '''
-        SELECT column_name, data_type
-        FROM information_schema.columns
-        WHERE table_schema = %s
-        AND table_name   = %s;
-    '''
-    cur = con.cursor()
-    cur.execute(q, [schema, table])
-    tuples = cur.fetchall()
-    #names = [t[0] for t in tuples]
-    return tuples
 
 def make_nmonths_table_from_template(con, dataset, date_column,
                                      n_months, max_dist,
@@ -72,7 +47,7 @@ def make_nmonths_table_from_template(con, dataset, date_column,
                                          max_dist=max_dist)
     #Check if table already exists in current schema
     #If not, create it
-    if table_name not in tables_in_schema(con, current_schema):
+    if table_name not in tables_in_schema(current_schema):
         logger.info('Table {} does not exist... Creating it'.format(table_name))
         path_to_template = os.path.join(os.environ['ROOT_FOLDER'],
                         'blight_risk_prediction',
@@ -95,7 +70,7 @@ def make_nmonths_table_from_template(con, dataset, date_column,
 
         #If table created has a geom column which type USER DEFINED,
         #delete it, we don't need it here
-        cols = columns_for_table_in_schema(con, table_name, current_schema)
+        cols = columns_for_table_in_schema(table_name, current_schema)
         if ('geom', 'USER-DEFINED') in cols:
             #Important: this is not prouction ready since it's
             #vulnerable to SQL injection, I haven't found any solution
@@ -116,7 +91,7 @@ def make_nmonths_table_from_template(con, dataset, date_column,
     if columns=='all':
         #Since the table contains a geom column, you need to subselect columns
         #to load otherwise pandas will complain
-        cols = columns_for_table_in_schema(con, table_name, current_schema)
+        cols = columns_for_table_in_schema(table_name, current_schema)
         valid_cols = filter(lambda x: x[1]!= 'USER-DEFINED', cols)
         cols_to_load = [x[0] for x in valid_cols]
     #If the user passed and array in the columns parameter, only

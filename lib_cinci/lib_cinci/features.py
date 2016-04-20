@@ -67,6 +67,38 @@ def tables_and_columns_for_schema(schema):
     conn.close()
     return results
 
+#Utility function to see which tables already exist in schema
+def tables_in_schema(schema):
+    q = '''
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema=%s;
+    '''
+    con = connect(host=main['db']['host'], user=main['db']['user'],
+                   password=main['db']['password'], database=main['db']['database'],
+                   port=main['db']['port'])
+    cur = con.cursor()
+    cur.execute(q, [schema])
+    tuples = cur.fetchall()
+    names = [t[0] for t in tuples]
+    return names
+
+def columns_for_table_in_schema(table, schema):
+    q = '''
+        SELECT column_name, data_type
+        FROM information_schema.columns
+        WHERE table_schema = %s
+        AND table_name   = %s;
+    '''
+    conn = connect(host=main['db']['host'], user=main['db']['user'],
+                   password=main['db']['password'], database=main['db']['database'],
+                   port=main['db']['port'])
+    cur = con.cursor()
+    cur.execute(q, [schema, table])
+    tuples = cur.fetchall()
+    #names = [t[0] for t in tuples]
+    return tuples
+
 def check_nas_threshold(df, threshold):
     nas_count = df.apply(pd.isnull).sum()
     nas_prop = nas_count/df.shape[0]
