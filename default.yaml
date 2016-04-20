@@ -8,7 +8,7 @@
 
 # Temporal stuff
 start_date: '01Jan2012'    #train only on inspections after this date
-fake_today: '31Dec2015'
+fake_today: '31Dec2013'
 validation_window: '1Year'  # Or '1Month'
 
 # only use residential parcels
