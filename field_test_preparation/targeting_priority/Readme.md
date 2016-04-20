@@ -10,7 +10,7 @@ several properties instead of individual owners (that might not have the means t
 1. To create a database table that counts how many properties each property owner in the city owns (for
 the year 2015). Create this table by executing the SQL commands in `num_properties_owned.sql`
 
-2. After having run `blight_risk_prediction/model` locate the output csv file (should be in folder `predictions`). 
+2. After having run `model/model` locate the output csv file (should be in folder `predictions`). 
 
 3. Set this filename in priotize.py and run
 

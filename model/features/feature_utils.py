@@ -50,7 +50,7 @@ def make_nmonths_table_from_template(con, dataset, date_column,
     if table_name not in tables_in_schema(current_schema):
         logger.info('Table {} does not exist... Creating it'.format(table_name))
         path_to_template = os.path.join(os.environ['ROOT_FOLDER'],
-                        'blight_risk_prediction',
+                        'model',
                         'features',
                         template)
         #Load template with SQL statement

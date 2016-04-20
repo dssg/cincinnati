@@ -12,7 +12,7 @@ def main():
     print 'Creating {} table...'.format(table_name)
     #Load template
     path_to_template = os.path.join(os.environ['ROOT_FOLDER'],
-        'blight_risk_prediction', 'neighborhood_score',
+        'model', 'neighborhood_score',
         'neighborhood_score.template.sql')
     with open(path_to_template, 'r') as f:
         sql_script = Template(f.read())
