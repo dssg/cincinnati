@@ -157,14 +157,13 @@ def generate_features(features_to_generate, n_months, max_dist,
         #corresponding parcels_inspections table in the schema being used
         # TO DO: check that feature_data has the right shape and indexes
         if table_to_save in existing_tables:
-            logger.info('Features table {} already exists. Skipping...'.format(feature.table))
-        else:
-            feature_data.to_sql(table_to_save, engine, chunksize=50000,
-                            if_exists='replace', index=True, schema=schema,
-			    #Force saving inspection_date as timestamp without timezone
-            dtype={'inspection_date': types.TIMESTAMP(timezone=False)})
-            logging.debug("{} table has {} rows".format(table_to_save, 
-                                                len(feature_data)))
+            logger.info('Features table {} already exists. Replacing...'.format(feature.table))
+
+        feature_data.to_sql(table_to_save, engine, chunksize=50000,
+          if_exists='replace', index=True, schema=schema,
+          #Force saving inspection_date as timestamp without timezone
+          dtype={'inspection_date': types.TIMESTAMP(timezone=False)})
+        logging.debug("{} table has {} rows".format(table_to_save, len(feature_data)))
 
 if __name__ == '__main__':
     #Get the table names for existing features
