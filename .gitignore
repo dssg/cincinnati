@@ -70,7 +70,7 @@ target/
 # Temporary data
 .ipynb_checkpoints/
 
-blight_risk_prediction/architecture.png
+model/architecture.png
 #### joe made this: https://goel.io/joe
 
 #####=== Vim ===#####

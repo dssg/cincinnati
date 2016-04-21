@@ -1,4 +1,4 @@
-PATH_TO_MODEL="$ROOT_FOLDER/blight_risk_prediction"
+PATH_TO_MODEL="$ROOT_FOLDER/model"
 PATH_TO_EXP="$ROOT_FOLDER/experiments/kdd"
 CORES=8
 

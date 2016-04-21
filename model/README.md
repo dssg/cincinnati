@@ -8,7 +8,7 @@ Before training a model, edit the `default.yaml` configuration file to select wh
 
 For detailed information on available options, run:
 
-`./blight_risk_prediction/model.py --help`
+`./model/model.py --help`
 
 Features are loaded from the `features` schema in the database.
 
