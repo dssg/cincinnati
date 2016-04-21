@@ -3,6 +3,7 @@ from psycopg2 import connect
 from sqlalchemy import create_engine
 from lib_cinci.db import uri
 import pandas as pd
+import re
 
 #Parameters in some of these functions are being passed in SQL queries,
 #this makes them vulverable to SQL injection, if this goes into production
@@ -111,3 +112,23 @@ def check_nas_threshold(df, threshold):
         raise Exception(('The following columns have higher NAs proportion '
             'than allowed:\n{}'.format(above_threshold)))
     return nas_prop
+
+def __check_element(element):
+    pattern = re.compile('^\w+$')
+    result = pattern.match(element)
+    if result is None:
+        raise ValueError('"{}" is not a valid argument'.format(element))
+
+def boundaries_for_table_and_column(table, column):
+    __check_element(table)
+    __check_element(column)
+
+    db = create_engine(uri)
+
+    q_min = 'SELECT MIN({}) FROM {}'.format(column, table)
+    q_max = 'SELECT MAX({}) FROM {}'.format(column, table)
+
+    min_val = db.execute(q_min).fetchone()[0]
+    max_val = db.execute(q_max).fetchone()[0]
+
+    return min_val, max_val
