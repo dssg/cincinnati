@@ -107,7 +107,7 @@ CREATE VIEW inspections_views.events AS (
     WHERE comp_type = 'CBHHAZ_R' AND date_d IS NOT NULL
   )
 
-  SELECT * FROM timeline WHERE EXTRACT(YEAR FROM DATE)>=2012
+  SELECT * FROM timeline WHERE EXTRACT(YEAR FROM DATE)>=2013
 );
 
 -- #################
