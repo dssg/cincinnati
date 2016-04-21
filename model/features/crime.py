@@ -3,6 +3,8 @@ import logging.config
 from feature_utils import make_inspections_address_nmonths_table, compute_frequency_features
 from feature_utils import format_column_names, group_and_count_from_db
 from lib_cinci.config import load
+from lib_cinci.features import check_date_boundaries
+
 #Config logger
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
@@ -21,6 +23,10 @@ def make_crime_features(con, n_months, max_dist):
     """
     dataset = 'crime'
     date_column = 'date_reported'
+
+    #Check that you have enough data to generate features,
+    #the function will raise and Exception if you don't
+    check_date_boundaries(con, n_months, dataset, date_column)
    
     make_inspections_address_nmonths_table(con, dataset, date_column,
                                                 n_months=n_months,

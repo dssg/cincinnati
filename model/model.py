@@ -25,7 +25,7 @@ from lib_cinci.config import load
 from lib_cinci.exceptions import MaxDateError, ConfigError, ExperimentExists
 from lib_cinci.folders import (path_to_predictions, path_to_pickled_models,
     path_to_pickled_scalers, path_to_pickled_imputers, path_to_dumps) 
-from lib_cinci.features import check_nas_threshold
+from lib_cinci.features import check_nas_threshold, boundaries_for_table_and_column
 
 """
 Purpose: train a binary classifier to identify those homes that are likely
@@ -79,18 +79,19 @@ def make_datasets(config):
     #May 05, 2015 at most. Further dates won't work since you don't
     #have data.
     #Check start date
-    max_date = datetime.datetime.strptime('05May2015', '%d%b%Y')
+    
+    _, max_date = boundaries_for_table_and_column('features.parcels_inspections',
+        'inspection_date')
+    
     if start_date > max_date:
-        raise MaxDateError('Error: Your start_date exceeds '
-             'May 05, 2015.  There\'s no data after that date. Udpate '
-             'data and change the date limit to prevent this message from '
-             'appearing')
+        raise MaxDateError(('Error: Your start_date exceeds '
+             '{:%B %d, %Y}, which is the latest inspection in '
+             '"features.parcels_inspections" table').format(max_date))
     #Check fake today + validation window
     if fake_today + validation_window > max_date:
         raise MaxDateError('Error: your fake_today + validation_window exceeds '
-             'May 05, 2015.  There\'s no data after that date. Udpate '
-             'data and change the date limit to prevent this message from '
-             'appearing')
+             '{:%B %d, %Y}, which is the latest inspection in '
+             '"features.parcels_inspections" table'.format(max_date))
 
     #Parse each feature pattern (table_name.pattern) in the config file and
     #return a list with tuples of the form (table_name, feature_name)
