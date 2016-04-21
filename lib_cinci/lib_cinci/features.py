@@ -5,6 +5,8 @@ from lib_cinci.db import uri
 import pandas as pd
 import re
 
+from dateutil.relativedelta import relativedelta
+
 #Parameters in some of these functions are being passed in SQL queries,
 #this makes them vulverable to SQL injection, if this goes into production
 #local SQL verification will be needed
@@ -114,7 +116,7 @@ def check_nas_threshold(df, threshold):
     return nas_prop
 
 def __check_element(element):
-    pattern = re.compile('^\w+$')
+    pattern = re.compile('^(\w|\.)+$')
     result = pattern.match(element)
     if result is None:
         raise ValueError('"{}" is not a valid argument'.format(element))
@@ -132,3 +134,38 @@ def boundaries_for_table_and_column(table, column):
     max_val = db.execute(q_max).fetchone()[0]
 
     return min_val, max_val
+
+
+def check_date_boundaries(con, n_months, table, date_column):
+    #Get current schema
+    cur = con.cursor()    
+    cur.execute('SELECT current_schema;')
+    current_schema = cur.fetchone()[0]
+    cur.close()
+
+    #Get boundaries for current inspections table
+    insp_table = '{}.parcels_inspections'.format(current_schema)
+    min_insp, max_insp = boundaries_for_table_and_column(insp_table, 'inspection_date')
+
+    #Get boundaries for features table
+    min_feat, max_feat = boundaries_for_table_and_column(table, date_column)
+
+    #Check that you have data for the lowest boundary (min_insp - n_months)
+    #if not, raise and exception since you don't have enough data to generate
+    #features for those dates
+    lowest_boundary = min_insp - relativedelta(months=n_months)
+    if not min_feat <= lowest_boundary:
+        raise Exception(('You cannot generate features for those dates, '
+            'your first observation for table "{table}" is {min_feat} and the earliest date '
+            'needed is {lowest_boundary} which is your earliest inspection ({min_insp}) minus n_months '
+            '({n_months}).').format(table=table, min_feat=min_feat, lowest_boundary=lowest_boundary,
+            min_insp=min_insp, n_months=n_months))
+    
+    #Check that you have data for the highest boundary (max_insp)
+    #if not, raise and exception since you don't have enough data to generate
+    #features for those dates
+    if not max_insp <= max_feat:
+        raise Exception(('You cannot generate features for those dates, '
+            'your last observation for table "{table}" is {max_feat} and the '
+            'latest inspection is {max_insp}.').format(table=table,
+            max_feat=max_feat, max_insp=max_insp))
