@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from lib_cinci.db import uri
 import pandas as pd
 import re
+import time
 
 from dateutil.relativedelta import relativedelta
 
@@ -153,8 +154,10 @@ def check_date_boundaries(con, n_months, table, date_column):
     #Check that you have data for the lowest boundary (min_insp - n_months)
     #if not, raise and exception since you don't have enough data to generate
     #features for those dates
+    #Compare using time.mktime to avoid errors due to datetime.date with datetime.datetime
+    #comparisons
     lowest_boundary = min_insp - relativedelta(months=n_months)
-    if not min_feat <= lowest_boundary:
+    if not time.mktime(min_feat.timetuple()) <= time.mktime(lowest_boundary.timetuple()):
         raise Exception(('You cannot generate features for those dates, '
             'your first observation for table "{table}" is {min_feat} and the earliest date '
             'needed is {lowest_boundary} which is your earliest inspection ({min_insp}) minus n_months '
@@ -164,7 +167,7 @@ def check_date_boundaries(con, n_months, table, date_column):
     #Check that you have data for the highest boundary (max_insp)
     #if not, raise and exception since you don't have enough data to generate
     #features for those dates
-    if not max_insp <= max_feat:
+    if not time.mktime(max_insp.timetuple()) <= time.mktime(max_feat.timetuple()):
         raise Exception(('You cannot generate features for those dates, '
             'your last observation for table "{table}" is {max_feat} and the '
             'latest inspection is {max_insp}.').format(table=table,
