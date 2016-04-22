@@ -12,7 +12,7 @@ UPDATE permits
     AND permits.address_id IS NULL;
 
 --Create index
-CREATE INDEX permits_id_index ON permits (address_id);
+CREATE INDEX permits_address_index ON permits (address_id);
 
 --CRIME
 --Create address_id column
@@ -27,7 +27,7 @@ UPDATE crime
     WHERE crime.address = address.address
     AND crime.address_id IS NULL;
 
-CREATE INDEX crime_id_index ON crime (address_id);
+CREATE INDEX crime_address_index ON crime (address_id);
 
 --FIRE
 --Create address_id column
