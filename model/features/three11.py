@@ -24,14 +24,13 @@ def make_three11_features(con, n_months, max_dist):
     dataset = 'three11'
     date_column = 'requested_datetime'
 
-    #Check that you have enough data to generate features,
-    #the function will raise and Exception if you don't
-    check_date_boundaries(con, n_months, dataset, date_column)
+    #Get the time window for which you can generate features
+    min_insp, max_insp = check_date_boundaries(con, n_months, dataset, date_column)
 
     make_inspections_latlong_nmonths_table(con, dataset, date_column,
-                                                n_months=n_months,
-                                                max_dist=max_dist,
-                                                load=False)
+        min_insp, max_insp, n_months=n_months, max_dist=max_dist, load=False)
+
+
     logger.info('Computing distance features for {}'.format(dataset))
     freq = group_and_count_from_db(con, dataset, n_months, max_dist)
     #Rename columns to avoid spaces and capital letters
