@@ -24,9 +24,8 @@ def make_fire_features(con, n_months, max_dist):
     dataset = 'fire'
     date_column = 'incident_date'
 
-    #Check that you have enough data to generate features,
-    #the function will raise and Exception if you don't
-    check_date_boundaries(con, n_months, dataset, date_column)
+    #Get the time window for which you can generate features
+    min_insp, max_insp = check_date_boundaries(con, n_months, dataset, date_column)
 
     make_inspections_address_nmonths_table(con, dataset, date_column,
                                                 n_months=n_months,
