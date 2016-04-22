@@ -187,7 +187,7 @@ def check_date_boundaries(con, n_months, table, date_column):
     if not time.mktime(max_insp.timetuple()) <= time.mktime(max_feat.timetuple()):
         #Upper inspections table date: max_feat
         upper_insp_subset = max_feat
-        logging.info(('Warining: You cannot generate features for those dates, '
+        logging.info(('Warning: You cannot generate features for those dates, '
             'your last observation for table "{table}" is {max_feat} and the '
             'latest inspection is {max_insp}. Inspections table will be subset '
             'ending in {upper_insp_subset}').format(table=table,
@@ -200,4 +200,4 @@ def check_date_boundaries(con, n_months, table, date_column):
     if upper_insp_subset is None:
         upper_insp_subset = max_insp
 
-    return lower_insp_subset, upper_insp_subset
+    return '{:%Y-%m-%d}'.format(lower_insp_subset), '{:%Y-%m-%d}'.format(upper_insp_subset)

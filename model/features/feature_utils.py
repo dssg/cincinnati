@@ -27,8 +27,9 @@ def format_column_names(columns, prefix=None):
     return names
 
 def make_nmonths_table_from_template(con, dataset, date_column,
-                                     n_months, max_dist,
-                                     template, load=False,  columns='all'):
+                                    min_insp_date, max_insp_date,
+                                    n_months, max_dist,
+                                    template, load=False,  columns='all'):
     '''
         Load inspections table matched with events that happened X months
         before. Returns pandas dataframe with the data loaded
@@ -61,7 +62,9 @@ def make_nmonths_table_from_template(con, dataset, date_column,
                                            DATASET=dataset,
                                            DATE_COLUMN=date_column,
                                            N_MONTHS=n_months,
-                                           MAX_DIST=max_dist)
+                                           MAX_DIST=max_dist,
+                                           MIN_INSP_DATE=min_insp_date,
+                                           MAX_INSP_DATE=max_insp_date)
         #Run the code using the connection
         #this is going to take a while
         cur.execute(sql_script)
@@ -107,17 +110,21 @@ def make_nmonths_table_from_template(con, dataset, date_column,
 
 
 def make_inspections_address_nmonths_table(con, dataset, date_column,
+                                           min_insp_date, max_insp_date,
                                            n_months, max_dist, load=False,
                                            columns='all'):
     return make_nmonths_table_from_template(con, dataset, date_column,
+                            min_insp_date, max_insp_date,
                             n_months, max_dist,
                             'inspections_address_xmonths.template.sql',
                             load, columns)
 
 def make_inspections_latlong_nmonths_table(con, dataset, date_column,
+                                           min_insp_date, max_insp_date,
                                            n_months, max_dist, load=False,
                                            columns='all'):
     return make_nmonths_table_from_template(con, dataset, date_column,
+                            min_insp_date, max_insp_date,
                             n_months, max_dist,
                             'inspections_latlong_xmonths.template.sql',
                             load, columns)
