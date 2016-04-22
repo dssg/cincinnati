@@ -10,3 +10,7 @@
 ../featurebot.py  -f sales -md 400 -m 3
 ../featurebot.py  -f sales -md 400 -m 6
 ../featurebot.py  -f sales -md 400 -m 9
+#50 m
+../featurebot.py  -f sales -md 50 -m 3
+../featurebot.py  -f sales -md 50 -m 6
+../featurebot.py  -f sales -md 50 -m 9
