@@ -11,8 +11,7 @@ UPDATE permits
     WHERE permits.address = address.address
     AND permits.address_id IS NULL;
 
---Create indexes
-CREATE INDEX permits_date_index ON permits (issueddate);
+--Create index
 CREATE INDEX permits_id_index ON permits (address_id);
 
 --CRIME
@@ -28,8 +27,6 @@ UPDATE crime
     WHERE crime.address = address.address
     AND crime.address_id IS NULL;
 
---Create indexes
-CREATE INDEX crime_date_index ON crime (date_reported);
 CREATE INDEX crime_id_index ON crime (address_id);
 
 --FIRE
@@ -45,7 +42,6 @@ UPDATE fire
     WHERE fire.address = address.address
     AND fire.address_id IS NULL;
 
-CREATE INDEX fire_date_index ON fire (date);
 CREATE INDEX fire_address_index ON fire (address_id);
 
 --SALES
@@ -61,5 +57,4 @@ UPDATE sales
     WHERE sales.address = address.address
     AND sales.address_id IS NULL;
 
-CREATE INDEX sales_date_index ON sales (date_of_sale);
 CREATE INDEX sales_address_index ON sales (address_id);

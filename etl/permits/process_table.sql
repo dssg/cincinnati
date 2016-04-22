@@ -5,4 +5,4 @@ ALTER TABLE permits ADD id SERIAL;
 ALTER TABLE permits ADD PRIMARY KEY (id);
 
 --create index on date column
-CREATE INDEX ON permits (issueddate);
+CREATE INDEX permits_date_index ON permits (issueddate);
