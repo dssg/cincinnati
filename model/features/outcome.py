@@ -13,7 +13,7 @@ def load_inspections_from_field_test(date):
     df.inspection_date = date
   return df
 
-def generate_labels(start_date, end_date):
+def generate_labels():
     """
     Generate labels for all the parcels in the inspection view.
 
@@ -33,13 +33,9 @@ def generate_labels(start_date, end_date):
                       "JOIN inspections_views.number_key2parcel_no AS parcel "
                       "ON events.number_key = parcel.number_key "
                       "WHERE events.comp_type = 'CBHCODE' "
-                      "AND events.event = 'Initial inspection' "
-                      "AND %(start_date)s <= events.date "
-                      "AND events.date <= %(end_date)s")
+                      "AND events.event = 'Initial inspection'")
 
-    df_insp = pd.read_sql_query(all_insp_query, con=engine,
-                                params={'start_date': start_date,
-                                'end_date': end_date})
+    df_insp = pd.read_sql_query(all_insp_query, con=engine)
 
     # SQL query to pull down all parcels with a violation
     all_viol_query = ("SELECT parcel.parcel_no, events.number_key, "
@@ -53,13 +49,9 @@ def generate_labels(start_date, end_date):
                       "OR events.event = 'Civil 1' OR events.event "
                       "= 'Final notice' OR "
                       "events.event = 'Pre-prosecution status' "
-                      "OR events.event = 'Prosecutor approves') "
-                      "AND %(start_date)s <= events.date "
-                      "AND events.date <= %(end_date)s")
+                      "OR events.event = 'Prosecutor approves') ")
 
-    df_viol = pd.read_sql_query(all_viol_query, con=engine,
-                                params={'start_date': start_date,
-                                'end_date': end_date})
+    df_viol = pd.read_sql_query(all_viol_query, con=engine)
 
     df_insp.columns = ['parcel_insp', 'number_key', 'date_insp']
     df_viol.columns = ['parcel_viol', 'number_key', 'date_viol']

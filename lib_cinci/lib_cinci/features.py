@@ -5,8 +5,14 @@ from lib_cinci.db import uri
 import pandas as pd
 import re
 import time
-
 from dateutil.relativedelta import relativedelta
+
+import logging
+import logging.config
+from lib_cinci.config import load
+
+logging.config.dictConfig(load('logger_config.yaml'))
+logger = logging.getLogger()
 
 #Parameters in some of these functions are being passed in SQL queries,
 #this makes them vulverable to SQL injection, if this goes into production
@@ -138,6 +144,10 @@ def boundaries_for_table_and_column(table, column):
 
 
 def check_date_boundaries(con, n_months, table, date_column):
+    '''
+        This function returns the min and max dates of inspections 
+        for which you can generate features
+    '''
     #Get current schema
     cur = con.cursor()    
     cur.execute('SELECT current_schema;')
@@ -151,6 +161,10 @@ def check_date_boundaries(con, n_months, table, date_column):
     #Get boundaries for features table
     min_feat, max_feat = boundaries_for_table_and_column(table, date_column)
 
+    #Set inspections table subset to None
+    lower_insp_subset = None
+    upper_insp_subset = None
+
     #Check that you have data for the lowest boundary (min_insp - n_months)
     #if not, raise and exception since you don't have enough data to generate
     #features for those dates
@@ -158,17 +172,32 @@ def check_date_boundaries(con, n_months, table, date_column):
     #comparisons
     lowest_boundary = min_insp - relativedelta(months=n_months)
     if not time.mktime(min_feat.timetuple()) <= time.mktime(lowest_boundary.timetuple()):
-        raise Exception(('You cannot generate features for those dates, '
+        #Lower inspections table date: min_feat + n_months
+        lower_insp_subset = min_feat + relativedelta(months=n_months)
+        logging.info(('Warning: You cannot generate features for those dates, '
             'your first observation for table "{table}" is {min_feat} and the earliest date '
             'needed is {lowest_boundary} which is your earliest inspection ({min_insp}) minus n_months '
-            '({n_months}).').format(table=table, min_feat=min_feat, lowest_boundary=lowest_boundary,
-            min_insp=min_insp, n_months=n_months))
+            '({n_months}). Inspections table will be subset starting from: '
+            '{lower_insp_subset}').format(table=table, min_feat=min_feat, lowest_boundary=lowest_boundary,
+            min_insp=min_insp, n_months=n_months, lower_insp_subset=lower_insp_subset))
     
     #Check that you have data for the highest boundary (max_insp)
     #if not, raise and exception since you don't have enough data to generate
     #features for those dates
     if not time.mktime(max_insp.timetuple()) <= time.mktime(max_feat.timetuple()):
-        raise Exception(('You cannot generate features for those dates, '
+        #Upper inspections table date: max_feat
+        upper_insp_subset = max_feat
+        logging.info(('Warining: You cannot generate features for those dates, '
             'your last observation for table "{table}" is {max_feat} and the '
-            'latest inspection is {max_insp}.').format(table=table,
-            max_feat=max_feat, max_insp=max_insp))
+            'latest inspection is {max_insp}. Inspections table will be subset '
+            'ending in {upper_insp_subset}').format(table=table,
+            max_feat=max_feat, max_insp=max_insp, upper_insp_subset=upper_insp_subset))
+
+    #If lower_insp_subset or upper_insp_subset are still
+    #none, set them to the min and max dates in the inspections table
+    if lower_insp_subset is None:
+        lower_insp_subset = min_insp
+    if upper_insp_subset is None:
+        upper_insp_subset = max_insp
+
+    return lower_insp_subset, upper_insp_subset
