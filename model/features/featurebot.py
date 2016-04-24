@@ -216,10 +216,4 @@ if __name__ == '__main__':
     print "Selected features: %s" % selected
     d = datetime.datetime.strptime(args.date, '%d%b%Y') if args.date is not None else None
 
-    if d is not None and d > datetime.datetime.strptime('31Dec2014', '%d%b%Y'):
-      raise MaxDateError('Error: This pipeline cannot generate features after '
-             'December 31, 2014 since data is incomplete for 2015. Add new '
-             'data and change the date limit to prevent this message from '
-             'appearing')
-
     generate_features(selected_features, args.months, args.maxdist, d, args.set)
