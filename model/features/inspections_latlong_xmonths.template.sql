@@ -18,7 +18,7 @@ CREATE TABLE ${TABLE_NAME} AS (
     JOIN public.parcel2${DATASET} AS p2e
     USING (parcel_id)
     JOIN public.${DATASET} AS event
-    ON ${DATASET}_id=event.id
+    ON event_id=event.id
     AND (insp.inspection_date - '${N_MONTHS}  month'::interval) <= event.${DATE_COLUMN}
     AND event.${DATE_COLUMN} <= insp.inspection_date
     AND p2e.dist_m <= ${MAX_DIST}
