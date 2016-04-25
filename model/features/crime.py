@@ -22,7 +22,7 @@ def make_crime_features(con, n_months, max_dist):
     A pandas dataframe, with one row per inspection and one column per feature.
     """
     dataset = 'crime'
-    date_column = 'date_reported'
+    date_column = 'occurred_on'
 
     #Check that you have enough data to generate features,
     #the function will raise and Exception if you don't
