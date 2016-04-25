@@ -1,0 +1,7 @@
+source:
+  filename: crime.csv
+  column: OccurredOn
+storage:
+  schema: public
+  table: crime
+  column: occurred_on

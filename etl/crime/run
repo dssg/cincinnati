@@ -11,46 +11,36 @@ DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
 mkdir -p $TMP_FOLDER
 
 echo "Converting data from $CRIME_CPD_FOLDER"
+#Convert raw data files to csv and store results in tmp folder
+ssconvert "$CRIME_CPD_FOLDER/crime.xlsx" "$CRIME_CPD_FOLDER/crime.csv"
 
-#Step 1 - Convert raw data files to csv and store results in tmp folder
-xlsx2csv -d x09 -s 1 "$CRIME_CPD_FOLDER/CRIME 2004-2006.xlsx" > "$TMP_FOLDER/crime_2004.csv"
-xlsx2csv -d x09 -s 2 "$CRIME_CPD_FOLDER/CRIME 2004-2006.xlsx" > "$TMP_FOLDER/crime_2005.csv"
-xlsx2csv -d x09 -s 3 "$CRIME_CPD_FOLDER/CRIME 2004-2006.xlsx" > "$TMP_FOLDER/crime_2006.csv"
+#Path to update script
+UPDATE_SCRIPT=$ROOT_FOLDER/lib_cinci/data_updater/update.py
+#Create diff file with entries to upload to the database
+$UPDATE_SCRIPT $ROOT_FOLDER/etl/crime/update.yaml
 
-xlsx2csv -d x09 -s 1 "$CRIME_CPD_FOLDER/CRIME 2007-2009.xlsx" > "$TMP_FOLDER/crime_2007.csv"
-xlsx2csv -d x09 -s 2 "$CRIME_CPD_FOLDER/CRIME 2007-2009.xlsx" > "$TMP_FOLDER/crime_2008.csv"
-xlsx2csv -d x09 -s 3 "$CRIME_CPD_FOLDER/CRIME 2007-2009.xlsx" > "$TMP_FOLDER/crime_2009.csv"
-
-xlsx2csv -d x09 -s 1 "$CRIME_CPD_FOLDER/CRIME 2010-2012.xlsx" > "$TMP_FOLDER/crime_2010.csv"
-xlsx2csv -d x09 -s 2 "$CRIME_CPD_FOLDER/CRIME 2010-2012.xlsx" > "$TMP_FOLDER/crime_2011.csv"
-xlsx2csv -d x09 -s 3 "$CRIME_CPD_FOLDER/CRIME 2010-2012.xlsx" > "$TMP_FOLDER/crime_2012.csv"
-
-xlsx2csv -d x09 -s 1 "$CRIME_CPD_FOLDER/CRIME 2013-2014.xlsx" > "$TMP_FOLDER/crime_2013.csv"
-xlsx2csv -d x09 -s 2 "$CRIME_CPD_FOLDER/CRIME 2013-2014.xlsx" > "$TMP_FOLDER/crime_2014.csv"
-
-#Put all files in a single CSV file
-echo 'Concatenating crime_20*.csv into a single one...'
-cat $TMP_FOLDER/crime_20*.csv > "$TMP_FOLDER/2004-2014.csv"
-
+echo 'Cleaning data...'
 #Perform cleaning on the  CSV file
-python "$ROOT_FOLDER/etl/crime/clean.py" "$TMP_FOLDER/2004-2014.csv" > "$TMP_FOLDER/2004-2014_cleaned.csv"
+python "$ROOT_FOLDER/etl/crime/clean.py"
 
+echo 'Geocoding...'
 #Geocode
-python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" --separator ';' "$TMP_FOLDER/2004-2014_cleaned.csv" "$TMP_FOLDER/crime_geocoded.csv"
-
+python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/diff_crime_clean.csv" "$TMP_FOLDER/diff_crime_geocoded.csv"
 #Process geocoded file
-python "$ROOT_FOLDER/bulk_geocoder/process_geocoded_csv.py" "$TMP_FOLDER/crime_geocoded.csv" "$TMP_FOLDER/crime_db.csv"
+python "$ROOT_FOLDER/bulk_geocoder/process_geocoded_csv.py" "$TMP_FOLDER/diff_crime_geocoded.csv" "$TMP_FOLDER/diff_crime_db.csv"
 
+echo 'Generating CREATE TABLE statement...'
 #Use csvsql to create a SQL script with the CREATE TABLE statement
-csvsql -i postgresql --tables crime --db-schema public "$TMP_FOLDER/crime_db.csv" > "$TMP_FOLDER/crime.sql"
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS crime;"  
+csvsql -i postgresql --tables crime --db-schema public "$TMP_FOLDER/diff_crime_db.csv" > "$TMP_FOLDER/crime.sql"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/crime.sql"  
+echo 'Processing table: adding index and unique id...'
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/crime/process_table.sql"  
 
-#Import the data into the new create table
-cat "$TMP_FOLDER/crime_db.csv" | psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.crime FROM STDIN  WITH CSV HEADER DELIMITER ',';"
+echo 'Uploading data...'
+#Get list of columns to cpy, this is necessary since we have a PRIMARY KEY
+#and we want postgres to take care of those values
+COLS="$(head -n 1 $TMP_FOLDER/diff_crime_db.csv)"
+#Upload data to the database
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.crime($COLS) FROM $TMP_FOLDER/diff_crime_db.csv WITH CSV HEADER DELIMITER ',';"
 
-#TODO: add process_table.sql
-#CREATE INDEX crime_date_index ON crime (date_reported);
-
-echo 'Done creating crime table!'
-
+echo 'Done.'

@@ -1,50 +1,46 @@
-from dateutil.parser import parse
+import pandas as pd
+from lib_cinci import data_folder
+import os
 import sys
 
-"""
-Do some basic data cleaning and conversion on our crime data
-"""
+path_to_data_folder = data_folder.for_file(__file__)
 
-order = ['incident_number', 'date_reported', "offense_title", "location", "weekday", 
-         "address", 'city', 'state', 'zip', "rpt_area", "neighbourhood",
-         "hour_from", "hour_to", "weapon", "ucr"]
+os.chdir(os.path.join(path_to_data_folder, 'tmp'))
+print 'Working in folder: %s' % path_to_data_folder
 
-print (";".join(order))
+input_filename = "diff_crime.csv"
+output_filename = "diff_crime_clean.csv"
 
-file_path = sys.argv[1]
+#Load csv file
+df = pd.read_csv(input_filename, index_col='OccurredOn', parse_dates=['OccurredOn'])
+print 'Raw file has {:,d} rows and {:,d} columns'.format(*df.shape)
 
-with open(file_path) as f:
-    for r in f.readlines():
-        # don't care about the header lines
-        if r.startswith("INCIDENT_NO	"):
-            continue
+#Lowercase column names
+df.columns = df.columns.map(lambda s: s.lower())
 
-        # make sure we can use ";" as delimiter
-        assert(";" not in r)
+#Rename some columns
+mapping = {'occurredon': 'occurred_on',
+           'location': 'address',
+           'addressstate': 'state'}
+df.index.rename('occurredon', inplace=True)
+df.rename(columns=mapping, inplace=True)
 
-        # too much weird windows whitespace going on
-        raw = r.split("\t")
-        raw = [c.strip() for c in raw]
-	
-        # some data conversions, will make sure that everything that should be int actually is
-        converted = dict()
-        converted["incident_number"] = raw[0]
-        converted["date_reported"] = parse(raw[1]) #method from dateutil
-        converted["offense_title"] = raw[2]
-        converted["location"] = raw[3]
-        converted["weekday"] = raw[5]
-        converted["address"] = raw[4]
-        converted["city"] = 'CINCINNATI'
-        converted["state"] = 'OHIO'
-        converted["zip"] = ''
-        converted["rpt_area"] = raw[6]
-        converted["neighbourhood"] = raw[7]
-        converted["hour_from"] = int(raw[8]) if len(raw[8]) > 0 else ''
-        converted["hour_to"] = int(raw[9]) if len(raw[9]) > 0 else ''
-        converted["weapon"] = raw[10]
-        converted["ucr"] = int(raw[11])
+#We are only using data starting from 2012
+df = df[df.index.year >= 2012]
+print 'Subset from 2012 has {:,d} rows and {:,d} columns'.format(*df.shape)
 
-        # print ordered column data
-        ordered = [str(converted[col]) for col in order]
-        print (";".join(ordered))
+#Check how many rows have empty addresses
+print '{:,d} rows with empty address, removing those'.format(df.address.isnull().sum())
+#Remove rows without address
+df = df[df.address.notnull()]
 
+#Check for duplicates
+duplicates = df.duplicated()
+n_duplicates = duplicates.sum()
+print 'Found {:,d} duplicates, dropping them'.format(n_duplicates)
+df = df[~duplicates]
+
+
+#Save data frame
+print 'Cleaned file has {:,d} rows and {:,d} columns. Saving on crime_clean.csv'.format(*df.shape)
+df.to_csv(output_filename)
