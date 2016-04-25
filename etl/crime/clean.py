@@ -29,6 +29,9 @@ df.rename(columns=mapping, inplace=True)
 df = df[df.index.year >= 2012]
 print 'Subset from 2012 has {:,d} rows and {:,d} columns'.format(*df.shape)
 
+#Add zip column (this is needed for geocoding.py script to work)
+df['zip'] = ''
+
 #Check how many rows have empty addresses
 print '{:,d} rows with empty address, removing those'.format(df.address.isnull().sum())
 #Remove rows without address
@@ -42,5 +45,5 @@ df = df[~duplicates]
 
 
 #Save data frame
-print 'Cleaned file has {:,d} rows and {:,d} columns. Saving on crime_clean.csv'.format(*df.shape)
+print 'Cleaned file has {:,d} rows and {:,d} columns. Saving on diff_crime_clean.csv'.format(*df.shape)
 df.to_csv(output_filename)
