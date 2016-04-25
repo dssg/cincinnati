@@ -8,7 +8,10 @@
 --Example for three11
 CREATE TABLE ${TABLE_NAME} AS (
     WITH inspections_subset AS(
-        SELECT * FROM features.parcels_inspections
+	--schema is not specified here
+	--since the db connection should set one
+	--using SET SCHEMA
+        SELECT * FROM parcels_inspections
         WHERE '${MIN_INSP_DATE}' <= inspection_date
         AND inspection_date <= '${MAX_INSP_DATE}'
     )
