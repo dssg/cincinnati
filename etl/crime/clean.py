@@ -19,10 +19,9 @@ print 'Raw file has {:,d} rows and {:,d} columns'.format(*df.shape)
 df.columns = df.columns.map(lambda s: s.lower())
 
 #Rename some columns
-mapping = {'occurredon': 'occurred_on',
-           'location': 'address',
+mapping = {'location': 'address',
            'addressstate': 'state'}
-df.index.rename('occurredon', inplace=True)
+df.index.rename('occurred_on', inplace=True)
 df.rename(columns=mapping, inplace=True)
 
 #We are only using data starting from 2012
