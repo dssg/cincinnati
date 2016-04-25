@@ -3,7 +3,7 @@ import os
 
 path_to_etl = os.path.join(os.environ['DATA_FOLDER'], 'etl')
 path_to_fire = os.path.join(path_to_etl, 'fire', 'tmp', 'fire_db.csv')
-path_to_crime = os.path.join(path_to_etl, 'crime', 'tmp', 'crime_db.csv')
+path_to_crime = os.path.join(path_to_etl, 'crime', 'tmp', 'diff_crime_db.csv')
 path_to_sales = os.path.join(path_to_etl, 'sales', 'tmp', 'diff_sales_db.csv')
 path_to_permits = os.path.join(path_to_etl, 'permits', 'tmp', 'diff_permits_db.csv')
 
