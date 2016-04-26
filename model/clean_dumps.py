@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+#This script cleans the MongoDB after running an experiment
+#by keeping just the top 20 models
 from pymongo import MongoClient
 from pymongo import DESCENDING
 from lib_cinci.config import main

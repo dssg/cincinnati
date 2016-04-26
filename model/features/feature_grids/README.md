@@ -1,1 +1,0 @@
-Scripts to compute spatiotemporal features for 3, 6, 9 months with 400, 700 and 1000 m. These are just shortcuts.
