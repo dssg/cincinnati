@@ -312,7 +312,7 @@ class Dataset():
         #table_name, feature_name tuples
         self.feature_mapping = feature_mapping
     def to_df(self):
-        df = pd.DataFrame(self.x, columns=self.feature_names)
+        df = pd.DataFrame(self.x, copy=True)
         df['viol_outcome'] = self.y
         index = pd.MultiIndex.from_tuples(self.parcels, names=['parcel_id', 'inspection_date'])
         df.set_index(index, inplace=True)
