@@ -153,11 +153,11 @@ def load_inspections_for(start_year, end_year=None):
     inspections.set_index(['parcel_id', 'inspection_date'], inplace=True)
     return inspections
 
-def load_one_inspection_for(start_year, end_year=None, which='last'):
+def load_one_inspection_for(start, end=None, which='last'):
     '''
         Returns a DataFrame with one inspection for every parcel in
-        features.parcels_inspections for the period given between start_year
-        and end_year.
+        features.parcels_inspections for the period given between start
+        and end.
 
         'which' parameter determines how to select the inspection. Possible 
         values are first, last or any.
@@ -170,14 +170,14 @@ def load_one_inspection_for(start_year, end_year=None, which='last'):
     #SQL queries to load inspections
     #load last inspection
     query_last = '''
-        --subselect inspections that happened between start_year and end_year
+        --subselect inspections that happened between start and end
         WITH sub AS(
             SELECT *
             FROM features.parcels_inspections AS insp
             WHERE
-                EXTRACT(YEAR FROM insp.inspection_date)>=%(start_year)s
+                insp.inspection_date>=%(start)s
             AND 
-                EXTRACT(YEAR FROM insp.inspection_date)<=%(end_year)s 
+                insp.inspection_date<=%(end)s 
         ),
         --group inspections by parcel_id, then order them using inspection_date
         --in descending order, for each group select the first row
@@ -195,14 +195,14 @@ def load_one_inspection_for(start_year, end_year=None, which='last'):
 
     #load first inspection
     query_first = '''
-        --subselect inspections that happened between start_year and end_year
+        --subselect inspections that happened between start and end
         WITH sub AS(
             SELECT *
             FROM features.parcels_inspections AS insp
             WHERE
-                EXTRACT(YEAR FROM insp.inspection_date)>=%(start_year)s
+                insp.inspection_date>=%(start)s
             AND 
-                EXTRACT(YEAR FROM insp.inspection_date)<=%(end_year)s 
+                insp.inspection_date<=%(end)s 
         ),
         --group inspections by parcel_id, then order them using inspection_date
         --in ascending order, for each group select the first row
@@ -227,9 +227,9 @@ def load_one_inspection_for(start_year, end_year=None, which='last'):
             SELECT *
             FROM features.parcels_inspections AS insp
             WHERE
-                EXTRACT(YEAR FROM insp.inspection_date)>=%(start_year)s
+                insp.inspection_date>=%(start)s
             AND 
-                EXTRACT(YEAR FROM insp.inspection_date)<=%(end_year)s 
+                insp.inspection_date<=%(end)s 
         ),
 
         earliest AS(
@@ -259,12 +259,12 @@ def load_one_inspection_for(start_year, end_year=None, which='last'):
     except:
         raise ValueError("Values for 'which' are 'first', 'last' and 'any'.")
 
-    #if end_year is not provided, use the same value as start_year
-    end_year = start_year if end_year is None else end_year
+    #if end is not provided, use the same value as start
+    end = start if end is None else end
     e = create_engine(uri)
 
     inspections_df = pd.read_sql(query, e,
-        params={'start_year':start_year, 'end_year':end_year})
+        params={'start':start, 'end':end})
     inspections_df.set_index(['parcel_id', 'inspection_date'], inplace=True)
     return inspections_df
 
