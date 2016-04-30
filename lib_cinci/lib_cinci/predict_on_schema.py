@@ -6,6 +6,7 @@ from bson.objectid import ObjectId
 from dataset import get_features_for_inspections_in_schema
 import pandas as pd
 
+
 def predict_on_schema(model_id, schema):
     '''
         Use the model from a previous experiment to predict on one of the
@@ -44,9 +45,6 @@ def predict_on_schema(model_id, schema):
     #takes tuples as parameter
     features = [tuple(feat) for feat in features]
     
-    #Now get your custom inspections list and make a dataset with the
-    #features the model was trained on
-    dataset = get_features_for_inspections_in_schema(schema, features)
 
     #Impute
     dataset.x = imputer.transform(dataset.x)
