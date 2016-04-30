@@ -44,7 +44,10 @@ def predict_on_schema(model_id, schema):
     #Mongodb returns tuples as lists, but our loading method
     #takes tuples as parameter
     features = [tuple(feat) for feat in features]
-    
+
+    #Now get your custom inspections list and make a dataset with the
+    #features the model was trained on
+    dataset = get_features_for_inspections_in_schema(schema, features)
 
     #Impute
     dataset.x = imputer.transform(dataset.x)
