@@ -1,4 +1,5 @@
 from collections import defaultdict
+import matplotlib.pyplot as plt
 
 def models_plot(models, plotting_fn, grouping_fn=None):
     '''
@@ -25,7 +26,7 @@ def models_plot(models, plotting_fn, grouping_fn=None):
         return res
 
     #If grouping functions is none, replace it with a dummy function
-    grouping_fn = lambda x:1 if grouping_fn is None else grouping_fn
+    grouping_fn = lambda model:1 if grouping_fn is None else grouping_fn
     
     #Group experiments using grouping fn
     groups = __groupby(models, fn=grouping_fn)
