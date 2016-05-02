@@ -1,6 +1,13 @@
 from collections import defaultdict
 import matplotlib.pyplot as plt
 
+def group_experiments_by(data, fn):
+    res = defaultdict(list)
+    for element in data:
+        key = fn(element)
+        res[key].append(element)
+    return res
+
 def models_plot(models, plotting_fn, grouping_fn=None):
     '''
         This functions takes a list with models (as obtained from MongoDB)
@@ -18,18 +25,11 @@ def models_plot(models, plotting_fn, grouping_fn=None):
 
 
     '''
-    def __groupby(data, fn):
-        res = defaultdict(list)
-        for element in data:
-            key = fn(element)
-            res[key].append(element)
-        return res
-
     #If grouping functions is none, replace it with a dummy function
-    grouping_fn = lambda model:1 if grouping_fn is None else grouping_fn
+    grouping_fn = (lambda model:1) if grouping_fn is None else grouping_fn
     
     #Group experiments using grouping fn
-    groups = __groupby(models, fn=grouping_fn)
+    groups = group_experiments_by(models, fn=grouping_fn)
     
     #Print group key and len
     #for k, models_group in groups.iteritems():
@@ -46,4 +46,4 @@ def models_plot(models, plotting_fn, grouping_fn=None):
         #Iterate over every model for every group
         for m in model_group:
             ax.plot(*plotting_fn(m))
-        ax.legend([m['experiment_name'] for m in models])
+        ax.legend([m['experiment_name'] for m in model_group])
