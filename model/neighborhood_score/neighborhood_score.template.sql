@@ -4,12 +4,22 @@
 --for example, true positives outside 'bad beighborhoods'
 CREATE TABLE ${schema}.${table_name} AS(
     --First: attach geometry column to parcels_inspections table
-    WITH inspections_location AS(
+    --in the current schema
+    WITH schema_inspections_location AS(
         SELECT insp.*, parcels.geom
         FROM ${schema}.parcels_inspections AS insp
         JOIN shape_files.parcels_cincy AS parcels
         ON insp.parcel_id=parcels.parcelid
     ),
+    --Do the same for the parcels_inspections table but in the features
+    --schema, since this table contains the labels
+    real_inspections_location AS(
+        SELECT insp.*, parcels.geom
+        FROM features.parcels_inspections AS insp
+        JOIN shape_files.parcels_cincy AS parcels
+        ON insp.parcel_id=parcels.parcelid
+    ),
+
     --Second: find inspections pairs that
     --ocurred within certain distance and time window
     --store the status of the second parcel
@@ -21,8 +31,8 @@ CREATE TABLE ${schema}.${table_name} AS(
                parcels_b.parcel_id AS parcel_id_b,
                parcels_b.inspection_date AS inspection_date_b,
                parcels_b.viol_outcome AS viol_outcome
-        FROM inspections_location AS parcels_a
-        JOIN inspections_location AS parcels_b
+        FROM schema_inspections_location AS parcels_a
+        JOIN real_inspections_location AS parcels_b
         ON ST_DWithin(parcels_a.geom, parcels_b.geom, ${max_dist_foot})
         AND (parcels_a.inspection_date - '${n_months} month'::interval) <= parcels_b.inspection_date
         AND parcels_b.inspection_date <= parcels_a.inspection_date
