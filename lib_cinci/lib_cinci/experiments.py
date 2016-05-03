@@ -37,7 +37,7 @@ def models_plot(models, plotting_fn, grouping_fn=None):
     
     #Get number of groups and matplolib axes object
     n_groups = len(groups.keys())
-    fig, axes = plt.subplots(nrows=n_groups, ncols=1, figsize=(20, 10))
+    fig, axes = plt.subplots(nrows=n_groups, ncols=1, figsize=(20, 5*n_groups))
     axes = [axes] if n_groups==1 else axes
     
     #Plot
