@@ -70,7 +70,7 @@ def make_datasets(config):
     elif config["validation_window"] == "1Month":
         validation_window = datetime.timedelta(days=30)
     elif config["validation_window"] == "6Month":
-        validation_window = datetime.timedelta(days=30*6)
+        validation_window = datetime.timedelta(days=30 * 6)
     elif config["validation_window"] == "None":
         validation_window = datetime.timedelta(days=0)
     else:

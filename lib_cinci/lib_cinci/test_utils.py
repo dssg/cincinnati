@@ -13,9 +13,11 @@ def iso_date(date_str):
 def date(date_str):
     return datetime.strptime(date_str, '%d%b%Y')
 
+
 def timestamp(date_str):
     d = datetime.strptime(date_str, '%d%b%Y')
     return pd.to_datetime(d)
+
 
 class Database():
     def __init__(self):
