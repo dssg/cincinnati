@@ -2,14 +2,11 @@
 import pandas as pd
 import datetime
 import yaml
-import pickle
 import os
 import logging
 import logging.config
 import copy
-from itertools import product
 import numpy as np
-from sklearn import linear_model, svm, ensemble
 from lib_cinci import dataset
 import evaluation
 from features import feature_parser
@@ -24,8 +21,11 @@ from lib_cinci.config import main as cfg_main
 from lib_cinci.config import load
 from lib_cinci.exceptions import MaxDateError, ConfigError, ExperimentExists
 from lib_cinci.folders import (path_to_predictions, path_to_pickled_models,
-    path_to_pickled_scalers, path_to_pickled_imputers, path_to_dumps) 
-from lib_cinci.features import check_nas_threshold, boundaries_for_table_and_column
+                               path_to_pickled_scalers,
+                               path_to_pickled_imputers,
+                               path_to_dumps)
+from lib_cinci.features import (check_nas_threshold,
+                                boundaries_for_table_and_column)
 
 """
 Purpose: train a binary classifier to identify those homes that are likely
@@ -157,40 +157,57 @@ def get_feature_importances(model):
                       'nor coef_ returning None'))
     return None
 
+
 def log_results(model, config, test, predictions, feature_importances,
-    imputer, scaler):
+                imputer, scaler):
     '''
         Log results to a MongoDB database
     '''
-    #Instantiate logger
+    # Instantiate logger
     logger_uri = cfg_main['logger']['uri']
     logger_db = cfg_main['logger']['db']
     logger_collection = cfg_main['logger']['collection']
     mongo_logger = Logger(logger_uri, logger_db, logger_collection)
-    #Compute some statistics to log
+    # Compute some statistics to log
     prec_at_1, cutoff_at_1 = precision_at(test.y, predictions, 0.01)
+    prec_at_5, cutoff_at_5 = precision_at(test.y, predictions, 0.05)
     prec_at_10, cutoff_at_10 = precision_at(test.y, predictions, 0.1)
-    #Add the name of the experiment if available
-    experiment_name = config["experiment_name"] if config["experiment_name"] else None
-    #Sending model will log model name, parameters and datetime
-    #Also log other important things by sending named parameters
-    mongo_id = mongo_logger.log_model(model, features=list(test.feature_names),
-        feature_importances=list(feature_importances),
-        config=config, prec_at_1=prec_at_1,
-        prec_at_10=prec_at_10, cutoff_at_1=cutoff_at_1,
-        cutoff_at_10=cutoff_at_10, experiment_name=experiment_name,
-        feature_mapping=test.feature_mapping)
+    prec_at_20, cutoff_at_20 = precision_at(test.y, predictions, 0.2)
 
-    #Dump test_labels, test_predictions and test_parcels to a csv file
+    # Add the name of the experiment if available
+    experiment_name = (config["experiment_name"] if config["experiment_name"]
+                       else None)
+    # Sending model will log model name, parameters and datetime
+    # Also log other important things by sending named parameters
+
+    ft_imp = list(feature_importances)
+    ft_map = test.feature_mapping
+
+    mongo_id = mongo_logger.log_model(model,
+                                      features=list(test.feature_names),
+                                      feature_importances=ft_imp,
+                                      config=config,
+                                      prec_at_1=prec_at_1,
+                                      cutoff_at_1=cutoff_at_1,
+                                      prec_at_5=prec_at_5,
+                                      cutoff_at_5=cutoff_at_5,
+                                      prec_at_10=prec_at_10,
+                                      cutoff_at_10=cutoff_at_10,
+                                      prec_at_20=prec_at_20,
+                                      cutoff_at_20=cutoff_at_20,
+                                      experiment_name=experiment_name,
+                                      feature_mapping=ft_map)
+
+    # Dump test_labels, test_predictions and test_parcels to a csv file
     parcel_id = [record[0] for record in test.parcels]
     inspection_date = [record[1] for record in test.parcels]
     dump = pd.DataFrame({'parcel_id': parcel_id,
-        'inspection_date': inspection_date,
-        'viol_outcome': test.y,
-        'prediction': predictions})
-    #Dump predictions to CSV
+                         'inspection_date': inspection_date,
+                         'viol_outcome': test.y,
+                         'prediction': predictions})
+    # Dump predictions to CSV
     dump.to_csv(os.path.join(path_to_predictions, mongo_id))
-    #Pickle model
+    # Pickle model
     if args.pickle:
         path_to_file = os.path.join(path_to_pickled_models, mongo_id)
         logger.info('Pickling model: {}'.format(path_to_file))
@@ -203,6 +220,7 @@ def log_results(model, config, test, predictions, feature_importances,
         path_to_file = os.path.join(path_to_pickled_scalers, mongo_id)
         logger.info('Pickling scaler: {}'.format(path_to_file))
         joblib.dump(scaler, path_to_file)
+
 
 def main():
     config_file = args.path_to_config_file
