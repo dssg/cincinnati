@@ -33,7 +33,8 @@ FeatureToGenerate = namedtuple("FeatureToGenerate",
 
 # list all existing feature-sets
 existing_features = [FeatureToGenerate("tax", tax.make_tax_features),
-                         FeatureToGenerate("crime_agg", crime_agg.make_crime_features),
+                         # Deprecated - data schema changed in the spring 2016 update
+                         # FeatureToGenerate("crime_agg", crime_agg.make_crime_features),
                          FeatureToGenerate("named_entities",
                                            ner.make_owner_features),
                          FeatureToGenerate("house_type",
