@@ -52,7 +52,8 @@ def add_parcel_type(df):
     parcel_type["is_residential"] = parcel_type["class"].apply(is_residential)
     return df.join(parcel_type[['is_residential']])
 
-def add_inspections_results_for(df, start_year, end_year):
+
+def add_inspections_results_for(df, start, end):
     '''
         Returns a copy of the original data frame with three new columns
         inspections, violations and nonviolations which is the count for
@@ -64,9 +65,9 @@ def add_inspections_results_for(df, start_year, end_year):
             SELECT *
             FROM features.parcels_inspections AS insp
             WHERE
-                EXTRACT(YEAR FROM insp.inspection_date)>=%(start_year)s
+                insp.inspection_date >= %(start)s
             AND
-                EXTRACT(YEAR FROM insp.inspection_date)<=%(end_year)s
+                insp.inspection_date <= %(end)s
         )
 
         SELECT  parcel_id,
@@ -76,7 +77,7 @@ def add_inspections_results_for(df, start_year, end_year):
         FROM sub GROUP BY parcel_id;
     '''
     insp_results = pd.read_sql(query, e, index_col='parcel_id',
-        params={'start_year':start_year, 'end_year':end_year})
+                               params={'start': start, 'end': end})
     return df.join(insp_results)
 
 
