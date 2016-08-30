@@ -23,7 +23,7 @@ schema = 'features_01may2015'
 # used for random sampling
 percent = 4
 # n_inspections - list length
-n_inspections = 1000
+n_inspections = 100
 # nei_schema - db schema used to look for the neighborhood score
 # table
 nei_schema = 'features_01may2015'
@@ -98,7 +98,10 @@ preds = preds.join(nei_score[['metric']])
 top_k = int(total*(4/100.0))
 subset = preds.head(top_k)
 
-subset[subset.inspections.notnull()]
+# subset[subset.inspections.notnull()]
 
 # step 6 - random samplong from the top predictions
 inspections_list = subset.sample(n_inspections)
+
+# step 7 - subset columns and save to csv
+inspections_list[['prediction']].to_csv('list-june16.csv')
