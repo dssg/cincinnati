@@ -1,0 +1,13 @@
+column,start,length
+year,0,4
+month,5,2
+day,8,3
+hour,11,2
+air_temp,13,6
+dew_point_temp,19,5
+sea_level_pressure,25,5
+wind_direction,31,6
+wind_speed_rate,37,6
+sky_condition_total_coverage_code,43,6
+liquid_precipitation_depth_dimension_one_hour,49,6
+liquid_precipitation_depth_dimension_six_hours,55,6

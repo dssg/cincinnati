@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+CODE_FOLDER="$ROOT_FOLDER/etl/weather"
+
+#Read variables from config file
+#DB_HOST=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.host)
+#DB_USER=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.user)
+#DB_NAME=$(cat $ROOT_FOLDER'/config.yaml' | shyaml get-value db.database)
+
+# Download weather data for Cincinnati/Louisville
+#bash "$CODE_FOLDER/download.sh" "$DATA_FOLDER" "724230" "93821"
+
+# Unzip, clean, and concatenate weather data
+gunzip -c $DATA_FOLDER/*.gz | sed 's/-9999/     /g' |
+in2csv -H -s $CODE_FOLDER/schema.csv > $DATA_FOLDER/weather_master.csv
+
+# Create table
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/weather.sql"  
+
+# Upload the csv file into the weather schema
+echo "Uploading weather data to the database..."
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\copy weather.weather from $DATA_FOLDER/weather_master.csv with csv header;"
+echo "Done creating weather table!"
