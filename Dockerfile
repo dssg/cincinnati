@@ -14,6 +14,7 @@ ENV OUTPUT_FOLDER=/root/output
 ENV PYTHONPATH=$PYTHONPATH:$ROOT_FOLDER/lib_cinci
 
 #Install wget and unzip
+RUN apt-get -qq update
 RUN apt-get install -y wget
 RUN apt-get install -y unzip
 
