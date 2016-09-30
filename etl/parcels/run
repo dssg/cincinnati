@@ -42,3 +42,4 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS shape_files.pa
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/parcels_w_building_info.sql"
 
 echo "Done uploading parcels data to postgres"
+
