@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+
+# this is the file you should be running for ETLing the inspections
+
+###########
+# Run this in your local bash
+############
+
 LOCAL_DATA_FOLDER="$DATA_FOLDER/etl/inspections"
 LOCAL_CODE_FOLDER="$ROOT_FOLDER/etl/inspections"
 TMP_FOLDER="$LOCAL_DATA_FOLDER/tmp"
@@ -13,14 +20,20 @@ ORACLE_USER=system
 ORACLE_PWD=oracle
 
 #Build image from Dockerfile
+# this needs to run from within etl/inspections/
 docker build -t ora2pg .
 echo 'Docker image built'
 
 #Run container
 docker run -d -p 49160:22 -p 49161:1521 -v $DATA_FOLDER/etl/inspections:/root/data ora2pg
+
 #SSH to Docker
 #password: admin
 ssh root@localhost -p 49160
+
+###########
+# Run this in the docker container
+############
 
 #For some reason this is not getting installed whe building
 #perl -MCPAN -e 'install DBD::Oracle'
@@ -38,6 +51,10 @@ ora2pg -t TABLE -n inspections_raw -o /root/data/tmp/inspections.tables.sql
 nohup ora2pg -t COPY -n inspections_raw -o /root/data/tmp/inspections.data.sql
 
 #Kill container
+
+###########
+# Run this in your local bash
+############
 
 #Part 2: Upload inspections data
 #Drop everything in case it already exists
