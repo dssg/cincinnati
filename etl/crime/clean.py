@@ -12,11 +12,14 @@ input_filename = "diff_crime.csv"
 output_filename = "diff_crime_clean.csv"
 
 #Load csv file
-df = pd.read_csv(input_filename, index_col='OccurredOn', parse_dates=['OccurredOn'])
+df = pd.read_csv(input_filename)
 print 'Raw file has {:,d} rows and {:,d} columns'.format(*df.shape)
 
 #Lowercase column names
 df.columns = df.columns.map(lambda s: s.lower())
+
+df['occurredon'] = pd.to_datetime(df['occurredon'])
+df = df.set_index('occurredon')
 
 #Rename some columns
 mapping = {'location': 'address',
