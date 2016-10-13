@@ -76,7 +76,8 @@ RUN conda create -n py3 python=3 pandas sqlalchemy pyyaml psycopg2 pip
 RUN source activate py3
 
 #Copy .pgpass
-COPY .pgpass /root/
+COPY $ROOT_FOLDER/.pgpass /root/
+RUN chmod 0600 /root/.pgpass
 
 #Automatically start cincinnati conda environment
 RUN echo 'source activate cincinnati' >> /root/.bashrc
