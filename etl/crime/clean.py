@@ -12,7 +12,7 @@ input_filename = "diff_crime.csv"
 output_filename = "diff_crime_clean.csv"
 
 #Load csv file
-df = pd.read_csv(input_filename)
+df = pd.read_csv(input_filename, dtype=object)
 print 'Raw file has {:,d} rows and {:,d} columns'.format(*df.shape)
 
 #Lowercase column names
@@ -32,7 +32,15 @@ df = df[df.index.year >= 2012]
 print 'Subset from 2012 has {:,d} rows and {:,d} columns'.format(*df.shape)
 
 #Add zip column (this is needed for geocoding.py script to work)
-df['zip'] = ''
+if 'zip' not in df.columns:
+    df['zip'] = ''
+
+# if no city column, add empty column
+if 'city' not in df.columns:
+    df['city'] = ''
+
+# if we don't know the city, it's probably Cincinnati
+df.loc[df.city=='', 'city'] = 'CINCINNATI'
 
 #Check how many rows have empty addresses
 print '{:,d} rows with empty address, removing those'.format(df.address.isnull().sum())

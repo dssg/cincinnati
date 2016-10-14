@@ -15,6 +15,6 @@ parser.add_argument("-sep", "--separator", help="separator in the file, defaults
 args = parser.parse_args()
 
 #Load data
-df = pd.read_csv(args.input, sep=args.separator)
+df = pd.read_csv(args.input, sep=args.separator, dtype='object')
 res = geocode_dataframe(df)
 res.to_csv(args.output, index=False)

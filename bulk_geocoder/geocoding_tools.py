@@ -2,6 +2,7 @@ from __future__ import division
 import grequests
 import pandas as pd
 import re
+from StringIO import StringIO
 
 class BadInputError(ValueError):
     '''Raise when the input Data Frame does not contain a appropiate input'''
@@ -97,8 +98,10 @@ def geocode_list(l):
 
     #Request parameters
     #http://stackoverflow.com/questions/25024087/mimic-curl-in-python
-    url = "http://geocoding.geo.census.gov/geocoder/locations/addressbatch"
+    url = "https://geocoding.geo.census.gov/geocoder/locations/addressbatch"
     data = {'benchmark': 'Public_AR_Census2010'}
+    # data = {'benchmark': 'Public_AR_Current', 'vintage': 'ACS2013_Current'}
+
 
     while try_again:
         #Split the list in chunks with max 1000 elements
@@ -106,7 +109,7 @@ def geocode_list(l):
         #Combine each chunk so it only has one big string
         files_content = [reduce(lambda x,y: x+'\n'+y, chunk) for chunk in chunks]
         #Create the request objects
-        rs = (grequests.post(url, data=data, files={'addressFile': a_file}) for a_file in files_content)
+        rs = (grequests.post(url, data=data, files={'addressFile': ('%d.csv'%idx, StringIO(a_file), 'text/csv')}) for idx, a_file in enumerate(files_content))
         #Make the calls, send in batches
         responses = grequests.map(rs, size=50)
         #Get the content for each response

@@ -18,7 +18,7 @@ args = parser.parse_args()
 print 'Processing csv file...'
 print 'Dropping some columns and remaning others...'
 
-df = pd.read_csv(args.input, sep=args.separator)
+df = pd.read_csv(args.input, sep=args.separator, dtype=object)
 
 #We don't really need state and city information
 to_drop = ['state', 'city', 'city_census', 'state_census']

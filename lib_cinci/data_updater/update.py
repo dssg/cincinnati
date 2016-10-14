@@ -64,7 +64,7 @@ if __name__ == '__main__':
     #Step three: load and subset the file to include new entries
     #TO DO: avoid loading if most_recent_row is None
     logger.info('Loading {}'.format(params['source']['filename']))
-    df = pd.read_csv(params['source']['filename'])
+    df = pd.read_csv(params['source']['filename'], dtype=object)
     df[file_column] = pd.to_datetime(df[file_column])
 
     #Subset only if db_most_recent has a value    
