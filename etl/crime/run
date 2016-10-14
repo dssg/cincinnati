@@ -31,7 +31,7 @@ python "$ROOT_FOLDER/bulk_geocoder/process_geocoded_csv.py" "$TMP_FOLDER/diff_cr
 
 echo 'Generating CREATE TABLE statement...'
 #Use csvsql to create a SQL script with the CREATE TABLE statement
-csvsql -i postgresql --tables crime --db-schema public "$TMP_FOLDER/diff_crime_db.csv" > "$TMP_FOLDER/crime.sql"
+csvsql -i postgresql --no-constraints --tables crime --db-schema public "$TMP_FOLDER/diff_crime_db.csv" > "$TMP_FOLDER/crime.sql"
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$TMP_FOLDER/crime.sql"  
 echo 'Processing table: adding index and unique id...'
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/crime/process_table.sql"  
