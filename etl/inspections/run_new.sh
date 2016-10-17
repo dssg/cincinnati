@@ -36,7 +36,7 @@ ssh root@localhost -p 49160
 ############
 
 #For some reason this is not getting installed whe building
-#perl -MCPAN -e 'install DBD::Oracle'
+perl -MCPAN -e 'install DBD::Oracle'
 
 export ORACLE_USER=system
 export ORACLE_PWD=oracle
