@@ -38,6 +38,9 @@ ssh root@localhost -p 49160
 #For some reason this is not getting installed whe building
 #perl -MCPAN -e 'install DBD::Oracle'
 
+export ORACLE_USER=system
+export ORACLE_PWD=oracle
+
 #Part 1: Export Oracle dump to SQL
 #Create schema to upload dmp file
 sqlplus -s $ORACLE_USER/$ORACLE_PWD@localhost <<< "create user inspections_raw identified by password default tablespace users;"
