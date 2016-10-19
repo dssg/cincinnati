@@ -20,6 +20,7 @@
 
 -- #################
 
+DROP VIEW IF EXISTS inspections_views.events;
 CREATE VIEW inspections_views.events AS (
   WITH timeline AS(
     SELECT number_key, comp_type, date_a AS date, 'Reported' AS event
@@ -115,7 +116,7 @@ CREATE VIEW inspections_views.events AS (
 -- one-to-one mapping between case and parcel. This query creates a view for such a mapping. Cases that have
 -- more than one parcel attached to it not contained in the view.
 -- #################
-
+DROP VIEW IF EXISTS inspections_views.number_key2parcel_no;
 CREATE VIEW inspections_views.number_key2parcel_no
 AS
    (SELECT par.number_key, trim(par.parcel_no) AS parcel_no
@@ -130,6 +131,7 @@ AS
     AND primary_parcel='1');
 
 -- map number key to parcel id
+DROP VIEW IF EXISTS inspections_views.events_parcel_id;
 CREATE VIEW inspections_views.events_parcel_id AS
  SELECT parcel.parcel_no,
     events.number_key,
@@ -140,12 +142,14 @@ CREATE VIEW inspections_views.events_parcel_id AS
    JOIN inspections_views.number_key2parcel_no AS parcel ON events.number_key = parcel.number_key;
 
 --Parcel id to coordinate
+DROP VIEW IF EXISTS inspections_views.parcel2lat_long ;
 CREATE VIEW shape_files.parcel2lat_long AS(
   SELECT parcelid AS parcel_id, ST_Y(ST_Transform(ST_Centroid(geom), 4326)) AS latitude, ST_X(ST_Transform(ST_Centroid(geom), 4326)) AS longitude
   FROM shape_files.parcels_cincy
 );
 
 --Visualize inspections and violations over the years
+DROP VIEW IF EXISTS inspections_views.events_and_lat_long;
 CREATE VIEW inspections_views.events_and_lat_long AS(
   SELECT events.parcel_no AS parcel_id, events.date, events.event, geo.latitude, geo.longitude
   FROM inspections_views.events_parcel_id AS events
