@@ -10,4 +10,4 @@ ADD longitude float8;
 UPDATE shape_files.parcels_cincy AS parcels
 SET
     latitude=ST_Y(ST_CENTROID(ST_TRANSFORM(parcels.geom, 4326))),
-    longitude=ST_X(ST_CENTROID(ST_TRANSFORM(parcels.geom, 4326)))
+    longitude=ST_X(ST_CENTROID(ST_TRANSFORM(parcels.geom, 4326)));

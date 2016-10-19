@@ -20,14 +20,16 @@ FROM	shape_files.hamilton_parcels as parcels,
 WHERE ST_Within(parcels.geom, city_boundry.geom));
 
 --rename some columns on parcels_cincy
-ALTER TABLE shape_files.parcels_cincy
-  RENAME COLUMN shape_area TO area;
+--  this seems to be available already, and 'area' has fewer 0s than 'shape_area'
+-- ALTER TABLE shape_files.parcels_cincy
+--  RENAME COLUMN shape_area TO area;
 
 --spatial index for new table
 CREATE INDEX ON shape_files.parcels_cincy USING gist(geom);
 
 --join parcels in Cincinnaty to blocks, block groups, tracts and neighborhoods
 --select parcels in census blocks
+DROP TABLE IF EXISTS shape_files.parcelid_blocks_groups_tracts;
 CREATE TABLE shape_files.parcelid_blocks_groups_tracts as
 (SELECT parcels.parcelid, parcels.addrno, parcels.addrst, parcels.addrsf, blocks.block, blocks.blkgrp, blocks.tract, parcels.geom
 FROM	shape_files.parcels_cincy as parcels,
@@ -70,7 +72,7 @@ CREATE TEMPORARY TABLE duplicate__parcels_cincy
 AS (SELECT parcelid
 FROM shape_files.parcels_cincy
 GROUP BY parcelid
-HAVING COUNT(*) > 1)
+HAVING COUNT(*) > 1);
 
 -- make mapping table that has lat and lon filled out
 CREATE TABLE shape_files.parcelid_blocks_grp_tracts_nhoods___with_lat_lon AS (
