@@ -14,10 +14,4 @@ wget -O "$LOCAL_DATA_FOLDER/fire_2014.csv" https://data.cincinnati-oh.gov/api/vi
 echo 'Downloading 2015 data...'
 wget -O "$LOCAL_DATA_FOLDER/fire_2015.csv" https://data.cincinnati-oh.gov/api/views/96sp-aysv/rows.csv?accessType=DOWNLOAD
 
-echo 'Concatenating files...'
-awk 'FNR > 1' fire_201*.csv > content.csv
-head -n1 fire_2012.csv > fire.csv
-cat content.csv >> fire.csv
-rm -f content.csv
-
 echo 'Done.'
