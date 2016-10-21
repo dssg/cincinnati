@@ -19,8 +19,12 @@ python "$ROOT_FOLDER/etl/fire/clean.py"
 
 echo 'Geocoding dataset, this may take a while...'
 python "$ROOT_FOLDER/bulk_geocoder/geocode_csv.py" "$TMP_FOLDER/fire_clean.csv" "$TMP_FOLDER/fire_geocoded.csv"
+
+echo 'Fill geocoded gaps with delivered lat/long, where available...'
+python "$ROOT_FOLDER/etl/fire/combine_latlong.py" "$TMP_FOLDER/fire_geocoded.csv" "$TMP_FOLDER/fire_combined_geocoded.csv"
+
 #Process geocoded file
-python "$ROOT_FOLDER/bulk_geocoder/process_geocoded_csv.py" "$TMP_FOLDER/fire_geocoded.csv" "$TMP_FOLDER/fire_db.csv"
+python "$ROOT_FOLDER/bulk_geocoder/process_geocoded_csv.py" "$TMP_FOLDER/fire_combined_geocoded.csv" "$TMP_FOLDER/fire_db.csv"
 
 #generate CREATE TABLE statement
 csvsql -i postgresql --tables fire --db-schema public -d ',' "$TMP_FOLDER/fire_db.csv" > "$TMP_FOLDER/fire.sql"

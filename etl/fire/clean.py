@@ -42,6 +42,9 @@ for df in yearlyFiles:
             df['city'] = df.location.str.extract('^(.*)\s\d{5}').str.upper()
             df.loc[df.city=='CINC','city'] = 'CINCINNATI'
 
+        df['delivered_latitude'] = df.location.str.extract('\n\((.*),').str.strip()
+        df['delivered_longitude'] = df.location.str.extract(',\s(.*)\)').str.strip()
+
         df.drop('location',1, inplace=True)
 
     else:
@@ -49,8 +52,10 @@ for df in yearlyFiles:
             df['city'] = 'CINCINNATI'
         if 'zip' not in df.columns:
             df['zip']  = ''
+        df['delivered_latitude'] = ''
+        df['delivered_longitude'] = ''
 
-    # probably save to fill gaps with 'Cincinnati'
+    # it's probably save to fill gaps with 'Cincinnati'
     df.loc[df.city=='', 'city'] = 'CINCINNATI'
     df.loc[:, 'city'] = df.city.fillna('CINCINNATI')
     df['state'] = 'OHIO'
