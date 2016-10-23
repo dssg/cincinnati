@@ -16,6 +16,7 @@ CREATE TABLE tax_combined AS(
         CAST(mkt_total_val AS integer),
         CAST(mkt_impr_val AS integer),
         CAST(mkt_land_val AS integer),
+        forcl_flag
         FROM taxes_2008
     ), t2009 AS (
         SELECT 2009 AS year,
