@@ -21,12 +21,13 @@ def format_address(x):
     number = str(x.house_number) if str(x.house_number) != 'nan' else ''
     dir_ = str(x.street_direction)  if str(x.street_direction) != 'nan' else ''
     name = str(x.street_name) if str(x.street_name) != 'nan' else ''
+    suff = str(x.street_suffix) if str(x.street_suffix) != 'nan' else ''
     non_empty = [e for e in [number, dir_, name] if e != '']
     addr = reduce(lambda x,y: x+' '+y, non_empty) if len(non_empty) else ''
     return addr
 
 df['address'] = [format_address(x) for x in df.itertuples()]
-df.drop(['street_direction', 'street_name', 'house_number'], axis=1, inplace=True)
+df.drop(['street_direction', 'street_name', 'house_number', 'street_suffix'], axis=1, inplace=True)
 
 #Add columns for geocoding
 df['city'] = 'CINCINNATI'
