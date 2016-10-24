@@ -64,6 +64,12 @@ RUN rm -rf $NAME.zip
 ENV CLASSPATH=/root/$NAME/stanford-ner.jar
 ENV NER_CLASSIFIERS=/root/$NAME/classifiers
 
+# also need some dependencies for NER
+RUN wget http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip
+RUN unzip stanford-corenlp-full-2015-12-09.zip
+RUN rm stanford-corenlp-full-2015-12-09.zip
+ENV CLASSPATH=$CLASSPATH:/root/stanford-corenlp-full-2015-12-09/stanford-corenlp-3.6.0.jar:/root/stanford-corenlp-full-2015-12-09/slf4j-simple.jar:/root/stanford-corenlp-full-2015-12-09/slf4j-api.jar
+
 #Copy the conda requirements file
 COPY environment.yml /tmp/
 
