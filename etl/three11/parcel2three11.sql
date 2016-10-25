@@ -10,21 +10,28 @@ WHERE NOT EXISTS (
     SELECT table_name FROM last_updated_event WHERE table_name = 'three11'
 );
 
-DROP TABLE IF EXISTS parcel2three11;
-
--- find all the events within 1 km
-CREATE TABLE parcel2three11 AS
-SELECT
-    parcels.parcelid AS parcel_id,
-    three11.id AS event_id,
-    ST_Distance(parcels.geom, three11.geom)/3.281 AS dist_m
-FROM shape_files.parcels_cincy AS parcels
-JOIN three11
-ON ST_DWithin(parcels.geom, three11.geom, 3281);
-
+--Create table if doesn't exist
+CREATE TABLE IF NOT EXISTS parcel2three11 (
+    parcel_id varchar(20) NOT NULL,
+    event_id int4 NOT NULL,
+    dist_m float8 NOT NULL
+);
 --Create indexes on parcel_id and three11_id
 CREATE INDEX three11_parcel_id_index ON parcel2three11 (parcel_id);
 CREATE INDEX three11_event_id_index ON parcel2three11 (event_id);
+    
+--Insert new rows into table
+INSERT INTO parcel2three11(
+    parcel_id,
+    event_id,
+    dist_m
+)
+--subselect table with rows that have an id greater than the one stored in last_updated_event table
+SELECT parcels.parcelid AS parcel_id, new_records.id AS event_id, ST_Distance(parcels.geom, new_records.geom)/3.281 AS dist_m
+FROM shape_files.parcels_cincy AS parcels
+JOIN three11 AS new_records
+ON ST_DWithin(parcels.geom, new_records.geom, 3281)
+WHERE new_records.id > (SELECT event_id FROM last_updated_event WHERE table_name='three11');
 
 --Update last_updated_event table
 UPDATE last_updated_event
