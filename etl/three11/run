@@ -34,8 +34,10 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\COPY public.three11($COLS) FROM $T
 echo 'Processing table: creating indexes, unique id and geometry column...'
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/process_table.sql"  
 
-#Match parcels to events (add indexes on parcel_id and event_id)
-echo 'Matching every parcel in cincinnati with new events in the three11 table (up to 3KM), this may take a while...'
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/parcel2three11.sql"
-
+# ### This does not seem to be used anywhere? Also, it generates a huge (~80GB) table that
+# ### takes ~30 hours to build the index for. Let's try without it.
+# #Match parcels to events (add indexes on parcel_id and event_id)
+# echo 'Matching every parcel in cincinnati with new events in the three11 table (up to 1KM), this may take a while...'
+# psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$ROOT_FOLDER/etl/three11/parcel2three11.sql"
+# ### 
 echo 'Done.'
