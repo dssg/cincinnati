@@ -24,7 +24,7 @@ You also will need to have `gnumeric` installed (the crime run script depends on
 
 ##Re-Running the ETL and New Data Dumps
 
-We received a new data dump from Cincinnati, and also need to re-ETL the existing data into a blank Postgres DB. After the steps above (i.e., running `db_setup.sh`), here's the steps we went through:
+We received a new data dump from Cincinnati in September 2016. At that time, we also needed to re-run all ETL to upload the data into a new (blank) Postgres database. After the steps above (i.e., running `db_setup.sh`), here's the steps we went through:
 
 1. **Parcels**: Build the repo's main Dockerfile, and drop into it as described in the repo's main README. Make sure that `shyaml` is installed in the container! (It should be.) Inside the container, also make sure that you have a `~/.pgpass` with the DB credentials (it should have been copied there), and that it's permissions are 0600 (`chmod 0600 ~/.pgpass`). Then go to `~/code/etl/parcels` and run the `run` script. It works off the `HamcoParcelData.gdb`, `parcpoly.shp`, and `Parcpoly_with_Bldinfo.shp`, which we consider static.
 2. **Crime**: Requires being updated with a data dump. The `run` script is able to add only those rows to the DB which are newer than the latest data in the DB. Previous years of crime data seem to have been delivered in individual files, but these have been manually concatenated into `$DATA_FOLDER/etl/crime/crime.csv`. Running the `run` script creates that file from `crime.xlsx` and loads the CSV. 
@@ -40,3 +40,6 @@ We received a new data dump from Cincinnati, and also need to re-ETL the existin
 10. **Food Safety**: Isn't used as a feature, so we don't load it again. The file that was previously ETL-ed (`od_cinc_food_safety.xls`) lists data for 2012 only, anyway. If this data is interesting to us, we should use Cincinnati's open data API, which now also provides the outcome of food inspections.
 11. **Water Shutoff**: Not used as a feature currently; we didn't load the old data again.
 12. **NER**: Has to be run in the repo's main Dockerfile; (almost) worked out of the box. This is running off the tax data, which we had updated.
+13. **Building Info**: This is a table that was provided initially (in summer 2015) as part of the inspections Oracle dump. Then, in April 2016, this data was updated via a delivery as a CSV file (`data-refresh/april-2016/bldinfo.txt`). This later file was never loaded, as it seems very similar to the initially delivered table from the Oracle dump. We should still ETL it at some point. For now, we just re-loaded the old table, using the SQL extracts from the Oracle dump (that the summer 2015 probably created by hand) and which are loaded by Part 1 of the `etl/inspections/run` script.
+
+Before running the `featurebot`, we also need to run `/bulk_geocoder/run`, as that created some tables the `featurebot` expected. Note that the bulk geocoder relies on some of the `tmp` folders (and the files therein) that are being created while running the ETL - so don't delete them!
