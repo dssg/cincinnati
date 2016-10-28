@@ -142,7 +142,7 @@ CREATE VIEW inspections_views.events_parcel_id AS
    JOIN inspections_views.number_key2parcel_no AS parcel ON events.number_key = parcel.number_key;
 
 --Parcel id to coordinate
-DROP VIEW IF EXISTS inspections_views.parcel2lat_long ;
+DROP VIEW IF EXISTS shape_files.parcel2lat_long ;
 CREATE VIEW shape_files.parcel2lat_long AS(
   SELECT parcelid AS parcel_id, ST_Y(ST_Transform(ST_Centroid(geom), 4326)) AS latitude, ST_X(ST_Transform(ST_Centroid(geom), 4326)) AS longitude
   FROM shape_files.parcels_cincy
