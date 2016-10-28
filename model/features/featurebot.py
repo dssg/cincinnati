@@ -215,6 +215,6 @@ if __name__ == '__main__':
     selected  = [t.table for t in selected_features]
     selected = reduce(lambda x,y: x+", "+y, selected) 
     print "Selected features: %s" % selected
-    d = datetime.datetime.strptime(args.date, '%d%b%Y') if args.date is not None else None
+    d = datetime.datetime.strptime(args.date, '%d%b%Y') if args.date not in [None, "None"] else None
 
     generate_features(selected_features, args.months, args.maxdist, d, args.set)
