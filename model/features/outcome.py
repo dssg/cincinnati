@@ -88,8 +88,16 @@ def generate_labels():
     df = df.drop('number_key', axis=1)  # don't need number key anymore
     df.columns = ['parcel_id', 'inspection_date', 'viol_outcome']
 
-    return df
+    # drop duplicate rows - if the same outcome happened 
+    # at the same (parcel_id, inspection_date) several times,
+    # that should be one
+    df = df.drop_duplicates()
 
+    # now there are still a few rows (identified by (parcel_id, inspection_date))
+    # that have conflicting information; drop them completely
+    df = df.drop_duplicates(subset=['parcel_id','inspection_date'], keep=False)
+
+    return df
 
 def make_fake_inspections_all_parcels_cincy(fake_inspection_date):
     """
