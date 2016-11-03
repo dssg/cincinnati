@@ -354,12 +354,25 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
     for table_name, feature_group in grouped_features:
         #Load features as data frame
         feats = loader.load_feature_group(table_name, feature_group)
+
+        # remember the column names
+        old_cols = feats.columns.copy()
+
         #Rename columns to [table_name]_[feature_name]
         #this will help to identify features when evaluating models
-        feats.columns = feats.columns.map(lambda s: '{}_{}'.format(table_name, s))
+        feats.columns = old_cols.map(lambda s: '{}_{}'.format(table_name, s))
+        
+        # where the columns were 'total', those are plain counts, 
+        # and should be imputed as 0
+        total_cols = [c for idx,c in enumerate(feats.columns) 
+                      if old_cols[idx]=='total']
+
         #Join with the labels and the rest of the features
         dataset = dataset.join(feats, how='left')
         # dataset = dataset.dropna(subset=['viol_outcome'])
+
+        # impute the 'total' columns
+        dataset.loc[:,total_cols] = dataset.loc[:,total_cols].fillna(0)
 
     # randomize the ordering
     dataset = dataset.reset_index()
