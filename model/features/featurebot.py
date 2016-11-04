@@ -114,6 +114,10 @@ def generate_features(features_to_generate, n_months, max_dist,
     #Get existing tables
     existing_tables =  tables_in_schema(schema)
     
+    # set the search path, otherwise won't find ST_DWithin()
+    cur = con.cursor()
+    cur.execute("SET search_path TO {schema}, public;".format(schema=schema))
+
     # make a new table that contains one row for every parcel in Cincinnati
     # this table has three columns: parcel_id, inspection_date, viol_outcome
     # inspection_date is the one given as a parameter and
@@ -133,8 +137,8 @@ def generate_features(features_to_generate, n_months, max_dist,
                       if_exists='fail', index=False, schema=schema)
         logging.debug("... table has {} rows".format(len(inspections)))
         #Create an index to make joins with events_Xmonths_* tables faster
-        cur.execute('CREATE INDEX ON features.parcels_inspections (parcel_id);')
-        cur.execute('CREATE INDEX ON features.parcels_inspections (inspection_date);')
+        cur.execute('CREATE INDEX ON parcels_inspections (parcel_id);')
+        cur.execute('CREATE INDEX ON parcels_inspections (inspection_date);')
         con.commit()
     else:
         logger.info('parcels_inspections table already exists, skipping...')
