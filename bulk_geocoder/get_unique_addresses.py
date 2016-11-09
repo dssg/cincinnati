@@ -21,19 +21,19 @@ def process_df(df):
 print 'Loading permits, fire, crime and sales. If you have more datasets with address add them here...'
 
 print 'Processing permits:'
-permits = pd.read_csv(path_to_permits)
+permits = pd.read_csv(path_to_permits, dtype=object)
 permits = process_df(permits)
 
 print 'Processing fire:'
-fire = pd.read_csv(path_to_fire)
+fire = pd.read_csv(path_to_fire, dtype=object)
 fire = process_df(fire)
 
 print 'Processing crime'
-crime = pd.read_csv(path_to_crime)
+crime = pd.read_csv(path_to_crime, dtype=object)
 crime = process_df(crime)
 
 print 'Processing sales'
-sales = pd.read_csv(path_to_sales)
+sales = pd.read_csv(path_to_sales, dtype=object)
 sales = process_df(sales)
 
 print 'Merging'
