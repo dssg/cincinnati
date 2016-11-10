@@ -39,13 +39,13 @@ n = 20
 experiments = collection.distinct('experiment_name')
 
 ids_to_keep = []
-#For each experiment_name, sort by precision at 1% and
+#For each experiment_name, sort by precision at 5% and
 #keep n models, get the ids
 for experiment_name in experiments:
     #Get the ids for the top models
     logger.info("Removing from experiment {}".format(experiment_name))
     object_ids = list(collection.find({"experiment_name": experiment_name}, {'_id':1})
-        .sort("prec_at_1", DESCENDING)
+        .sort("prec_at_5", DESCENDING)
         .limit(n))
     ids = [obj['_id'] for obj in object_ids]
     #Remove documents that match the experiment name and are not in the
