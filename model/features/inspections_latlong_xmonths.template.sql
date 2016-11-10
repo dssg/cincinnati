@@ -10,19 +10,17 @@ CREATE TABLE ${TABLE_NAME} AS (
 	--schema is not specified here
 	--since the db connection should set one
 	--using SET SCHEMA
-    SELECT 
-        insp.parcel_id, 
-        insp.inspection_date, 
-        ST_Distance(parcels.geom, event.geom)/3.281 AS dist_m,
-        event.id --columns to select from event, limited in WHERE clause below
+    SELECT insp.parcel_id, insp.inspection_date, p2e.dist_m,
+            event.id --columns to select from event, limited in WHERE clause below
     FROM parcels_inspections AS insp
-    JOIN shape_files.parcels_cincy AS parcels ON (insp.parcel_id = parcels.parcelid)
-    JOIN public.${DATASET} AS event ON (
-        ST_DWithin(parcels.geom, event.geom, ${MAX_DIST}*3.281::double precision)
-        AND (insp.inspection_date - '${N_MONTHS}  month'::interval) <= event.${DATE_COLUMN}
-        AND event.${DATE_COLUMN} <= insp.inspection_date
-    )
-    WHERE insp.inspection_date BETWEEN '${MIN_INSP_DATE}' AND '${MAX_INSP_DATE}'
+    JOIN public.parcel2${DATASET} AS p2e
+    USING (parcel_id)
+    JOIN public.${DATASET} AS event
+    ON event_id=event.id
+    AND (insp.inspection_date - '${N_MONTHS}  month'::interval) <= event.${DATE_COLUMN}
+    AND event.${DATE_COLUMN} <= insp.inspection_date
+    WHERE p2e.dist_m <= ${MAX_DIST}
+    AND insp.inspection_date BETWEEN '${MIN_INSP_DATE}' AND '${MAX_INSP_DATE}'
 );
 
 
