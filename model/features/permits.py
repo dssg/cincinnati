@@ -106,22 +106,22 @@ def make_permits_features(con, n_months, max_dist):
             SELECT * FROM insp2permits_{n_months}months_{max_dist}m i2e
             LEFT JOIN public.permits event USING (id)
         ) 
-        SELECT parcel_id, inspection_date, 'permitclass_'||permitclass as categ, count(*) as count
+        SELECT parcel_id, inspection_date, 'permitclass_'||coalesce(permitclass,'missing') as categ, count(*) as count
           FROM t GROUP BY parcel_id, inspection_date, permitclass
         UNION ALL (
-          SELECT parcel_id, inspection_date, 'currstatus_'||statuscurrent as categ, count(*) as count
+          SELECT parcel_id, inspection_date, 'currstatus_'||coalesce(statuscurrent,'missing') as categ, count(*) as count
           FROM t GROUP BY parcel_id, inspection_date, statuscurrent
         )
         UNION ALL (
-          SELECT parcel_id, inspection_date, 'workclass_'||workclass as categ, count(*) as count
+          SELECT parcel_id, inspection_date, 'workclass_'||coalesce(workclass,'missing') as categ, count(*) as count
           FROM t GROUP BY parcel_id, inspection_date, workclass
         )
         UNION ALL (
-          SELECT parcel_id, inspection_date, 'permittype_'||permittype as categ, count(*) as count
+          SELECT parcel_id, inspection_date, 'permittype_'||coalesce(permittype,'missing') as categ, count(*) as count
           FROM t GROUP BY parcel_id, inspection_date, permittype
         )
         UNION ALL (
-          SELECT parcel_id, inspection_date, 'prpsduse_'||t.proposeduse as categ, count(*) as count
+          SELECT parcel_id, inspection_date, 'prpsduse_'||coalesce(t.proposeduse,'missing') as categ, count(*) as count
           FROM t
           LEFT JOIN public.frequentpermituses frequse
           ON frequse.proposeduse = t.proposeduse
