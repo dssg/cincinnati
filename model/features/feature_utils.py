@@ -157,3 +157,13 @@ def compute_frequency_features(df, columns,
     #If add total, add column with rows sums
     cross['total'] = cross.sum(axis=1)
     return cross
+
+def load_colpivot(con):
+    # add the colpivot function to our Postgres schema
+    with open(os.path.join(os.environ['ROOT_FOLDER'], 
+                'model','features', 'colpivot.sql'), 'r') as fin:
+        query = fin.read()
+
+    cur = con.cursor()
+    cur.execute(query)
+    con.commit()

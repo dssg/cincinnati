@@ -1,7 +1,7 @@
 import logging
 import logging.config
 from feature_utils import make_inspections_address_nmonths_table, compute_frequency_features
-from feature_utils import format_column_names, group_and_count_from_db
+from feature_utils import format_column_names, group_and_count_from_db, load_colpivot
 from lib_cinci.config import load
 from lib_cinci.features import check_date_boundaries
 import os
@@ -41,13 +41,7 @@ def make_fire_features(con, n_months, max_dist):
                                          max_dist=str(max_dist))
 
     # add the colpivot function to our Postgres schema
-    with open(os.path.join(os.environ['ROOT_FOLDER'], 
-                'model','features', 'colpivot.sql'), 'r') as fin:
-        query = fin.read()
-
-    cur = con.cursor()
-    cur.execute(query)
-    con.commit()
+    load_colpivot(con)
 
     # create a table of the most common fire types,
     # so we can limit the pivot later to the 15 most common
@@ -108,9 +102,6 @@ def make_fire_features(con, n_months, max_dist):
     cur.close()
     cur = con.cursor()
     query = """
-
-         --begin;
-
         DROP TABLE IF EXISTS firefeatures_{n_months}months_{max_dist}m;
 
         -- Join the fire with the inspections; then group by 
@@ -159,9 +150,6 @@ def make_fire_features(con, n_months, max_dist):
             JOIN firefeatures2_{n_months}months_{max_dist}m
             USING (parcel_id, inspection_date)
         ;
-
-         --commit;
-
         """.format(insp2tablename=insp2tablename,
                    n_months=str(n_months),
                    max_dist=str(max_dist))
