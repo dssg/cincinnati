@@ -34,10 +34,6 @@ def make_fire_features(con, n_months, max_dist):
         min_insp, max_insp, n_months=n_months, max_dist=max_dist, load=False)
     
     logger.info('Computing distance features for {}'.format(dataset))
-    freq = group_and_count_from_db(con, dataset, n_months, max_dist)
-
-    #Rename columns to avoid spaces and capital letters
-    freq.columns = format_column_names(freq.columns)
 
     insp2tablename = ('insp2{dataset}_{n_months}months'
                   '_{max_dist}m').format(dataset='fire',
