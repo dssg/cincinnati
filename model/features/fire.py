@@ -88,7 +88,7 @@ def make_fire_features(con, n_months, max_dist):
     try:
         cur.execute(query)
         con.commit()
-    except InternalError as e:
+    except (InternalError, ProgrammingError) as e:
         logger.warning("Catching Exception: " + e.message)
         logger.warning("CONTINUING, NOT RE-RUNNING frequentfiretype_idx QUERY.....")
         cur.close()
@@ -101,7 +101,7 @@ def make_fire_features(con, n_months, max_dist):
     try:
         cur.execute(query)
         con.commit()
-    except InternalError as e:
+    except (InternalError, ProgrammingError) as e:
         logger.warning("Catching Exception: " + e.message)
         logger.warning("CONTINUING, NOT RE-RUNNING firetype_idx QUERY.....")
         cur.close()
@@ -190,7 +190,7 @@ def make_fire_features(con, n_months, max_dist):
     query = 'drop table firefeatures_{n_months}months_{max_dist}m'.format(
             n_months=str(n_months), max_dist=str(max_dist))
     cur.execute(query)
-    cur.commit()
+    con.commit()
 
     return df
 
