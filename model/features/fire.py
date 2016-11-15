@@ -4,6 +4,8 @@ from feature_utils import make_inspections_address_nmonths_table, compute_freque
 from feature_utils import format_column_names, group_and_count_from_db
 from lib_cinci.config import load
 from lib_cinci.features import check_date_boundaries
+import os
+from psycopg2 import ProgrammingError
 
 #Config logger
 logging.config.dictConfig(load('logger_config.yaml'))
@@ -32,6 +34,123 @@ def make_fire_features(con, n_months, max_dist):
     
     logger.info('Computing distance features for {}'.format(dataset))
     freq = group_and_count_from_db(con, dataset, n_months, max_dist)
+
     #Rename columns to avoid spaces and capital letters
     freq.columns = format_column_names(freq.columns)
-    return freq
+
+    insp2tablename = ('insp2{dataset}_{n_months}months'
+                  '_{max_dist}m').format(dataset='fire',
+                                         n_months=n_months,
+                                         max_dist=max_dist)
+
+    # add the colpivot function to our Postgres schema
+    with open(os.path.join(os.environ['ROOT_FOLDER'], 
+                'model','features', 'colpivot.sql'), 'r') as fin:
+        query = fin.read()
+
+    cur = con.cursor()
+    cur.execute(query)
+    con.commit()
+
+    # create a table of the most common fire types,
+    # so we can limit the pivot later to the 15 most common
+    # types of incidents
+    query = """
+        CREATE TABLE public.frequentfiretypes AS (
+        WITH t as (
+        SELECT incident_type_id, incident_type_desc, count(*) AS count
+        FROM public.fire
+        GROUP BY incident_type_id, incident_type_desc
+        ORDER BY count desc
+        )
+        SELECT row_number() OVER () as rnum, t.*
+        FROM t
+        );
+        CREATE INDEX frequentfiretype_idx ON public.frequentfiretypes (incident_type_id);
+    """
+
+    # if it already exists, no need to re-run; we're using all 
+    # the data to find the most common types anyway
+    try:
+        cur.execute(query)
+        con.commit()
+    except Exception as e:
+        logger.warning("Catching Exception: " + e.message)
+        logger.warning("CONTINUING, NOT RE-RUNNING ANY QUERIES.....")
+
+    query = """
+        CREATE INDEX firetype_idx ON public.fire (incident_type_id);
+    """
+    try:
+        cur.execute(query)
+        con.commit()
+    except Exception as e:
+        logger.warning("Catching Exception: " + e.message)
+        logger.warning("CONTINUING, NOT RE-RUNNING ANY QUERIES.....")
+
+    query = """
+
+        begin;
+
+        DROP TABLE IF EXISTS firefeatures_{n_months}months_{max_dist}m;
+
+        -- Join the fire with the inspections; then group by 
+        -- inspections and fire types (we'll pivot later)
+        CREATE TEMP TABLE firetypes_{n_months}months_{max_dist}m ON COMMIT DROP AS (
+            SELECT parcel_id, inspection_date, event.incident_type_desc,
+            count(*) as count
+            FROM insp2fire_{n_months}months_{max_dist}m i2e
+            LEFT JOIN public.fire event USING (id)
+            LEFT JOIN public.frequentfiretypes frequentfires 
+            ON frequentfires.incident_type_id = event.incident_type_id
+            WHERE frequentfires.rnum <= 15
+            GROUP BY parcel_id, inspection_date, event.incident_type_desc
+        );
+
+        -- Now call the pivot function to create columns with the 
+        -- different fire types
+        SELECT colpivot('firefeatures_{n_months}months_{max_dist}m',
+                        'select * from firetypes_{n_months}months_{max_dist}m',
+                        array['parcel_id','inspection_date'],
+                        array['incident_type_desc'],
+                        'coalesce(#.count,0)',
+                        null
+        );
+
+        -- The pivot function only creates a temp table,
+        -- so we still need to save it into a proper table.
+        -- Also, this is a good time to join in the other 
+        -- features we want.
+
+        DROP TABLE IF EXISTS firefeatures2_{n_months}months_{max_dist}m;
+
+        CREATE TABLE firefeatures2_{n_months}months_{max_dist}m AS (
+            SELECT parcel_id, inspection_date,
+                count(*) as total, -- note that total includes the non-frequent incident types
+                avg(
+                   extract(epoch from event.unit_clear_date_time-event.alarm_date_time)::int/60
+                ) as avg_clear_time_minutes
+            FROM insp2fire_{n_months}months_{max_dist}m i2e
+            LEFT JOIN public.fire event USING (id)
+            GROUP BY parcel_id, inspection_date
+        ); 
+
+        CREATE TABLE firefeatures_{n_months}months_{max_dist}m AS
+            SELECT * FROM firefeatures_{n_months}months_{max_dist}m
+            JOIN firefeatures2_{n_months}months_{max_dist}m
+            USING (parcel_id, inspection_date)
+        ;
+
+        commit;
+
+        """.format(insp2tablename=insp2tablename,
+                   n_months=str(n_months),
+                   max_dist=str(max_dist))
+
+    query = """
+        SELECT * FROM firefeatures_{n_months}months_{max_dist}m;
+    """.format(n_months=n_months, max_dist=max_dist)
+    df = pd.read_sql(query, con, index_col=['parcel_id', 'inspection_date'])
+
+    return df
+
