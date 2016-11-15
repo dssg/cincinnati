@@ -89,6 +89,7 @@ def generate_features(features_to_generate, n_months, max_dist,
     # this makes sure that we grab the "inspections_parcels"
     # table from the correct schema in all feature creators
     con = engine.raw_connection()
+    # con = engine.connect()
 
     if schema not in existing_feature_schemas():
         #Create schema here

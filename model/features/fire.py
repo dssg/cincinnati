@@ -5,7 +5,8 @@ from feature_utils import format_column_names, group_and_count_from_db
 from lib_cinci.config import load
 from lib_cinci.features import check_date_boundaries
 import os
-from psycopg2 import ProgrammingError
+from psycopg2 import ProgrammingError, InternalError
+import pandas as pd
 
 #Config logger
 logging.config.dictConfig(load('logger_config.yaml'))
@@ -40,8 +41,8 @@ def make_fire_features(con, n_months, max_dist):
 
     insp2tablename = ('insp2{dataset}_{n_months}months'
                   '_{max_dist}m').format(dataset='fire',
-                                         n_months=n_months,
-                                         max_dist=max_dist)
+                                         n_months=str(n_months),
+                                         max_dist=str(max_dist))
 
     # add the colpivot function to our Postgres schema
     with open(os.path.join(os.environ['ROOT_FOLDER'], 
@@ -66,7 +67,6 @@ def make_fire_features(con, n_months, max_dist):
         SELECT row_number() OVER () as rnum, t.*
         FROM t
         );
-        CREATE INDEX frequentfiretype_idx ON public.frequentfiretypes (incident_type_id);
     """
 
     # if it already exists, no need to re-run; we're using all 
@@ -74,23 +74,46 @@ def make_fire_features(con, n_months, max_dist):
     try:
         cur.execute(query)
         con.commit()
-    except Exception as e:
+    except ProgrammingError as e:
         logger.warning("Catching Exception: " + e.message)
-        logger.warning("CONTINUING, NOT RE-RUNNING ANY QUERIES.....")
+        logger.warning("CONTINUING, NOT RE-RUNNING frequentfiretypes table QUERY.....")
+        cur.close()
+        cur = con.cursor()
 
+    # let's make an index on that little table
+    query = """
+        CREATE INDEX frequentfiretype_idx ON public.frequentfiretypes (incident_type_id);
+    """
+    # if the index already exists, we don't re-run
+    try:
+        cur.execute(query)
+        con.commit()
+    except InternalError as e:
+        logger.warning("Catching Exception: " + e.message)
+        logger.warning("CONTINUING, NOT RE-RUNNING frequentfiretype_idx QUERY.....")
+        cur.close()
+        cur = con.cursor()
+
+    # also make sure that the fire data has an index there, as we want to join on it
     query = """
         CREATE INDEX firetype_idx ON public.fire (incident_type_id);
     """
     try:
         cur.execute(query)
         con.commit()
-    except Exception as e:
+    except InternalError as e:
         logger.warning("Catching Exception: " + e.message)
-        logger.warning("CONTINUING, NOT RE-RUNNING ANY QUERIES.....")
+        logger.warning("CONTINUING, NOT RE-RUNNING firetype_idx QUERY.....")
+        cur.close()
+        cur = con.cursor()
 
+    # now on to the actual feature generation
+    con.commit()
+    cur.close()
+    cur = con.cursor()
     query = """
 
-        begin;
+         --begin;
 
         DROP TABLE IF EXISTS firefeatures_{n_months}months_{max_dist}m;
 
@@ -124,7 +147,7 @@ def make_fire_features(con, n_months, max_dist):
 
         DROP TABLE IF EXISTS firefeatures2_{n_months}months_{max_dist}m;
 
-        CREATE TABLE firefeatures2_{n_months}months_{max_dist}m AS (
+        CREATE TEMP TABLE firefeatures2_{n_months}months_{max_dist}m AS (
             SELECT parcel_id, inspection_date,
                 count(*) as total, -- note that total includes the non-frequent incident types
                 avg(
@@ -141,16 +164,33 @@ def make_fire_features(con, n_months, max_dist):
             USING (parcel_id, inspection_date)
         ;
 
-        commit;
+         --commit;
 
         """.format(insp2tablename=insp2tablename,
                    n_months=str(n_months),
                    max_dist=str(max_dist))
 
+    cur.execute(query)
+    con.commit()
+
     query = """
         SELECT * FROM firefeatures_{n_months}months_{max_dist}m;
-    """.format(n_months=n_months, max_dist=max_dist)
+    """.format(n_months=str(n_months),
+               max_dist=str(max_dist))
+
+    # fetch the data
     df = pd.read_sql(query, con, index_col=['parcel_id', 'inspection_date'])
+
+    # clean up the column names
+    df.columns = map(lambda x: x.replace(' ','_').lower(), df.columns)
+    df.columns = map(lambda x: ''.join(c for c in x if c.isalnum() or c=='_'),
+                    df.columns)
+
+    # drop the last interim table
+    query = 'drop table firefeatures_{n_months}months_{max_dist}m'.format(
+            n_months=str(n_months), max_dist=str(max_dist))
+    cur.execute(query)
+    cur.commit()
 
     return df
 
