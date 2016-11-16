@@ -11,6 +11,7 @@ import logging
 import logging.config
 from lib_cinci.config import load
 from lib_cinci.features import tables_in_schema, columns_for_table_in_schema
+from psycopg2 import ProgrammingError, InternalError
 
 #Config logger
 logging.config.dictConfig(load('logger_config.yaml'))
@@ -167,3 +168,43 @@ def load_colpivot(con):
     cur = con.cursor()
     cur.execute(query)
     con.commit()
+
+def make_table_of_frequent_codes(con, col, intable, outtable, dropifexists=False,
+        coalesceto='missing'):
+    """ Make a table of codes and counts, so we can filter on them.
+        If you don't want to coalesce missing codes to anything, pass
+        coalescto='null'.
+    """
+
+    cur = con.cursor()
+
+    if dropifexists:
+        query = "DROP TABLE IF EXISTS {outtable};".format(outtable=outtable)
+        cur.execute(query)
+        con.commit()
+
+    # create a table of the most common types,
+    # so we can limit the pivot later to them
+    query = """
+        CREATE TABLE {outtable} AS (
+        WITH t as (
+        SELECT coalesce({col},{'coalesceto'}) AS {col}, count(*) AS count
+        FROM {intable}
+        GROUP BY {col}
+        ORDER BY count desc
+        )
+        SELECT row_number() OVER () as rnum, t.*
+        FROM t
+        );
+    """.format(outtable=outtable, col=col, coalesceto=coalesceto,
+                intable=intable)
+
+    # if it already exists and hasn't been dropped above, don't re-run
+    try:
+        cur.execute(query)
+        con.commit()
+    except ProgrammingError as e:
+        logger.warning("Catching Exception: " + e.message)
+        logger.warning("CONTINUING, NOT RE-RUNNING {outtable} table QUERY.".format(
+            outtable=outtable))
+        con.rollback()

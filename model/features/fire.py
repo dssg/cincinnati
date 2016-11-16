@@ -1,7 +1,8 @@
 import logging
 import logging.config
 from feature_utils import make_inspections_address_nmonths_table, compute_frequency_features
-from feature_utils import format_column_names, group_and_count_from_db, load_colpivot
+from feature_utils import format_column_names, group_and_count_from_db, load_colpivot, \
+                            make_table_of_frequent_codes
 from lib_cinci.config import load
 from lib_cinci.features import check_date_boundaries
 import os
@@ -43,50 +44,19 @@ def make_fire_features(con, n_months, max_dist):
     # add the colpivot function to our Postgres schema
     load_colpivot(con)
 
+    cur = con.cursor()
+
     # create a table of the most common fire types,
     # so we can limit the pivot later to the 15 most common
     # types of incidents
-    query = """
-        CREATE TABLE public.frequentfiretypes AS (
-        WITH t as (
-        SELECT incident_type_id, incident_type_desc, count(*) AS count
-        FROM public.fire
-        GROUP BY incident_type_id, incident_type_desc
-        ORDER BY count desc
-        )
-        SELECT row_number() OVER () as rnum, t.*
-        FROM t
-        );
-    """
+    make_table_of_frequent_codes(con, col='incident_type_desc', 
+            intable='public.fire',
+            outtable='public.frequentfiretypes')
 
-    # if it already exists, no need to re-run; we're using all 
-    # the data to find the most common types anyway
-    try:
-        cur.execute(query)
-        con.commit()
-    except ProgrammingError as e:
-        logger.warning("Catching Exception: " + e.message)
-        logger.warning("CONTINUING, NOT RE-RUNNING frequentfiretypes table QUERY.....")
-        cur.close()
-        cur = con.cursor()
-
-    # let's make an index on that little table
+    # also make sure that the fire data has an index on the description,
+    # as we want to join on it
     query = """
-        CREATE INDEX frequentfiretype_idx ON public.frequentfiretypes (incident_type_id);
-    """
-    # if the index already exists, we don't re-run
-    try:
-        cur.execute(query)
-        con.commit()
-    except (InternalError, ProgrammingError) as e:
-        logger.warning("Catching Exception: " + e.message)
-        logger.warning("CONTINUING, NOT RE-RUNNING frequentfiretype_idx QUERY.....")
-        cur.close()
-        cur = con.cursor()
-
-    # also make sure that the fire data has an index there, as we want to join on it
-    query = """
-        CREATE INDEX firetype_idx ON public.fire (incident_type_id);
+        CREATE INDEX firetype_idx ON public.fire (incident_type_desc);
     """
     try:
         cur.execute(query)
@@ -94,13 +64,9 @@ def make_fire_features(con, n_months, max_dist):
     except (InternalError, ProgrammingError) as e:
         logger.warning("Catching Exception: " + e.message)
         logger.warning("CONTINUING, NOT RE-RUNNING firetype_idx QUERY.....")
-        cur.close()
-        cur = con.cursor()
+        con.rollback()
 
     # now on to the actual feature generation
-    con.commit()
-    cur.close()
-    cur = con.cursor()
     query = """
         DROP TABLE IF EXISTS firefeatures_{n_months}months_{max_dist}m;
 
@@ -112,7 +78,7 @@ def make_fire_features(con, n_months, max_dist):
             FROM insp2fire_{n_months}months_{max_dist}m i2e
             LEFT JOIN public.fire event USING (id)
             LEFT JOIN public.frequentfiretypes frequentfires 
-            ON frequentfires.incident_type_id = event.incident_type_id
+            ON frequentfires.incident_type_desc = event.incident_type_desc
             WHERE frequentfires.rnum <= 15
             GROUP BY parcel_id, inspection_date, event.incident_type_desc
         );
