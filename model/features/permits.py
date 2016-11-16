@@ -1,7 +1,8 @@
 import logging
 import logging.config
 from feature_utils import make_inspections_address_nmonths_table, compute_frequency_features
-from feature_utils import format_column_names, group_and_count_from_db, load_colpivot
+from feature_utils import format_column_names, group_and_count_from_db, load_colpivot, \
+                            make_table_of_frequent_codes
 from lib_cinci.config import load
 from lib_cinci.features import check_date_boundaries
 from psycopg2 import ProgrammingError, InternalError
@@ -46,32 +47,9 @@ def make_permits_features(con, n_months, max_dist):
     # create a table of the most common proposeduse types,
     # so we can limit the pivot later to the 15 most common
     # types of uses
-    query = """
-        CREATE TABLE public.frequentpermituses AS (
-        WITH t as (
-        SELECT proposeduse, count(*) AS count
-        FROM public.permits
-        GROUP BY proposeduse
-        ORDER BY count desc
-        )
-        SELECT row_number() OVER () as rnum, t.*
-        FROM t
-        );
-    """
+    make_table_of_frequent_codes(con, col='proposeduse', intable='public.permits',
+            outtable='public.frequentpermituses')
 
-    # if it already exists, no need to re-run; we're using all 
-    # the data to find the most common types anyway
-    try:
-        cur.execute(query)
-        con.commit()
-    except ProgrammingError as e:
-        logger.warning("Catching Exception: " + e.message)
-        logger.warning("CONTINUING, NOT RE-RUNNING frequentpermituses table QUERY.....")
-        cur.close()
-        cur = con.cursor()
-
-    con.commit()
-    cur.close()
     cur = con.cursor()
     query = """
         DROP TABLE IF EXISTS permitfeatures1_{n_months}months_{max_dist}m;
