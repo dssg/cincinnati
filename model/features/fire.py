@@ -83,6 +83,9 @@ def make_fire_features(con, n_months, max_dist):
             GROUP BY parcel_id, inspection_date, event.incident_type_desc
         );
 
+        CREATE INDEX firetypes_parcel_idx ON firetypes_{n_months}months_{max_dist}m (parcel_id);
+        CREATE INDEX firetypes_inspdate_idx ON firetypes_{n_months}months_{max_dist}m (inspection_date);
+
         -- Now call the pivot function to create columns with the 
         -- different fire types
         SELECT colpivot('firefeatures_{n_months}months_{max_dist}m',
@@ -92,15 +95,13 @@ def make_fire_features(con, n_months, max_dist):
                         'coalesce(#.count,0)',
                         null
         );
+        CREATE INDEX firefeatures_parcel_idx ON firefeatures_{n_months}months_{max_dist}m (parcel_id);
+        CREATE INDEX firefeatures_inspdate_idx ON firefeatures_{n_months}months_{max_dist}m (inspection_date);
 
-        -- The pivot function only creates a temp table,
-        -- so we still need to save it into a proper table.
-        -- Also, this is a good time to join in the other 
-        -- features we want.
-
+        -- now we do some simple features
         DROP TABLE IF EXISTS firefeatures2_{n_months}months_{max_dist}m;
 
-        CREATE TEMP TABLE firefeatures2_{n_months}months_{max_dist}m AS (
+        CREATE TEMP TABLE firefeatures2_{n_months}months_{max_dist}m ON COMMIT DROP AS (
             SELECT parcel_id, inspection_date,
                 count(*) as total, -- note that total includes the non-frequent incident types
                 avg(
@@ -110,7 +111,13 @@ def make_fire_features(con, n_months, max_dist):
             LEFT JOIN public.fire event USING (id)
             GROUP BY parcel_id, inspection_date
         ); 
+        CREATE INDEX firefeatures2_parcel_idx ON firefeatures2_{n_months}months_{max_dist}m (parcel_id);
+        CREATE INDEX firefeatures2_inspdate_idx ON firefeatures2_{n_months}months_{max_dist}m (inspection_date);
 
+        -- The pivot function only creates a temp table,
+        -- so we still need to save it into a proper table.
+        -- Also, this is a good time to join in the other 
+        -- features we want.
         CREATE TABLE firefeatures_{n_months}months_{max_dist}m AS
             SELECT * FROM firefeatures_{n_months}months_{max_dist}m
             JOIN firefeatures2_{n_months}months_{max_dist}m

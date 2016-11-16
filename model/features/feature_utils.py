@@ -169,7 +169,7 @@ def load_colpivot(con):
     cur.execute(query)
     con.commit()
 
-def make_table_of_frequent_codes(con, col, intable, outtable, dropifexists=False,
+def make_table_of_frequent_codes(con, col, intable, outtable, dropifexists=True,
         coalesceto='missing'):
     """ Make a table of codes and counts, so we can filter on them.
         If you don't want to coalesce missing codes to anything, pass
@@ -188,7 +188,7 @@ def make_table_of_frequent_codes(con, col, intable, outtable, dropifexists=False
     query = """
         CREATE TABLE {outtable} AS (
         WITH t as (
-        SELECT coalesce({col},{'coalesceto'}) AS {col}, count(*) AS count
+        SELECT coalesce({col},'{coalesceto}') AS {col}, count(*) AS count
         FROM {intable}
         GROUP BY {col}
         ORDER BY count desc
