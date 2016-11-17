@@ -2,6 +2,10 @@
 --counts are done using a certain distance and time window
 --using this table we will identify interesting predictions in our model
 --for example, true positives outside 'bad beighborhoods'
+
+
+DROP TABLE IF EXISTS ${schema}.${table_name};
+
 CREATE TABLE ${schema}.${table_name} AS(
     --First: attach geometry column to parcels_inspections table
     --in the current schema
