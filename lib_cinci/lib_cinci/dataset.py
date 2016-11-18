@@ -256,6 +256,29 @@ class FeatureLoader():
             return features
 
         return load_features_from_table
+
+    def impute_feature_group(self, table_name, df, dtypes):
+        # By convention, the method to impute features from table_name
+        # is impute_table_name
+        impute_method_name = 'impute_%s' % table_name
+
+        #If method does not exist, use generic imputation method
+        try:
+            impute_method = getattr(self, impute_method_name)
+        except Exception, e:
+            logger.debug("{} does not exist. Using generic method".format(impute_method_name))
+            impute_method = self.generic_imputer
+
+        #Execute loading method and send a list of features to load
+        return impute_method(df, dtypes)
+
+    def generic_imputer(self, df, dtypes):
+        # exploit that counts are ints, while averages (and such) are floats
+        float_cols = [df.columns[idx] for idx,dt in enumerate(dtypes) if dt==pd.np.dtype('float64')]
+        int_cols = [df.columns[idx] for idx,dt in enumerate(dtypes) if dt==pd.np.dtype('int64')]
+        df.loc[:,float_cols] = df.loc[:,float_cols].fillna(df.loc[:,float_cols].median(axis=0))
+        df.loc[:,int_cols] = df.loc[:,int_cols].fillna(df.loc[:,int_cols].median(axis=0))
+        return df
     
     def __read_feature_from_db(self, query, features_to_load,
                                drop_duplicates=True, table_name=None):
@@ -361,18 +384,19 @@ def get_dataset(schema, features, start_date, end_date, only_residential):
         #Rename columns to [table_name]_[feature_name]
         #this will help to identify features when evaluating models
         feats.columns = old_cols.map(lambda s: '{}_{}'.format(table_name, s))
-        
-        # where the columns were 'total', those are plain counts, 
-        # and should be imputed as 0
-        total_cols = [c for idx,c in enumerate(feats.columns) 
-                      if old_cols[idx]=='total']
+
+        old_cols_to_new = {o:n for o,n in zip(old_cols,feats.columns)}
+        new_cols_to_old = {v:k for k,v in old_cols_to_new.items()}
 
         #Join with the labels and the rest of the features
         dataset = dataset.join(feats, how='left')
         # dataset = dataset.dropna(subset=['viol_outcome'])
 
-        # impute the 'total' columns
-        dataset.loc[:,total_cols] = dataset.loc[:,total_cols].fillna(0)
+        # impute the columns
+        dataset.loc[:,feats.columns] = loader.impute_feature_group(table_name,
+                                        dataset.loc[:,feats.columns].rename(columns=new_cols_to_old),
+                                        feats.dtypes
+                                       ).rename(columns=old_cols_to_new)
 
     # randomize the ordering
     dataset = dataset.reset_index()
