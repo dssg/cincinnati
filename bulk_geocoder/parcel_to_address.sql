@@ -7,3 +7,4 @@ CREATE TABLE IF NOT EXISTS parcel2address (
 
 CREATE INDEX parcel2address_parcel_id_index ON parcel2address (parcel_id);
 CREATE INDEX parcel2address_address_id_index ON parcel2address (address_id);
+CREATE INDEX parcel2address_dist_m_index ON parcel2address (dist_m);

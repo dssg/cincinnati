@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS parcel2three11 (
 --Create indexes on parcel_id and three11_id
 CREATE INDEX three11_parcel_id_index ON parcel2three11 (parcel_id);
 CREATE INDEX three11_event_id_index ON parcel2three11 (event_id);
+CREATE INDEX three11_dist_m_index ON parcel2three11 (dist_m);
     
 --Insert new rows into table
 INSERT INTO parcel2three11(

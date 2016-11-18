@@ -22,6 +22,6 @@ CREATE TABLE ${TABLE_NAME} AS (
     WHERE p2e.dist_m <= ${MAX_DIST}
     AND insp.inspection_date BETWEEN '${MIN_INSP_DATE}' AND '${MAX_INSP_DATE}'
 );
-
-
+CREATE INDEX ON ${TABLE_NAME} (parcel_id, inspection_date);
+CREATE INDEX ON ${TABLE_NAME} (id);
 

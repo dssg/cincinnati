@@ -140,6 +140,7 @@ def generate_features(features_to_generate, n_months, max_dist,
         #Create an index to make joins with events_Xmonths_* tables faster
         cur.execute('CREATE INDEX ON parcels_inspections (parcel_id);')
         cur.execute('CREATE INDEX ON parcels_inspections (inspection_date);')
+        cur.execute('CREATE INDEX ON parcels_inspections (parcel_id, inspection_date);')
         con.commit()
     else:
         logger.info('parcels_inspections table already exists, skipping...')

@@ -132,3 +132,5 @@ CREATE TABLE ${schema}.${table_name} AS(
     rank() OVER (ORDER BY houses) AS houses_rank
     FROM scores
 );
+
+CREATE INDEX ON ${schema}.${table_name} (parcel_id, inspection_date);
