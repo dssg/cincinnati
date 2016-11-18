@@ -87,11 +87,9 @@ def make_sales_features(con, n_months, max_dist):
     # insp2sales_Xmonths_Ym.
     unionall_template = """
         SELECT parcel_id, inspection_date, '{col}_'||coalesce(t.{col},'missing') as categ, count(*) as count
-        FROM insp2sales_{n_months}months_{max_dist}m i2e
-        LEFT JOIN public.sales t USING (id)
+        FROM {joined_table} t
         GROUP BY parcel_id, inspection_date, t.{col}
         """
-
     to_dummify_columns = ['style',
                           'grade',
                           'exterior_wall_type',
@@ -101,7 +99,7 @@ def make_sales_features(con, n_months, max_dist):
 
     unionall_statements = '\n'.join([
                             'UNION ALL ( %s )'%unionall_template.format(col=col,
-                                            n_months=str(n_months),max_dist=str(max_dist))
+                                                                        joined_table='joinedtable')
                             for col in to_dummify_columns 
                             ])
 
@@ -124,21 +122,31 @@ def make_sales_features(con, n_months, max_dist):
         CREATE INDEX salesfeatures1_parcel_idx ON salesfeatures1_{n_months}months_{max_dist}m (parcel_id);
         CREATE INDEX salesfeatures1_inspdate_idx ON salesfeatures1_{n_months}months_{max_dist}m (inspection_date);
 
+        -- make the categorical (dummified) features 
+        CREATE TEMP TABLE joinedtable ON COMMIT DROP AS
+            SELECT parcel_id, inspection_date, event.* 
+            FROM insp2sales_{n_months}months_{max_dist}m i2e
+            LEFT JOIN LATERAL (
+                SELECT * FROM public.sales s where s.id=i2e.id
+            ) event
+            ON true
+        ;
+        CREATE INDEX joinedtable_parcel_idx ON joinedtable (parcel_id);
+        CREATE INDEX joinedtable_insp_idx ON joinedtable (inspection_date);
+
         CREATE TEMP TABLE salesfeatures2_{n_months}months_{max_dist}m ON COMMIT DROP AS
         
         -- now, we have a few columns with too many levels; we restrict these levels to the {max_rnum} most common ones,
         -- using the tables of frequency counts for these levels that we created earlier
         SELECT parcel_id, inspection_date, 'use_code_'||coalesce(t.use_code::varchar,'missing') as categ, count(*) as count
-        FROM insp2sales_{n_months}months_{max_dist}m i2e
-        LEFT JOIN public.sales t USING (id)
+        FROM joinedtable t
         LEFT JOIN public.frequentsales_use_codes freqcateg
         ON freqcateg.use_code = t.use_code
         WHERE freqcateg.rnum <= {max_rnum}
         GROUP BY parcel_id, inspection_date, t.use_code
         UNION ALL (
           SELECT parcel_id, inspection_date, 'instrument_type_'||coalesce(t.instrument_type,'missing') as categ, count(*) as count
-          FROM insp2sales_{n_months}months_{max_dist}m i2e
-          LEFT JOIN public.sales t USING (id)
+          FROM joinedtable t
           LEFT JOIN public.frequentsales_instrument_types freqcateg
           ON freqcateg.instrument_type = t.instrument_type
           WHERE freqcateg.rnum <= {max_rnum}
@@ -146,8 +154,7 @@ def make_sales_features(con, n_months, max_dist):
         )
         UNION ALL (
           SELECT parcel_id, inspection_date, 'garage_type_'||coalesce(t.garage_type,'missing') as categ, count(*) as count
-          FROM insp2sales_{n_months}months_{max_dist}m i2e
-          LEFT JOIN public.sales t USING (id)
+          FROM joinedtable t
           LEFT JOIN public.frequentsales_garage_types freqcateg
           ON freqcateg.garage_type = t.garage_type
           WHERE freqcateg.rnum <= {max_rnum}
