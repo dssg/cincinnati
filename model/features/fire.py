@@ -63,20 +63,30 @@ def make_fire_features(con, n_months, max_dist):
         con.commit()
     except (InternalError, ProgrammingError) as e:
         logger.warning("Catching Exception: " + e.message)
-        logger.warning("CONTINUING, NOT RE-RUNNING firetype_idx QUERY.....")
+        logger.warning(" - CONTINUING, NOT RE-RUNNING firetype_idx QUERY.....")
         con.rollback()
 
     # now on to the actual feature generation
     query = """
         DROP TABLE IF EXISTS firefeatures_{n_months}months_{max_dist}m;
 
-        -- Join the fire with the inspections; then group by 
-        -- inspections and fire types (we'll pivot later)
+        -- link parcels and events within the right radius
+        CREATE TEMP TABLE joinedtable ON COMMIT DROP AS
+            SELECT parcel_id, inspection_date, event.* 
+            FROM insp2fire_{n_months}months_{max_dist}m i2e
+            LEFT JOIN LATERAL (
+                SELECT * FROM public.fire s where s.id=i2e.id
+            ) event
+            ON true
+        ;
+        CREATE INDEX joinedtable_parcel_idx ON joinedtable (parcel_id);
+        CREATE INDEX joinedtable_insp_idx ON joinedtable (inspection_date);
+
+        -- group by inspections and fire types (we'll pivot later)
         CREATE TEMP TABLE firetypes_{n_months}months_{max_dist}m ON COMMIT DROP AS (
             SELECT parcel_id, inspection_date, event.incident_type_desc,
             count(*) as count
-            FROM insp2fire_{n_months}months_{max_dist}m i2e
-            LEFT JOIN public.fire event USING (id)
+            FROM joinedtable event
             LEFT JOIN public.frequentfiretypes frequentfires 
             ON frequentfires.incident_type_desc = event.incident_type_desc
             WHERE frequentfires.rnum <= 15
@@ -107,8 +117,7 @@ def make_fire_features(con, n_months, max_dist):
                 avg(
                    extract(epoch from event.unit_clear_date_time-event.alarm_date_time)::int/60
                 ) as avg_clear_time_minutes
-            FROM insp2fire_{n_months}months_{max_dist}m i2e
-            LEFT JOIN public.fire event USING (id)
+            FROM joinedtable event
             GROUP BY parcel_id, inspection_date
         ); 
         CREATE INDEX firefeatures2_parcel_idx ON firefeatures2_{n_months}months_{max_dist}m (parcel_id);

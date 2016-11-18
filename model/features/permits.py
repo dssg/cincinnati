@@ -79,30 +79,40 @@ def make_permits_features(con, n_months, max_dist):
         CREATE INDEX permitfeatures1_parcel_idx ON permitfeatures1_{n_months}months_{max_dist}m (parcel_id);
         CREATE INDEX permitfeatures1_inspdate_idx ON permitfeatures1_{n_months}months_{max_dist}m (inspection_date);
 
+        -- make the categorical (dummified) features 
+        CREATE TEMP TABLE joinedtable ON COMMIT DROP AS
+            SELECT parcel_id, inspection_date, event.* 
+            FROM insp2permits_{n_months}months_{max_dist}m i2e
+            LEFT JOIN LATERAL (
+                SELECT * FROM public.permits s where s.id=i2e.id
+            ) event
+            ON true
+        ;
+        CREATE INDEX joinedtable_parcel_idx ON joinedtable (parcel_id);
+        CREATE INDEX joinedtable_insp_idx ON joinedtable (inspection_date);
+
         -- Join the permits with the inspections; then concatenate the 
         -- inspections and the various categorical variables (we'll pivot later)
+        
         CREATE TEMP TABLE permitfeatures2_{n_months}months_{max_dist}m ON COMMIT DROP AS
-        WITH t as ( 
-            SELECT * FROM insp2permits_{n_months}months_{max_dist}m i2e
-            LEFT JOIN public.permits event USING (id)
-        ) 
+
         SELECT parcel_id, inspection_date, 'permitclass_'||coalesce(permitclass,'missing') as categ, count(*) as count
-          FROM t GROUP BY parcel_id, inspection_date, permitclass
+          FROM joinedtable t GROUP BY parcel_id, inspection_date, permitclass
         UNION ALL (
           SELECT parcel_id, inspection_date, 'currstatus_'||coalesce(statuscurrent,'missing') as categ, count(*) as count
-          FROM t GROUP BY parcel_id, inspection_date, statuscurrent
+          FROM joinedtable t GROUP BY parcel_id, inspection_date, statuscurrent
         )
         UNION ALL (
           SELECT parcel_id, inspection_date, 'workclass_'||coalesce(workclass,'missing') as categ, count(*) as count
-          FROM t GROUP BY parcel_id, inspection_date, workclass
+          FROM joinedtable t GROUP BY parcel_id, inspection_date, workclass
         )
         UNION ALL (
           SELECT parcel_id, inspection_date, 'permittype_'||coalesce(permittype,'missing') as categ, count(*) as count
-          FROM t GROUP BY parcel_id, inspection_date, permittype
+          FROM joinedtable t GROUP BY parcel_id, inspection_date, permittype
         )
         UNION ALL (
           SELECT parcel_id, inspection_date, 'prpsduse_'||coalesce(t.proposeduse,'missing') as categ, count(*) as count
-          FROM t
+          FROM joinedtable t
           LEFT JOIN public.frequentpermituses frequse
           ON frequse.proposeduse = t.proposeduse
           WHERE frequse.rnum <= 15

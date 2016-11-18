@@ -170,10 +170,11 @@ def load_colpivot(con):
     con.commit()
 
 def make_table_of_frequent_codes(con, col, intable, outtable, dropifexists=True,
-        coalesceto='missing'):
+        coalesceto="'missing'"):
     """ Make a table of codes and counts, so we can filter on them.
         If you don't want to coalesce missing codes to anything, pass
-        coalescto='null'.
+        coalescto="null". Note that strings must be double-quoted, as in 
+        coaelsto's default argument ("'missing'").
     """
 
     cur = con.cursor()
@@ -188,7 +189,7 @@ def make_table_of_frequent_codes(con, col, intable, outtable, dropifexists=True,
     query = """
         CREATE TABLE {outtable} AS (
         WITH t as (
-        SELECT coalesce({col},'{coalesceto}') AS {col}, count(*) AS count
+        SELECT coalesce({col},{coalesceto}) AS {col}, count(*) AS count
         FROM {intable}
         GROUP BY {col}
         ORDER BY count desc
@@ -205,6 +206,6 @@ def make_table_of_frequent_codes(con, col, intable, outtable, dropifexists=True,
         con.commit()
     except ProgrammingError as e:
         logger.warning("Catching Exception: " + e.message)
-        logger.warning("CONTINUING, NOT RE-RUNNING {outtable} table QUERY.".format(
+        logger.warning(" - CONTINUING, NOT RE-RUNNING {outtable} table QUERY.".format(
             outtable=outtable))
         con.rollback()
