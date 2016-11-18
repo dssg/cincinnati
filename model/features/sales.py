@@ -109,20 +109,9 @@ def make_sales_features(con, n_months, max_dist):
     query = """
         DROP TABLE IF EXISTS salesfeatures1_{n_months}months_{max_dist}m;
        
-        -- make the simple features
-        CREATE TEMP TABLE salesfeatures1_{n_months}months_{max_dist}m ON COMMIT DROP AS
-            SELECT 
-                parcel_id,
-                inspection_date,
-                count(*) as total,
-                {featureselects}
-            FROM insp2sales_{n_months}months_{max_dist}m i2e
-            LEFT JOIN public.sales event USING (id)
-            GROUP BY parcel_id, inspection_date;
-        CREATE INDEX salesfeatures1_parcel_idx ON salesfeatures1_{n_months}months_{max_dist}m (parcel_id);
-        CREATE INDEX salesfeatures1_inspdate_idx ON salesfeatures1_{n_months}months_{max_dist}m (inspection_date);
+        DROP TABLE IF EXISTS joinedtable;
 
-        -- make the categorical (dummified) features 
+        -- join the inspections and sales
         CREATE TEMP TABLE joinedtable ON COMMIT DROP AS
             SELECT parcel_id, inspection_date, event.* 
             FROM insp2sales_{n_months}months_{max_dist}m i2e
@@ -134,6 +123,19 @@ def make_sales_features(con, n_months, max_dist):
         CREATE INDEX joinedtable_parcel_idx ON joinedtable (parcel_id);
         CREATE INDEX joinedtable_insp_idx ON joinedtable (inspection_date);
 
+        -- make the simple features
+        CREATE TEMP TABLE salesfeatures1_{n_months}months_{max_dist}m ON COMMIT DROP AS
+            SELECT 
+                parcel_id,
+                inspection_date,
+                count(*) as total,
+                {featureselects}
+            FROM joinedtable event
+            GROUP BY parcel_id, inspection_date;
+        CREATE INDEX salesfeatures1_parcel_idx ON salesfeatures1_{n_months}months_{max_dist}m (parcel_id);
+        CREATE INDEX salesfeatures1_inspdate_idx ON salesfeatures1_{n_months}months_{max_dist}m (inspection_date);
+
+        -- make the categorical (dummified) features 
         CREATE TEMP TABLE salesfeatures2_{n_months}months_{max_dist}m ON COMMIT DROP AS
         
         -- now, we have a few columns with too many levels; we restrict these levels to the {max_rnum} most common ones,
