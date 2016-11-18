@@ -123,6 +123,9 @@ def make_sales_features(con, n_months, max_dist):
         CREATE INDEX salesfeatures1_inspdate_idx ON salesfeatures1_{n_months}months_{max_dist}m (inspection_date);
 
         -- make the categorical (dummified) features 
+
+        -- we start by joining inspections and all the events
+        -- within the given radius and time interval
         CREATE TEMP TABLE joinedtable ON COMMIT DROP AS
             SELECT parcel_id, inspection_date, event.* 
             FROM insp2sales_{n_months}months_{max_dist}m i2e
