@@ -4,6 +4,7 @@ from feature_utils import make_inspections_address_nmonths_table, compute_freque
 from feature_utils import format_column_names, group_and_count_from_db
 from lib_cinci.config import load
 from lib_cinci.features import check_date_boundaries
+import pandas as pd
 
 #Config logger
 logging.config.dictConfig(load('logger_config.yaml'))
@@ -11,7 +12,7 @@ logger = logging.getLogger()
 
 def make_crime_features(con, n_months, max_dist):
     """
-    Make Fire features
+    Make crime features
 
     Input:
     db_connection: connection to postgres database.
@@ -31,8 +32,113 @@ def make_crime_features(con, n_months, max_dist):
         min_insp, max_insp, n_months=n_months, max_dist=max_dist, load=False)
 
     logger.info('Computing distance features for {}'.format(dataset))
-    freq = group_and_count_from_db(con, dataset, n_months, max_dist)
-    #Rename columns to avoid spaces and capital letters
-    freq.columns = format_column_names(freq.columns)
-    return freq
+
+    # make a table of the more general offense frequencies so we can prune them
+    # also include a column with an array of corresponding detailed levels
+    query = """
+        DROP TABLE IF EXISTS public.frequentcrimes_orc;
+        CREATE TABLE public.frequentcrimes_orc AS (
+        WITH t as (
+        SELECT substring(orc from ' \((\w*)\) ') as orc_combined,
+               array_agg(distinct orc) as all_orcs,
+               count(*) as count
+        FROM public.crime
+        GROUP BY orc_combined
+        ORDER BY count desc
+        )
+        SELECT row_number() OVER () as rnum, t.*
+        FROM t
+        );"""
+
+    cur = con.cursor()
+    cur.execute(query)
+    con.commit()
+
+    max_rnum = 15
+
+    query = """
+        DROP TABLE IF EXISTS crimefeatures1_{n_months}months_{max_dist}m;
+       
+        DROP TABLE IF EXISTS joinedcrime_{n_months}months_{max_dist}m;
+
+        -- join the inspections and crime
+        CREATE TEMP TABLE joinedcrime_{n_months}months_{max_dist}m ON COMMIT DROP AS
+            SELECT parcel_id, inspection_date,
+                   substring(event.orc from ' \((\w*)\) ') as orc_combined
+            FROM insp2crime_{n_months}months_{max_dist}m i2e
+            LEFT JOIN LATERAL (
+                SELECT * FROM public.crime s where s.id=i2e.id
+            ) event
+            ON true
+        ;
+        CREATE INDEX ON joinedcrime_{n_months}months_{max_dist}m (parcel_id, inspection_date);
+        
+        -- make the simple features
+        CREATE TEMP TABLE crimefeatures1_{n_months}months_{max_dist}m ON COMMIT DROP AS
+            SELECT 
+                parcel_id,
+                inspection_date,
+                count(*) as total
+            FROM joinedcrime_{n_months}months_{max_dist}m event
+            GROUP BY parcel_id, inspection_date;
+        CREATE INDEX ON crimefeatures1_{n_months}months_{max_dist}m (parcel_id, inspection_date);
+
+        -- make the categorical (dummified) features 
+        CREATE TEMP TABLE crimefeatures2_{n_months}months_{max_dist}m ON COMMIT DROP AS
+            -- restrict crime levels to the {max_rnum} most common ones,
+            -- using the tables of frequency counts for these levels that we created earlier
+            SELECT parcel_id, inspection_date, 'orc_combined_'||coalesce(t.orc_combined,'missing') as categ, count(*) as count
+            FROM joinedcrime_{n_months}months_{max_dist}m t
+            LEFT JOIN public.frequentcrimes_orc freqcateg
+            ON freqcateg.orc_combined = t.orc_combined
+            WHERE freqcateg.rnum <= {max_rnum}
+            GROUP BY parcel_id, inspection_date, t.orc_combined
+        ;
+
+        CREATE INDEX ON crimefeatures2_{n_months}months_{max_dist}m (parcel_id, inspection_date);
+
+        -- Now call the pivot function to create columns with the 
+        -- different fire types
+        SELECT colpivot('crimepivot_{n_months}months_{max_dist}m',
+                        'select * from crimefeatures2_{n_months}months_{max_dist}m',
+                        array['parcel_id','inspection_date'],
+                        array['categ'],
+                        'coalesce(#.count,0)',
+                        null
+        );
+        CREATE INDEX ON crimepivot_{n_months}months_{max_dist}m (parcel_id, inspection_date);
+
+        -- still need to 'save' the tables into a permanent table
+        DROP TABLE IF EXISTS crimefeatures_{n_months}months_{max_dist}m;
+        CREATE TABLE crimefeatures_{n_months}months_{max_dist}m AS
+            SELECT * FROM crimefeatures1_{n_months}months_{max_dist}m
+            JOIN crimepivot_{n_months}months_{max_dist}m
+            USING (parcel_id, inspection_date)
+        ;
+    """.format(n_months=str(n_months), max_dist=str(max_dist),
+                max_rnum = str(max_rnum))
+
+    cur.execute(query)
+    con.commit()
+    
+    # fetch the data
+    query = """
+        SELECT * FROM crimefeatures_{n_months}months_{max_dist}m;
+    """.format(n_months=str(n_months),
+               max_dist=str(max_dist))
+
+    df = pd.read_sql(query, con, index_col=['parcel_id', 'inspection_date'])
+
+    # clean up the column names
+    df.columns = map(lambda x: x.replace(' ','_').lower(), df.columns)
+    df.columns = map(lambda x: ''.join(c for c in x if c.isalnum() or c=='_'),
+                    df.columns)
+
+    # drop the last interim table
+    query = 'drop table crimefeatures_{n_months}months_{max_dist}m'.format(
+            n_months=str(n_months), max_dist=str(max_dist))
+    cur.execute(query)
+    con.commit()
+
+    return df
 
