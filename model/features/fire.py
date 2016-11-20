@@ -113,7 +113,16 @@ def make_fire_features(con, n_months, max_dist):
                 count(*) as total, -- note that total includes the non-frequent incident types
                 avg(
                    extract(epoch from event.unit_clear_date_time-event.alarm_date_time)::int/60
-                ) as avg_clear_time_minutes
+                ) as avg_clear_time_minutes,
+                max(
+                   extract(epoch from event.unit_clear_date_time-event.alarm_date_time)::int/60
+                ) as max_clear_time_minutes,
+                min(
+                   extract(epoch from event.unit_clear_date_time-event.alarm_date_time)::int/60
+                ) as min_clear_time_minutes,
+                stddev(
+                   extract(epoch from event.unit_clear_date_time-event.alarm_date_time)::int/60
+                ) as stddev_clear_time_minutes
             FROM joinedtable event
             GROUP BY parcel_id, inspection_date
         ); 
