@@ -83,11 +83,11 @@ def make_sales_features(con, n_months, max_dist):
     # the level of our categorical column, and count is the number of times that level appears
     # for index (parcel_id, inspection_date). (We create a new level for 'null' rows.)
     # Here, we just define a template for this table query; we'll use it below.
-    # {col} will be the categorical column name; {joined_table} a join between sales and 
+    # {col} will be the categorical column name; joinedsales_Xmonths_Ym a join between sales and 
     # insp2sales_Xmonths_Ym.
     unionall_template = """
         SELECT parcel_id, inspection_date, '{col}_'||coalesce(t.{col},'missing') as categ, count(*) as count
-        FROM {joined_table} t
+        FROM joinedsales_{n_months}months_{max_dist}m t
         GROUP BY parcel_id, inspection_date, t.{col}
         """
     to_dummify_columns = ['style',
@@ -99,7 +99,9 @@ def make_sales_features(con, n_months, max_dist):
 
     unionall_statements = '\n'.join([
                             'UNION ALL ( %s )'%unionall_template.format(col=col,
-                                                                        joined_table='joinedtable')
+                                                                        n_months=str(n_months),
+                                                                        max_dist=str(max_dist)
+                                                                        )
                             for col in to_dummify_columns 
                             ])
 
@@ -109,10 +111,10 @@ def make_sales_features(con, n_months, max_dist):
     query = """
         DROP TABLE IF EXISTS salesfeatures1_{n_months}months_{max_dist}m;
        
-        DROP TABLE IF EXISTS joinedtable;
+        DROP TABLE IF EXISTS joinedsales_{n_months}months_{max_dist}m;
 
         -- join the inspections and sales
-        CREATE TEMP TABLE joinedtable ON COMMIT DROP AS
+        CREATE TEMP TABLE joinedsales_{n_months}months_{max_dist}m ON COMMIT DROP AS
             SELECT parcel_id, inspection_date, event.* 
             FROM insp2sales_{n_months}months_{max_dist}m i2e
             LEFT JOIN LATERAL (
@@ -120,8 +122,7 @@ def make_sales_features(con, n_months, max_dist):
             ) event
             ON true
         ;
-        CREATE INDEX joinedtable_parcel_idx ON joinedtable (parcel_id);
-        CREATE INDEX joinedtable_insp_idx ON joinedtable (inspection_date);
+        CREATE INDEX ON joinedsales_{n_months}months_{max_dist}m (parcel_id, inspection_date);
 
         -- make the simple features
         CREATE TEMP TABLE salesfeatures1_{n_months}months_{max_dist}m ON COMMIT DROP AS
@@ -130,10 +131,9 @@ def make_sales_features(con, n_months, max_dist):
                 inspection_date,
                 count(*) as total,
                 {featureselects}
-            FROM joinedtable event
+            FROM joinedsales_{n_months}months_{max_dist}m event
             GROUP BY parcel_id, inspection_date;
-        CREATE INDEX salesfeatures1_parcel_idx ON salesfeatures1_{n_months}months_{max_dist}m (parcel_id);
-        CREATE INDEX salesfeatures1_inspdate_idx ON salesfeatures1_{n_months}months_{max_dist}m (inspection_date);
+        CREATE INDEX ON salesfeatures1_{n_months}months_{max_dist}m (parcel_id, inspection_date);
 
         -- make the categorical (dummified) features 
         CREATE TEMP TABLE salesfeatures2_{n_months}months_{max_dist}m ON COMMIT DROP AS
@@ -141,14 +141,14 @@ def make_sales_features(con, n_months, max_dist):
         -- now, we have a few columns with too many levels; we restrict these levels to the {max_rnum} most common ones,
         -- using the tables of frequency counts for these levels that we created earlier
         SELECT parcel_id, inspection_date, 'use_code_'||coalesce(t.use_code::varchar,'missing') as categ, count(*) as count
-        FROM joinedtable t
+        FROM joinedsales_{n_months}months_{max_dist}m t
         LEFT JOIN public.frequentsales_use_codes freqcateg
         ON freqcateg.use_code = t.use_code
         WHERE freqcateg.rnum <= {max_rnum}
         GROUP BY parcel_id, inspection_date, t.use_code
         UNION ALL (
           SELECT parcel_id, inspection_date, 'instrument_type_'||coalesce(t.instrument_type,'missing') as categ, count(*) as count
-          FROM joinedtable t
+          FROM joinedsales_{n_months}months_{max_dist}m t
           LEFT JOIN public.frequentsales_instrument_types freqcateg
           ON freqcateg.instrument_type = t.instrument_type
           WHERE freqcateg.rnum <= {max_rnum}
@@ -156,7 +156,7 @@ def make_sales_features(con, n_months, max_dist):
         )
         UNION ALL (
           SELECT parcel_id, inspection_date, 'garage_type_'||coalesce(t.garage_type,'missing') as categ, count(*) as count
-          FROM joinedtable t
+          FROM joinedsales_{n_months}months_{max_dist}m t
           LEFT JOIN public.frequentsales_garage_types freqcateg
           ON freqcateg.garage_type = t.garage_type
           WHERE freqcateg.rnum <= {max_rnum}
@@ -165,8 +165,7 @@ def make_sales_features(con, n_months, max_dist):
         {unionall_statements} -- these are all the columns that we defined above
         ;
         
-        CREATE INDEX salesfeatures2_parcel_idx ON salesfeatures2_{n_months}months_{max_dist}m (parcel_id);
-        CREATE INDEX salesfeatures2_inspdate_idx ON salesfeatures2_{n_months}months_{max_dist}m (inspection_date);
+        CREATE INDEX ON salesfeatures2_{n_months}months_{max_dist}m (parcel_id, inspection_date);
 
         -- Now call the pivot function to create columns with the 
         -- different fire types
@@ -177,8 +176,7 @@ def make_sales_features(con, n_months, max_dist):
                         'coalesce(#.count,0)',
                         null
         );
-        CREATE INDEX salespivot_parcel_idx ON salespivot_{n_months}months_{max_dist}m (parcel_id);
-        CREATE INDEX salespivot_inspdate_idx ON salespivot_{n_months}months_{max_dist}m (inspection_date);
+        CREATE INDEX ON salespivot_{n_months}months_{max_dist}m (parcel_id, inspection_date);
 
         -- still need to 'save' the tables into a permanent table
         DROP TABLE IF EXISTS salesfeatures_{n_months}months_{max_dist}m;

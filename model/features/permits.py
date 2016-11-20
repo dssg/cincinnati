@@ -76,8 +76,7 @@ def make_permits_features(con, n_months, max_dist):
             FROM insp2permits_{n_months}months_{max_dist}m i2e
             LEFT JOIN public.permits event USING (id)
             GROUP BY parcel_id, inspection_date;
-        CREATE INDEX permitfeatures1_parcel_idx ON permitfeatures1_{n_months}months_{max_dist}m (parcel_id);
-        CREATE INDEX permitfeatures1_inspdate_idx ON permitfeatures1_{n_months}months_{max_dist}m (inspection_date);
+        CREATE INDEX ON permitfeatures1_{n_months}months_{max_dist}m (parcel_id, inspection_date);
 
         -- make the categorical (dummified) features 
         CREATE TEMP TABLE joinedtable ON COMMIT DROP AS
@@ -88,8 +87,7 @@ def make_permits_features(con, n_months, max_dist):
             ) event
             ON true
         ;
-        CREATE INDEX joinedtable_parcel_idx ON joinedtable (parcel_id);
-        CREATE INDEX joinedtable_insp_idx ON joinedtable (inspection_date);
+        CREATE INDEX ON joinedtable (parcel_id, inspection_date);
 
         -- Join the permits with the inspections; then concatenate the 
         -- inspections and the various categorical variables (we'll pivot later)
@@ -118,8 +116,7 @@ def make_permits_features(con, n_months, max_dist):
           WHERE frequse.rnum <= 15
           GROUP BY parcel_id, inspection_date, t.proposeduse
         );
-        CREATE INDEX permitfeatures2_parcel_idx ON permitfeatures2_{n_months}months_{max_dist}m (parcel_id);
-        CREATE INDEX permitfeatures2_inspdate_idx ON permitfeatures2_{n_months}months_{max_dist}m (inspection_date);
+        CREATE INDEX ON permitfeatures2_{n_months}months_{max_dist}m (parcel_id, inspection_date);
 
         -- Now call the pivot function to create columns with the 
         -- different fire types
@@ -130,8 +127,7 @@ def make_permits_features(con, n_months, max_dist):
                         'coalesce(#.count,0)',
                         null
         );
-        CREATE INDEX permitpivot_parcel_idx ON permitpivot_{n_months}months_{max_dist}m (parcel_id);
-        CREATE INDEX permitpivot_inspdate_idx ON permitpivot_{n_months}months_{max_dist}m (inspection_date);
+        CREATE INDEX ON permitpivot_{n_months}months_{max_dist}m (parcel_id, inspection_date);
 
         -- still need to 'save' the tables into a permanent table
         CREATE TABLE permitfeatures_{n_months}months_{max_dist}m AS

@@ -79,8 +79,7 @@ def make_fire_features(con, n_months, max_dist):
             ) event
             ON true
         ;
-        CREATE INDEX joinedtable_parcel_idx ON joinedtable (parcel_id);
-        CREATE INDEX joinedtable_insp_idx ON joinedtable (inspection_date);
+        CREATE INDEX ON joinedtable (parcel_id, inspection_date);
 
         -- group by inspections and fire types (we'll pivot later)
         CREATE TEMP TABLE firetypes_{n_months}months_{max_dist}m ON COMMIT DROP AS (
@@ -93,8 +92,7 @@ def make_fire_features(con, n_months, max_dist):
             GROUP BY parcel_id, inspection_date, event.incident_type_desc
         );
 
-        CREATE INDEX firetypes_parcel_idx ON firetypes_{n_months}months_{max_dist}m (parcel_id);
-        CREATE INDEX firetypes_inspdate_idx ON firetypes_{n_months}months_{max_dist}m (inspection_date);
+        CREATE INDEX ON firetypes_{n_months}months_{max_dist}m (parcel_id, inspection_date);
 
         -- Now call the pivot function to create columns with the 
         -- different fire types
@@ -105,8 +103,7 @@ def make_fire_features(con, n_months, max_dist):
                         'coalesce(#.count,0)',
                         null
         );
-        CREATE INDEX firefeatures_parcel_idx ON firefeatures_{n_months}months_{max_dist}m (parcel_id);
-        CREATE INDEX firefeatures_inspdate_idx ON firefeatures_{n_months}months_{max_dist}m (inspection_date);
+        CREATE INDEX ON firefeatures_{n_months}months_{max_dist}m (parcel_id,inspection_date);
 
         -- now we do some simple features
         DROP TABLE IF EXISTS firefeatures2_{n_months}months_{max_dist}m;
@@ -120,8 +117,7 @@ def make_fire_features(con, n_months, max_dist):
             FROM joinedtable event
             GROUP BY parcel_id, inspection_date
         ); 
-        CREATE INDEX firefeatures2_parcel_idx ON firefeatures2_{n_months}months_{max_dist}m (parcel_id);
-        CREATE INDEX firefeatures2_inspdate_idx ON firefeatures2_{n_months}months_{max_dist}m (inspection_date);
+        CREATE INDEX ON firefeatures2_{n_months}months_{max_dist}m (parcel_id,inspection_date);
 
         -- The pivot function only creates a temp table,
         -- so we still need to save it into a proper table.
