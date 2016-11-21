@@ -44,11 +44,11 @@ def make_sales_features(con, n_months, max_dist):
     # there are several columns that we need to prune in terms of codes;
     # thus, make tables of value counts
     make_table_of_frequent_codes(con, col='use_code', intable='public.sales',
-            outtable='public.frequentsales_use_codes', coalesceto="null")
+            outtable='public.frequentsales_use_codes', coalesceto="null", dropifexists=False)
     make_table_of_frequent_codes(con, col='instrument_type', intable='public.sales',
-            outtable='public.frequentsales_instrument_types')
+            outtable='public.frequentsales_instrument_types', dropifexists=False)
     make_table_of_frequent_codes(con, col='garage_type', intable='public.sales',
-            outtable='public.frequentsales_garage_types')
+            outtable='public.frequentsales_garage_types', dropifexists=False)
 
     cur = con.cursor()
 

@@ -51,7 +51,8 @@ def make_fire_features(con, n_months, max_dist):
     # types of incidents
     make_table_of_frequent_codes(con, col='incident_type_desc', 
             intable='public.fire',
-            outtable='public.frequentfiretypes')
+            outtable='public.frequentfiretypes',
+            dropifexists=False)
 
     # also make sure that the fire data has an index on the description,
     # as we want to join on it

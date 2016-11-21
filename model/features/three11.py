@@ -36,7 +36,7 @@ def make_three11_features(con, n_months, max_dist):
 
     # frequent service_codes, so we can prune them (there are too many)
     make_table_of_frequent_codes(con, col='service_code', intable='public.three11',
-            outtable='public.frequentthree11_service_code')
+            outtable='public.frequentthree11_service_code', dropifexists=False)
 
     max_rnum = 15
 

@@ -48,7 +48,7 @@ def make_permits_features(con, n_months, max_dist):
     # so we can limit the pivot later to the 15 most common
     # types of uses
     make_table_of_frequent_codes(con, col='proposeduse', intable='public.permits',
-            outtable='public.frequentpermituses')
+            outtable='public.frequentpermituses', dropifexists=False)
 
     cur = con.cursor()
     query = """
