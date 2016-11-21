@@ -39,7 +39,7 @@ CREATE TABLE ${schema}.${table_name} AS(
         JOIN real_inspections_location AS parcels_b
         ON ST_DWithin(parcels_a.geom, parcels_b.geom, ${max_dist_foot})
         AND (parcels_a.inspection_date - '${n_months} month'::interval) <= parcels_b.inspection_date
-        AND parcels_b.inspection_date <= parcels_a.inspection_date
+        AND parcels_b.inspection_date < parcels_a.inspection_date
     ),
     
     --select * from matches
