@@ -422,6 +422,12 @@ def distance_on_unit_sphere(coords1, coords2):
     # distance = rho * arc length
     cos = (math.sin(phi1)*math.sin(phi2)*math.cos(theta1 - theta2) +
     math.cos(phi1)*math.cos(phi2))
+
+    if cos > 1.0:
+        cos = 1.0
+    if cos < -1.0:
+        cos = -1.0
+
     arc = math.acos( cos )
     # Remember to multiply arc by the radius of the earth
     # in your favorite set of units to get length.
