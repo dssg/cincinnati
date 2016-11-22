@@ -1,6 +1,6 @@
-drop table if exists input.weather;
+drop table if exists public.weather;
 
-CREATE TABLE input.weather (
+CREATE TABLE public.weather (
 	year INTEGER NOT NULL, 
 	month VARCHAR(2) NOT NULL, 
 	day VARCHAR(2) NOT NULL, 
