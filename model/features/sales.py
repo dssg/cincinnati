@@ -26,10 +26,6 @@ def make_sales_features(con, n_months, max_dist):
     """
     dataset = 'sales'
     date_column = 'date_of_sale'
-    insp2tablename = ('insp2{dataset}_{n_months}months'
-                  '_{max_dist}m').format(dataset='sales',
-                                         n_months=str(n_months),
-                                         max_dist=str(max_dist))
 
     load_colpivot(con)
 
@@ -49,7 +45,7 @@ def make_sales_features(con, n_months, max_dist):
             outtable='public.frequentsales_instrument_types', dropifexists=False)
     make_table_of_frequent_codes(con, col='garage_type', intable='public.sales',
             outtable='public.frequentsales_garage_types', dropifexists=False)
-
+    
     cur = con.cursor()
 
     # let's generate all the 'simple' features we might want;

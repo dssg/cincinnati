@@ -56,7 +56,6 @@ existing_features = [FeatureToGenerate("tax", tax.make_tax_features),
                          FeatureToGenerate("sales",
                                            sales.make_sales_features)]
 
-
 def generate_features(features_to_generate, n_months, max_dist,
                      inspection_date=None, insp_set='all_inspections'):
     """
@@ -118,6 +117,7 @@ def generate_features(features_to_generate, n_months, max_dist,
     # set the search path, otherwise won't find ST_DWithin()
     cur = con.cursor()
     cur.execute("SET search_path TO {schema}, public;".format(schema=schema))
+    con.commit()
 
     # make a new table that contains one row for every parcel in Cincinnati
     # this table has three columns: parcel_id, inspection_date, viol_outcome

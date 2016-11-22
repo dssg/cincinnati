@@ -1,7 +1,8 @@
 import logging
 import logging.config
 from feature_utils import make_inspections_latlong_nmonths_table, compute_frequency_features
-from feature_utils import format_column_names, group_and_count_from_db, make_table_of_frequent_codes
+from feature_utils import format_column_names, group_and_count_from_db, make_table_of_frequent_codes, \
+        load_colpivot
 from lib_cinci.config import load
 from lib_cinci.features import check_date_boundaries
 import pandas as pd
@@ -39,7 +40,7 @@ def make_three11_features(con, n_months, max_dist):
             outtable='public.frequentthree11_service_code', dropifexists=False)
 
     max_rnum = 15
-
+    load_colpivot(con)
     cur = con.cursor()
 
     query = """
