@@ -19,7 +19,7 @@ from lib_cinci.features import existing_feature_schemas, tables_in_schema
 
 #Features
 import ner, parcel, outcome, tax, crime_agg, census, three11
-import fire, permits, crime, sales, violation_density
+import fire, permits, crime, sales, violation_density, weather
 
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
@@ -56,7 +56,9 @@ existing_features = [FeatureToGenerate("tax", tax.make_tax_features),
                          FeatureToGenerate("sales",
                                            sales.make_sales_features),
                          FeatureToGenerate("density",
-                                           violation_density.make_inspections_features)]
+                                           violation_density.make_inspections_features),
+                         FeatureToGenerate("sixweeksweather",
+                                           weather.make_weather_features)]
 
 def generate_features(features_to_generate, n_months, max_dist,
                      inspection_date=None, insp_set='all_inspections'):
