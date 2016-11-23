@@ -19,5 +19,13 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/weather.sql"
 
 # Upload the csv file into the weather schema
 echo "Uploading weather data to the database..."
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\copy public.weather from $DATA_FOLDER/weather_master.csv with csv header;"
-echo "Done creating weather table!"
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "\copy public.weather_tmp from $DATA_FOLDER/weather_master.csv with csv header;"
+
+query="CREATE TABLE public.weather AS \
+        SELECT make_timestamp(year, month::int, day::int, hour::int, 0, 0), \
+               w.* \
+        FROM public.weather_tmp w;"
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME < "$CODE_FOLDER/weather2.sql"  
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "DROP TABLE public.weather_tmp;"
+
+echo "Uploaded weather data."
