@@ -26,6 +26,10 @@ def make_sales_features(con, n_months, max_dist):
     """
     dataset = 'sales'
     date_column = 'date_of_sale'
+    insp2tablename = ('insp2{dataset}_{n_months}months'
+                  '_{max_dist}m').format(dataset='sales',
+                                         n_months=str(n_months),
+                                         max_dist=str(max_dist))
 
     load_colpivot(con)
 
@@ -39,13 +43,17 @@ def make_sales_features(con, n_months, max_dist):
 
     # there are several columns that we need to prune in terms of codes;
     # thus, make tables of value counts
+    rnum = 15
     make_table_of_frequent_codes(con, col='use_code', intable='public.sales',
-            outtable='public.frequentsales_use_codes', coalesceto="null", dropifexists=False)
+            outtable='public.frequentsales_use_codes', coalesceto="null",
+            rnum=rnum, to_other="9999")
     make_table_of_frequent_codes(con, col='instrument_type', intable='public.sales',
-            outtable='public.frequentsales_instrument_types', dropifexists=False)
+            outtable='public.frequentsales_instrument_types',
+            rnum=rnum)
     make_table_of_frequent_codes(con, col='garage_type', intable='public.sales',
-            outtable='public.frequentsales_garage_types', dropifexists=False)
-    
+            outtable='public.frequentsales_garage_types',
+            rnum=rnum)
+
     cur = con.cursor()
 
     # let's generate all the 'simple' features we might want;
@@ -101,9 +109,6 @@ def make_sales_features(con, n_months, max_dist):
                             for col in to_dummify_columns 
                             ])
 
-    # this is the number of levels we'll restrict the pivoted use_code, instrument_type, and garage_type to
-    max_rnum = 15 
-
     query = """
         DROP TABLE IF EXISTS salesfeatures1_{n_months}months_{max_dist}m;
        
@@ -134,29 +139,26 @@ def make_sales_features(con, n_months, max_dist):
         -- make the categorical (dummified) features 
         CREATE TEMP TABLE salesfeatures2_{n_months}months_{max_dist}m ON COMMIT DROP AS
         
-        -- now, we have a few columns with too many levels; we restrict these levels to the {max_rnum} most common ones,
+        -- now, we have a few columns with too many levels; we restrict these levels to the 15 most common ones,
         -- using the tables of frequency counts for these levels that we created earlier
-        SELECT parcel_id, inspection_date, 'use_code_'||coalesce(t.use_code::varchar,'missing') as categ, count(*) as count
+        SELECT parcel_id, inspection_date, 'use_code_'||coalesce(freqcateg.level::varchar,'missing') as categ, count(*) as count
         FROM joinedsales_{n_months}months_{max_dist}m t
         LEFT JOIN public.frequentsales_use_codes freqcateg
-        ON freqcateg.use_code = t.use_code
-        WHERE freqcateg.rnum <= {max_rnum}
-        GROUP BY parcel_id, inspection_date, t.use_code
+        ON freqcateg.raw_level = t.use_code
+        GROUP BY parcel_id, inspection_date, freqcateg.level
         UNION ALL (
-          SELECT parcel_id, inspection_date, 'instrument_type_'||coalesce(t.instrument_type,'missing') as categ, count(*) as count
+          SELECT parcel_id, inspection_date, 'instrument_type_'||coalesce(freqcateg.level,'missing') as categ, count(*) as count
           FROM joinedsales_{n_months}months_{max_dist}m t
           LEFT JOIN public.frequentsales_instrument_types freqcateg
-          ON freqcateg.instrument_type = t.instrument_type
-          WHERE freqcateg.rnum <= {max_rnum}
-          GROUP BY parcel_id, inspection_date, t.instrument_type
+          ON freqcateg.raw_level = t.instrument_type
+          GROUP BY parcel_id, inspection_date, freqcateg.level
         )
         UNION ALL (
-          SELECT parcel_id, inspection_date, 'garage_type_'||coalesce(t.garage_type,'missing') as categ, count(*) as count
+          SELECT parcel_id, inspection_date, 'garage_type_'||coalesce(freqcateg.level,'missing') as categ, count(*) as count
           FROM joinedsales_{n_months}months_{max_dist}m t
           LEFT JOIN public.frequentsales_garage_types freqcateg
-          ON freqcateg.garage_type = t.garage_type
-          WHERE freqcateg.rnum <= {max_rnum}
-          GROUP BY parcel_id, inspection_date, t.garage_type
+          ON freqcateg.raw_level = t.garage_type
+          GROUP BY parcel_id, inspection_date, freqcateg.level
         )
         {unionall_statements} -- these are all the columns that we defined above
         ;
@@ -183,8 +185,7 @@ def make_sales_features(con, n_months, max_dist):
         ;
     """.format(n_months=str(n_months), max_dist=str(max_dist),
                 featureselects=featureselects,
-                unionall_statements=unionall_statements,
-                max_rnum = str(max_rnum))
+                unionall_statements=unionall_statements)
 
     cur.execute(query)
     con.commit()

@@ -33,6 +33,8 @@ def make_crime_features(con, n_months, max_dist):
 
     logger.info('Computing distance features for {}'.format(dataset))
 
+    max_rnum = 15
+
     # make a table of the more general offense frequencies so we can prune them
     # also include a column with an array of corresponding detailed levels
     query = """
@@ -46,15 +48,18 @@ def make_crime_features(con, n_months, max_dist):
         GROUP BY orc_combined
         ORDER BY count desc
         )
-        SELECT row_number() OVER () as rnum, t.*
+        SELECT 
+            row_number() OVER () as rnum,
+            t.orc_combined,
+            t.all_orcs,
+            CASE WHEN row_number() OVER () <= {rnum} THEN t.orc_combined
+            ELSE 'other' END AS level
         FROM t
-        );"""
+        );""".format(rnum=max_rnum)
 
     cur = con.cursor()
     cur.execute(query)
     con.commit()
-
-    max_rnum = 15
 
     query = """
         DROP TABLE IF EXISTS crimefeatures1_{n_months}months_{max_dist}m;
@@ -85,14 +90,13 @@ def make_crime_features(con, n_months, max_dist):
 
         -- make the categorical (dummified) features 
         CREATE TEMP TABLE crimefeatures2_{n_months}months_{max_dist}m ON COMMIT DROP AS
-            -- restrict crime levels to the {max_rnum} most common ones,
+            -- restrict crime levels to the 15 most common ones,
             -- using the tables of frequency counts for these levels that we created earlier
-            SELECT parcel_id, inspection_date, 'orc_combined_'||coalesce(t.orc_combined,'missing') as categ, count(*) as count
+            SELECT parcel_id, inspection_date, 'orc_combined_'||coalesce(freqcateg.level,'missing') as categ, count(*) as count
             FROM joinedcrime_{n_months}months_{max_dist}m t
             LEFT JOIN public.frequentcrimes_orc freqcateg
             ON freqcateg.orc_combined = t.orc_combined
-            WHERE freqcateg.rnum <= {max_rnum}
-            GROUP BY parcel_id, inspection_date, t.orc_combined
+            GROUP BY parcel_id, inspection_date, freqcateg.level
         ;
 
         CREATE INDEX ON crimefeatures2_{n_months}months_{max_dist}m (parcel_id, inspection_date);
@@ -115,8 +119,7 @@ def make_crime_features(con, n_months, max_dist):
             JOIN crimepivot_{n_months}months_{max_dist}m
             USING (parcel_id, inspection_date)
         ;
-    """.format(n_months=str(n_months), max_dist=str(max_dist),
-                max_rnum = str(max_rnum))
+    """.format(n_months=str(n_months), max_dist=str(max_dist))
 
     cur.execute(query)
     con.commit()

@@ -52,7 +52,7 @@ def make_fire_features(con, n_months, max_dist):
     make_table_of_frequent_codes(con, col='incident_type_desc', 
             intable='public.fire',
             outtable='public.frequentfiretypes',
-            dropifexists=False)
+            rnum=15)
 
     # also make sure that the fire data has an index on the description,
     # as we want to join on it
@@ -84,13 +84,13 @@ def make_fire_features(con, n_months, max_dist):
 
         -- group by inspections and fire types (we'll pivot later)
         CREATE TEMP TABLE firetypes_{n_months}months_{max_dist}m ON COMMIT DROP AS (
-            SELECT parcel_id, inspection_date, event.incident_type_desc,
+            SELECT parcel_id, inspection_date, 
+            'incident_type_'||frequentfires.level AS incident_type_desc,
             count(*) as count
             FROM joinedtable event
             LEFT JOIN public.frequentfiretypes frequentfires 
-            ON frequentfires.incident_type_desc = event.incident_type_desc
-            WHERE frequentfires.rnum <= 15
-            GROUP BY parcel_id, inspection_date, event.incident_type_desc
+            ON frequentfires.raw_level = event.incident_type_desc
+            GROUP BY parcel_id, inspection_date, frequentfires.level
         );
 
         CREATE INDEX ON firetypes_{n_months}months_{max_dist}m (parcel_id, inspection_date);

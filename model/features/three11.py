@@ -1,8 +1,7 @@
 import logging
 import logging.config
 from feature_utils import make_inspections_latlong_nmonths_table, compute_frequency_features
-from feature_utils import format_column_names, group_and_count_from_db, make_table_of_frequent_codes, \
-        load_colpivot
+from feature_utils import format_column_names, group_and_count_from_db, make_table_of_frequent_codes
 from lib_cinci.config import load
 from lib_cinci.features import check_date_boundaries
 import pandas as pd
@@ -33,14 +32,14 @@ def make_three11_features(con, n_months, max_dist):
         min_insp, max_insp, n_months=n_months, max_dist=max_dist, load=False)
 
 
+    max_rnum = 15
+
     logger.info('Computing distance features for {}'.format(dataset))
 
     # frequent service_codes, so we can prune them (there are too many)
     make_table_of_frequent_codes(con, col='service_code', intable='public.three11',
-            outtable='public.frequentthree11_service_code', dropifexists=False)
+            outtable='public.frequentthree11_service_code', rnum=max_rnum)
 
-    max_rnum = 15
-    load_colpivot(con)
     cur = con.cursor()
 
     query = """
@@ -78,14 +77,13 @@ def make_three11_features(con, n_months, max_dist):
 
         -- make the categorical (dummified) features 
         CREATE TEMP TABLE three11features2_{n_months}months_{max_dist}m ON COMMIT DROP AS
-            -- restrict three11 levels to the {max_rnum} most common ones,
+            -- restrict three11 levels to the 15 most common ones,
             -- using the tables of frequency counts for these levels that we created earlier
-            SELECT parcel_id, inspection_date, 'service_code_'||coalesce(t.service_code,'missing') as categ, count(*) as count
+            SELECT parcel_id, inspection_date, 'service_code_'||coalesce(freqcateg.level,'missing') as categ, count(*) as count
             FROM joinedthree11_{n_months}months_{max_dist}m t
             LEFT JOIN public.frequentthree11_service_code freqcateg
-            ON freqcateg.service_code = t.service_code
-            WHERE freqcateg.rnum <= {max_rnum}
-            GROUP BY parcel_id, inspection_date, t.service_code
+            ON freqcateg.raw_level = t.service_code
+            GROUP BY parcel_id, inspection_date, freqcateg.level
         ;
 
         CREATE INDEX ON three11features2_{n_months}months_{max_dist}m (parcel_id, inspection_date);
@@ -108,8 +106,7 @@ def make_three11_features(con, n_months, max_dist):
             JOIN three11pivot_{n_months}months_{max_dist}m
             USING (parcel_id, inspection_date)
         ;
-    """.format(n_months=str(n_months), max_dist=str(max_dist),
-                max_rnum = str(max_rnum))
+    """.format(n_months=str(n_months), max_dist=str(max_dist))
 
     cur.execute(query)
     con.commit()

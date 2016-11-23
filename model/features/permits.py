@@ -48,7 +48,7 @@ def make_permits_features(con, n_months, max_dist):
     # so we can limit the pivot later to the 15 most common
     # types of uses
     make_table_of_frequent_codes(con, col='proposeduse', intable='public.permits',
-            outtable='public.frequentpermituses', dropifexists=False)
+            outtable='public.frequentpermituses', rnum=15)
 
     cur = con.cursor()
     query = """
@@ -109,12 +109,11 @@ def make_permits_features(con, n_months, max_dist):
           FROM joinedtable t GROUP BY parcel_id, inspection_date, permittype
         )
         UNION ALL (
-          SELECT parcel_id, inspection_date, 'prpsduse_'||coalesce(t.proposeduse,'missing') as categ, count(*) as count
+          SELECT parcel_id, inspection_date, 'prpsduse_'||coalesce(frequse.level,'missing') as categ, count(*) as count
           FROM joinedtable t
           LEFT JOIN public.frequentpermituses frequse
-          ON frequse.proposeduse = t.proposeduse
-          WHERE frequse.rnum <= 15
-          GROUP BY parcel_id, inspection_date, t.proposeduse
+          ON frequse.raw_level = t.proposeduse
+          GROUP BY parcel_id, inspection_date, frequse.level
         );
         CREATE INDEX ON permitfeatures2_{n_months}months_{max_dist}m (parcel_id, inspection_date);
 
