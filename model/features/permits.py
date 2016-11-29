@@ -47,8 +47,50 @@ def make_permits_features(con, n_months, max_dist):
     # create a table of the most common proposeduse types,
     # so we can limit the pivot later to the 15 most common
     # types of uses
-    make_table_of_frequent_codes(con, col='proposeduse', intable='public.permits',
-            outtable='public.frequentpermituses', rnum=15)
+    cols = ['proposeduse',
+            'statuscurrent',
+            'workclass',
+            'permitclass',
+            'permittype'
+            ]
+
+    for col in cols:
+        make_table_of_frequent_codes(con, col=col, intable='public.permits',
+                outtable='public.frequentpermit_%s'%col, rnum=15)
+
+    unionall_template = """
+        SELECT parcel_id, inspection_date, 
+              '{col}_'||coalesce(t2.level,'missing') as categ,
+              coalesce(t1.count, 0) as count
+        FROM (
+            SELECT parcel_id, inspection_date,
+                   fs.level,
+                   count(*) as count
+            FROM joinedpermits_{n_months}months_{max_dist}m event
+            LEFT JOIN public.frequentpermit_{col} fs
+            ON fs.raw_level = event.{col}
+            GROUP BY parcel_id, inspection_date, fs.level
+        ) t1
+        RIGHT JOIN (
+            SELECT parcel_id, inspection_date, t.level
+            FROM parcels_inspections
+            JOIN ( SELECT distinct level FROM public.frequentpermit_{col} ) t
+            ON true
+        ) t2
+        USING (parcel_id, inspection_date, level)
+        """
+
+    unionall_statements = unionall_template.format(col=cols[0],
+                                                  n_months=str(n_months),
+                                                  max_dist=str(max_dist)
+                                                  ) + \
+                          '\n'.join([
+                            'UNION ALL ( %s )'%unionall_template.format(col=col,
+                                                                        n_months=str(n_months),
+                                                                        max_dist=str(max_dist)
+                                                                        )
+                            for col in cols[1:]
+                            ])
 
     cur = con.cursor()
     query = """
@@ -79,7 +121,7 @@ def make_permits_features(con, n_months, max_dist):
         CREATE INDEX ON permitfeatures1_{n_months}months_{max_dist}m (parcel_id, inspection_date);
 
         -- make the categorical (dummified) features 
-        CREATE TEMP TABLE joinedtable ON COMMIT DROP AS
+        CREATE TEMP TABLE joinedpermits_{n_months}months_{max_dist}m ON COMMIT DROP AS
             SELECT parcel_id, inspection_date, event.* 
             FROM insp2permits_{n_months}months_{max_dist}m i2e
             LEFT JOIN LATERAL (
@@ -87,34 +129,15 @@ def make_permits_features(con, n_months, max_dist):
             ) event
             ON true
         ;
-        CREATE INDEX ON joinedtable (parcel_id, inspection_date);
+        CREATE INDEX ON joinedpermits_{n_months}months_{max_dist}m (parcel_id, inspection_date);
 
         -- Join the permits with the inspections; then concatenate the 
         -- inspections and the various categorical variables (we'll pivot later)
         
         CREATE TEMP TABLE permitfeatures2_{n_months}months_{max_dist}m ON COMMIT DROP AS
 
-        SELECT parcel_id, inspection_date, 'permitclass_'||coalesce(permitclass,'missing') as categ, count(*) as count
-          FROM joinedtable t GROUP BY parcel_id, inspection_date, permitclass
-        UNION ALL (
-          SELECT parcel_id, inspection_date, 'currstatus_'||coalesce(statuscurrent,'missing') as categ, count(*) as count
-          FROM joinedtable t GROUP BY parcel_id, inspection_date, statuscurrent
-        )
-        UNION ALL (
-          SELECT parcel_id, inspection_date, 'workclass_'||coalesce(workclass,'missing') as categ, count(*) as count
-          FROM joinedtable t GROUP BY parcel_id, inspection_date, workclass
-        )
-        UNION ALL (
-          SELECT parcel_id, inspection_date, 'permittype_'||coalesce(permittype,'missing') as categ, count(*) as count
-          FROM joinedtable t GROUP BY parcel_id, inspection_date, permittype
-        )
-        UNION ALL (
-          SELECT parcel_id, inspection_date, 'prpsduse_'||coalesce(frequse.level,'missing') as categ, count(*) as count
-          FROM joinedtable t
-          LEFT JOIN public.frequentpermituses frequse
-          ON frequse.raw_level = t.proposeduse
-          GROUP BY parcel_id, inspection_date, frequse.level
-        );
+            {unionall_statements};
+
         CREATE INDEX ON permitfeatures2_{n_months}months_{max_dist}m (parcel_id, inspection_date);
 
         -- Now call the pivot function to create columns with the 
@@ -134,7 +157,7 @@ def make_permits_features(con, n_months, max_dist):
             JOIN permitpivot_{n_months}months_{max_dist}m
             USING (parcel_id, inspection_date)
         ;
-    """.format(n_months=str(n_months), max_dist=str(max_dist))
+    """.format(n_months=str(n_months), max_dist=str(max_dist), unionall_statements=unionall_statements)
 
     cur.execute(query)
     con.commit()
