@@ -104,7 +104,6 @@ def make_fire_features(con, n_months, max_dist):
                 ON true
             ) t2
             USING (parcel_id, inspection_date, level)
-            ORDER BY parcel_id, inspection_date, level desc
         );
 
         CREATE INDEX ON firetypes_{n_months}months_{max_dist}m (parcel_id, inspection_date);

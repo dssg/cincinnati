@@ -44,15 +44,24 @@ def make_sales_features(con, n_months, max_dist):
     # there are several columns that we need to prune in terms of codes;
     # thus, make tables of value counts
     rnum = 15
+
+    to_dummify_columns = ['instrument_type',
+                          'garage_type',
+                          'style',
+                          'grade',
+                          'exterior_wall_type',
+                          'basement',
+                          'heating',
+                          'air_conditioning']
+
+    for col in to_dummify_columns:
+        make_table_of_frequent_codes(con, col=col, intable='public.sales',
+            outtable='public.frequentsales_%s'%col, rnum=rnum)
+
+    # use_code needs special treatment because it's an int
     make_table_of_frequent_codes(con, col='use_code', intable='public.sales',
-            outtable='public.frequentsales_use_codes', coalesceto="null",
+            outtable='public.frequentsales_use_code', coalesceto="null",
             rnum=rnum, to_other="9999")
-    make_table_of_frequent_codes(con, col='instrument_type', intable='public.sales',
-            outtable='public.frequentsales_instrument_types',
-            rnum=rnum)
-    make_table_of_frequent_codes(con, col='garage_type', intable='public.sales',
-            outtable='public.frequentsales_garage_types',
-            rnum=rnum)
 
     cur = con.cursor()
 
@@ -77,7 +86,7 @@ def make_sales_features(con, n_months, max_dist):
         'half_floor_area',
         'finished_basement'
         ]
-    funs = ['avg','sum','min','max','stddev']
+    funs = ['avg'] # ,'sum','min','max','stddev'] # could do more, but probably not necessary
     featureselects = ',\n'.join(coltemplate.format(fun=f,col=c) for f,c in itertools.product(funs, cols)) 
 
     # This is a template for a pivot table. In the sales table, we have several categorical columns.
@@ -90,16 +99,26 @@ def make_sales_features(con, n_months, max_dist):
     # {col} will be the categorical column name; joinedsales_Xmonths_Ym a join between sales and 
     # insp2sales_Xmonths_Ym.
     unionall_template = """
-        SELECT parcel_id, inspection_date, '{col}_'||coalesce(t.{col},'missing') as categ, count(*) as count
-        FROM joinedsales_{n_months}months_{max_dist}m t
-        GROUP BY parcel_id, inspection_date, t.{col}
+        SELECT parcel_id, inspection_date, 
+              '{col}_'||coalesce(t2.level,'missing') as categ,
+              coalesce(t1.count, 0) as count
+        FROM (
+            SELECT parcel_id, inspection_date,
+                   fs.level,
+                   count(*) as count
+            FROM joinedsales_{n_months}months_{max_dist}m event
+            LEFT JOIN public.frequentsales_{col} fs
+            ON fs.raw_level = event.{col}
+            GROUP BY parcel_id, inspection_date, fs.level
+        ) t1
+        RIGHT JOIN (
+            SELECT parcel_id, inspection_date, t.level
+            FROM parcels_inspections
+            JOIN ( SELECT distinct level FROM public.frequentsales_{col} ) t
+            ON true
+        ) t2
+        USING (parcel_id, inspection_date, level)
         """
-    to_dummify_columns = ['style',
-                          'grade',
-                          'exterior_wall_type',
-                          'basement',
-                          'heating',
-                          'air_conditioning']
 
     unionall_statements = '\n'.join([
                             'UNION ALL ( %s )'%unionall_template.format(col=col,
@@ -141,25 +160,28 @@ def make_sales_features(con, n_months, max_dist):
         
         -- now, we have a few columns with too many levels; we restrict these levels to the 15 most common ones,
         -- using the tables of frequency counts for these levels that we created earlier
-        SELECT parcel_id, inspection_date, 'use_code_'||coalesce(freqcateg.level::varchar,'missing') as categ, count(*) as count
-        FROM joinedsales_{n_months}months_{max_dist}m t
-        LEFT JOIN public.frequentsales_use_codes freqcateg
-        ON freqcateg.raw_level = t.use_code
-        GROUP BY parcel_id, inspection_date, freqcateg.level
-        UNION ALL (
-          SELECT parcel_id, inspection_date, 'instrument_type_'||coalesce(freqcateg.level,'missing') as categ, count(*) as count
-          FROM joinedsales_{n_months}months_{max_dist}m t
-          LEFT JOIN public.frequentsales_instrument_types freqcateg
-          ON freqcateg.raw_level = t.instrument_type
-          GROUP BY parcel_id, inspection_date, freqcateg.level
-        )
-        UNION ALL (
-          SELECT parcel_id, inspection_date, 'garage_type_'||coalesce(freqcateg.level,'missing') as categ, count(*) as count
-          FROM joinedsales_{n_months}months_{max_dist}m t
-          LEFT JOIN public.frequentsales_garage_types freqcateg
-          ON freqcateg.raw_level = t.garage_type
-          GROUP BY parcel_id, inspection_date, freqcateg.level
-        )
+
+        -- use_code is special, as it's an int (and we want it as varchar
+        SELECT parcel_id, inspection_date, 
+              'use_code_'||coalesce(t2.level::varchar,'missing') as categ,
+              coalesce(t1.count, 0) as count
+        FROM (
+            SELECT parcel_id, inspection_date,
+                   fs.level,
+                   count(*) as count
+            FROM joinedsales_{n_months}months_{max_dist}m event
+            LEFT JOIN public.frequentsales_use_code fs
+            ON fs.raw_level = event.use_code
+            GROUP BY parcel_id, inspection_date, fs.level
+        ) t1
+        RIGHT JOIN (
+            SELECT parcel_id, inspection_date, t.level
+            FROM parcels_inspections
+            JOIN ( SELECT distinct level FROM public.frequentsales_use_code ) t
+            ON true
+        ) t2
+        USING (parcel_id, inspection_date, level)
+
         {unionall_statements} -- these are all the columns that we defined above
         ;
         
