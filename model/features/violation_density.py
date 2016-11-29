@@ -79,31 +79,45 @@ def make_inspections_features(con, n_months, max_dist):
     query = """
         DROP TABLE IF EXISTS inspfeatures1_{n_months}months_{max_dist}m;
         CREATE TEMP TABLE inspfeatures1_{n_months}months_{max_dist}m ON COMMIT DROP AS
-            SELECT  
-                feature_y.parcel_id,
-                feature_y.inspection_date,
-                realinspections.event,
-                count(*) as count,
-                (count(*)+1.0) / (max(feature_y.parcels)+5.0) as regularized_count_per_houses -- max() doesn't do anything as the number is unique per parcel_id
+            SELECT t2.parcel_id, t2.inspection_date,
+                   t2.event,
+                   coalesce(t1.count, 0) as count,
+                   coalesce(t1.regularized_count_per_houses, 1./5.) as regularized_count_per_houses
             FROM (
-                SELECT t.*, p.geom, ih.parcels
-                FROM parcels_inspections t
-                LEFT JOIN shape_files.parcels_cincy p
-                ON t.parcel_id=p.parcelid
-                LEFT JOIN insp2houses_{max_dist}m ih
-                USING (parcel_id)
-            ) feature_y
-            JOIN (
-                SELECT insp.*, p.geom
-                FROM inspections_views.events_parcel_id insp
-                JOIN shape_files.parcels_cincy p
-                ON insp.parcel_no=p.parcelid
-            ) realinspections
-            ON realinspections.date < feature_y.inspection_date
-            AND (feature_y.inspection_date - '{n_months} month'::interval) <= realinspections.date
-            AND ST_DWithin(feature_y.geom, realinspections.geom, {max_dist}*3.281::double precision)
-            WHERE feature_y.inspection_date BETWEEN '{min_date}' AND '{max_date}'
-            GROUP BY feature_y.parcel_id, feature_y.inspection_date, realinspections.event
+                SELECT  
+                    feature_y.parcel_id,
+                    feature_y.inspection_date,
+                    realinspections.event,
+                    count(*) as count,
+                    (count(*)+1.0) / (max(feature_y.parcels)+5.0) as regularized_count_per_houses -- max() doesn't do anything as the number is unique per parcel_id
+                FROM (
+                    SELECT t.*, p.geom, ih.parcels
+                    FROM parcels_inspections t
+                    LEFT JOIN shape_files.parcels_cincy p
+                    ON t.parcel_id=p.parcelid
+                    LEFT JOIN insp2houses_{max_dist}m ih
+                    USING (parcel_id)
+                ) feature_y
+                JOIN (
+                    SELECT insp.*, p.geom
+                    FROM inspections_views.events_parcel_id insp
+                    JOIN shape_files.parcels_cincy p
+                    ON insp.parcel_no=p.parcelid
+                ) realinspections
+                ON realinspections.date < feature_y.inspection_date
+                AND (feature_y.inspection_date - '{n_months} month'::interval) <= realinspections.date
+                AND ST_DWithin(feature_y.geom, realinspections.geom, {max_dist}*3.281::double precision)
+                WHERE feature_y.inspection_date BETWEEN '{min_date}' AND '{max_date}'
+                GROUP BY feature_y.parcel_id, feature_y.inspection_date, realinspections.event
+            ) t1
+            RIGHT JOIN
+            (SELECT parcel_id, inspection_date, ft.event
+                FROM parcels_inspections
+                JOIN 
+                    (select distinct event from inspections_views.events_parcel_id) ft
+                ON true
+            ) t2
+            USING (parcel_id, inspection_date,event)
         ;
 
         CREATE TEMP TABLE inspfeatures2_{n_months}months_{max_dist}m ON COMMIT DROP AS (
