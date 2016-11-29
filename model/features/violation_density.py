@@ -82,14 +82,13 @@ def make_inspections_features(con, n_months, max_dist):
             SELECT t2.parcel_id, t2.inspection_date,
                    t2.event,
                    coalesce(t1.count, 0) as count,
-                   coalesce(t1.regularized_count_per_houses, 1./5.) as regularized_count_per_houses
+                   (coalesce(t1.count, 0)+1.0) / (coalesce(t2.parcels,0)+5.0) as regularized_count_per_houses 
             FROM (
                 SELECT  
                     feature_y.parcel_id,
                     feature_y.inspection_date,
                     realinspections.event,
-                    count(*) as count,
-                    (count(*)+1.0) / (max(feature_y.parcels)+5.0) as regularized_count_per_houses -- max() doesn't do anything as the number is unique per parcel_id
+                    count(*) as count
                 FROM (
                     SELECT t.*, p.geom, ih.parcels
                     FROM parcels_inspections t
@@ -111,11 +110,13 @@ def make_inspections_features(con, n_months, max_dist):
                 GROUP BY feature_y.parcel_id, feature_y.inspection_date, realinspections.event
             ) t1
             RIGHT JOIN
-            (SELECT parcel_id, inspection_date, ft.event
+            (SELECT parcel_id, inspection_date, ft.event, parcels
                 FROM parcels_inspections
                 JOIN 
                     (select distinct event from inspections_views.events_parcel_id) ft
                 ON true
+                JOIN insp2houses_{max_dist}m
+                USING (parcel_id)
             ) t2
             USING (parcel_id, inspection_date,event)
         ;
