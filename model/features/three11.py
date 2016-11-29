@@ -77,13 +77,32 @@ def make_three11_features(con, n_months, max_dist):
 
         -- make the categorical (dummified) features 
         CREATE TEMP TABLE three11features2_{n_months}months_{max_dist}m ON COMMIT DROP AS
+
             -- restrict three11 levels to the 15 most common ones,
             -- using the tables of frequency counts for these levels that we created earlier
-            SELECT parcel_id, inspection_date, 'service_code_'||coalesce(freqcateg.level,'missing') as categ, count(*) as count
-            FROM joinedthree11_{n_months}months_{max_dist}m t
-            LEFT JOIN public.frequentthree11_service_code freqcateg
-            ON freqcateg.raw_level = t.service_code
-            GROUP BY parcel_id, inspection_date, freqcateg.level
+            -- also make sure all levels always appear
+
+            SELECT 
+                t2.parcel_id, t2.inspection_date,
+                'service_code_'||t2.level AS categ,
+                coalesce(t1.count,0) as count   
+             FROM
+             (SELECT parcel_id, inspection_date,
+                     ft.level,
+                     count(*) as count
+              FROM joinedthree11_{n_months}months_{max_dist}m event
+              LEFT JOIN public.frequentthree11_service_code ft
+              ON ft.raw_level = event.service_code
+              GROUP BY parcel_id, inspection_date, ft.level
+             ) t1
+             RIGHT JOIN
+             (SELECT parcel_id, inspection_date, ft.level 
+                 FROM parcels_inspections
+                 JOIN 
+                     (select distinct level from public.frequentthree11_service_code) ft
+                 ON true
+             ) t2
+             USING (parcel_id, inspection_date,level)
         ;
 
         CREATE INDEX ON three11features2_{n_months}months_{max_dist}m (parcel_id, inspection_date);
