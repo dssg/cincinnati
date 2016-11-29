@@ -83,14 +83,28 @@ def make_fire_features(con, n_months, max_dist):
         CREATE INDEX ON joinedtable (parcel_id, inspection_date);
 
         -- group by inspections and fire types (we'll pivot later)
+        -- make sure to include all types
         CREATE TEMP TABLE firetypes_{n_months}months_{max_dist}m ON COMMIT DROP AS (
-            SELECT parcel_id, inspection_date, 
-            'incident_type_'||frequentfires.level AS incident_type_desc,
-            count(*) as count
-            FROM joinedtable event
-            LEFT JOIN public.frequentfiretypes frequentfires 
-            ON frequentfires.raw_level = event.incident_type_desc
-            GROUP BY parcel_id, inspection_date, frequentfires.level
+
+            SELECT t2.parcel_id, t2.inspection_date,
+                   'incident_type_'||t2.level AS incident_type_desc,
+                   coalesce(t1.count, 0) as count
+            FROM ( SELECT parcel_id, inspection_date,
+                       frequentfires.level,
+                       count(*) as count
+                   FROM joinedtable event
+                   LEFT JOIN public.frequentfiretypes frequentfires
+                   ON frequentfires.raw_level = event.incident_type_desc
+                   GROUP BY parcel_id, inspection_date, frequentfires.level
+            ) t1
+            RIGHT JOIN (
+                SELECT parcel_id, inspection_date, ft.level
+                FROM parcels_inspections
+                JOIN (SELECT DISTINCT level FROM public.frequentfiretypes) ft
+                ON true
+            ) t2
+            USING (parcel_id, inspection_date, level)
+            ORDER BY parcel_id, inspection_date, level desc
         );
 
         CREATE INDEX ON firetypes_{n_months}months_{max_dist}m (parcel_id, inspection_date);
