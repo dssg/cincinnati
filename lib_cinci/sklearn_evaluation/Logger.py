@@ -35,3 +35,12 @@ class Logger:
         '''
         return (self.collection.find({"experiment_name": experiment_name})
                     .sort("prec_at_1", pymongo.DESCENDING)[0])
+
+    def delete_experiment(self, experiment_name):
+        ''' 
+            Delete an experiment by key
+        '''
+        to_delete = [c['_id'] for c in 
+                self.collection.find({'experiment_name': experiment_name})]
+        self.collection.delete_many({ '_id': { '$in': to_delete }})
+
