@@ -60,3 +60,13 @@ def predict_on_schema(model_id, schema):
     df = dataset.to_df()[['viol_outcome']]
     df['prediction'] = preds_proba
     return df
+
+
+def get_predictions(model_id, schema):
+    output_folder = os.environ['OUTPUT_FOLDER']
+    path_to_predictions = os.path.join(output_folder, "top_predictions_on_all_parcels")
+
+    predictions = pd.read_csv(os.path.join(path_to_predictions, model_id),
+                                    index_col=['parcel_id', 'inspection_date'],
+                                   parse_dates=['inspection_date'])
+    return predictions
