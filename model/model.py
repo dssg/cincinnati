@@ -74,11 +74,12 @@ def make_datasets(config, predictset=False):
     if float(dnum)%1 != 0:
         raise ValueError("The validation window needs an integer!")
     dnum = int(dnum)
-    units = units.lower() 
-    if units[-1] != 's':
-        units = units + 's' # make 'month' into 'months'
-    validation_window = relativedelta.relativedelta(**{units: dnum}) + \
-                        relativedelta.relativedelta(days=1) # need an extra day to align with schemas
+    units = units.lower()
+    unitdict = {'month':'M', 'day':'D'}
+    if units not in unitdict.keys():
+        raise ValueError("Validation window units need to be 'Month' or 'Day'!")
+    training_end = pd.date_range(start=fake_today, periods=2, 
+                                 freq='%d%s'%(dnum,unitdict[units]))[1]
 
     #Before proceeding, make sure dates for training and testing are 
     #May 05, 2015 at most. Further dates won't work since you don't
@@ -93,7 +94,7 @@ def make_datasets(config, predictset=False):
             '{:%B %d, %Y}, which is the latest inspection in '
             '"features.parcels_inspections" table').format(max_date))
     #Check fake today + validation window
-    if fake_today + validation_window > max_date:
+    if training_end > max_date:
         raise MaxDateError('Error: your fake_today + validation_window exceeds '
              '{:%B %d, %Y}, which is the latest inspection in '
              '"features.parcels_inspections" table'.format(max_date))
@@ -122,14 +123,14 @@ def make_datasets(config, predictset=False):
     test = dataset.get_testing_dataset(
         features=features,
         start_date=fake_today,
-        end_date=fake_today + validation_window,
+        end_date=training_end,
         only_residential=only_residential)
 
     if not predictset:
         return train, test
     else:
         schema = "features_{}".format(
-                    (fake_today+validation_window) 
+                    (training_end) 
                         .strftime('%d%b%Y')).lower()
         preds = dataset.get_features_for_inspections_in_schema(
                 schema=schema,
@@ -213,8 +214,6 @@ def log_results(model, config, test, predictions, feature_importances,
     ft_map = test.feature_mapping
 
     mongo_id = mongo_logger.log_model(model,
-                                      features=list(test.feature_names),
-                                      feature_importances=ft_imp,
                                       config=config,
                                       prec_at_1=prec_at_1,
                                       cutoff_at_1=cutoff_at_1,
@@ -224,8 +223,11 @@ def log_results(model, config, test, predictions, feature_importances,
                                       cutoff_at_10=cutoff_at_10,
                                       prec_at_20=prec_at_20,
                                       cutoff_at_20=cutoff_at_20,
-                                      experiment_name=experiment_name,
-                                      feature_mapping=ft_map)
+                                      experiment_name=experiment_name) #,
+                                      # features=list(test.feature_names),
+                                      # feature_mapping=ft_map,
+                                      # feature_importances=ft_imp)
+
 
     # Dump test_labels, test_predictions and test_parcels to a csv file
     parcel_id = [record[0] for record in test.parcels]
