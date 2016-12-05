@@ -8,6 +8,7 @@ import os
 import logging
 import logging.config
 import copy
+import random
 import numpy as np
 from lib_cinci import dataset
 import evaluation
@@ -356,6 +357,9 @@ def main():
     #Flatten list
     models = [a_grid for a_model_grid in grids for a_grid in a_model_grid]
 
+    if args.shufflemodels:
+        random.shuffle(models)
+
     # fit each model for all of these
     for idx, model in enumerate(models):
         #Try to run in parallel if possible
@@ -433,5 +437,7 @@ if __name__ == '__main__':
                         "store the top X percent. Will be saved to "
                         "$OUTPUT_FOLDER/dumps/[experiment_name]_predict. " 
                         "Requires that the corresponding features have been created.")
+    parser.add_argument("-sm", "--shufflemodels", action="store_true",
+                        help="Shuffle the order in which models are being run.")
     args = parser.parse_args()
     main()
