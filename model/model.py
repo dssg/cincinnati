@@ -10,6 +10,7 @@ import logging.config
 import copy
 import random
 import numpy as np
+from pydoc import locate
 from lib_cinci import dataset
 import evaluation
 from features import feature_parser
@@ -18,7 +19,7 @@ from sklearn import preprocessing
 from sklearn.externals import joblib
 from sklearn_evaluation.Logger import Logger
 from sklearn_evaluation.metrics import precision_at
-from grid_generator import grid_from_class
+from grid_generator import grid_from_class, _generate_grid
 
 from lib_cinci.config import main as cfg_main
 from lib_cinci.config import load
@@ -352,10 +353,28 @@ def main():
     grid_size = config["grid_size"]
     #Get list of models selected
     models_selected = config["models"]
-    #Get grid for each class
-    grids = [grid_from_class(m, size=grid_size) for m in models_selected]
-    #Flatten list
-    models = [a_grid for a_model_grid in grids for a_grid in a_model_grid]
+
+    models = []
+    for m in models_selected:
+        # if the model is a dict, the user has supplied parameters,
+        # over which we take the product
+        if type(m) == dict:
+            if len(m.keys()) > 1 or len(m.values()) > 1:
+                raise ValueError("A model is not specified correctly.")
+            modelclass = m.keys()[0]
+            paramdicts = _generate_grid(m.values()[0])
+
+            logging.info("%s has parameter ranges supplied; "
+                         "ignoring grid_size"%modelclass)
+
+            for paramdict in paramdicts:
+                models.append(
+                        locate(modelclass)(**paramdict)
+                        )
+        else:
+            # just use the pre-specified grid-class
+            for thism in grid_from_class(m, size=grid_size):
+                models.append(thism)
 
     if args.shufflemodels:
         random.shuffle(models)
