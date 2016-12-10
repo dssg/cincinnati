@@ -16,6 +16,11 @@ class Logger:
         name = get_model_name(model)
         dt = datetime.datetime.utcnow() 
         model = {'name': name, 'parameters': params, 'datetime': dt}
+        for mym in keywords['config']['models']:
+            if type(mym) == dict:
+                old_key = mym.keys()[0]
+                new_key = old_key.replace('.','_')
+                mym[new_key] = mym.pop(old_key)
         model.update(keywords)
         inserted_id = self.collection.insert_one(model).inserted_id
         return str(inserted_id)
