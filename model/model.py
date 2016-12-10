@@ -424,8 +424,9 @@ def main():
             #and pickle model
             model_id = log_results(model, config_raw, test, predicted,
                 feature_importances, imputer, scaler)
-            log_predictions_on_all(preds, predicted_on_all, 
-                                   model_id, float(args.predicttop))
+            if args.predicttop:
+                log_predictions_on_all(preds, predicted_on_all, 
+                                       model_id, float(args.predicttop))
 
 
 if __name__ == '__main__':
