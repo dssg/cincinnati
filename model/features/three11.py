@@ -36,9 +36,12 @@ def make_three11_features(con, n_months, max_dist):
 
     logger.info('Computing distance features for {}'.format(dataset))
 
+    coalescemissing = "'missing'" # needs to be double-quoted cause SQL-injection
+
     # frequent service_codes, so we can prune them (there are too many)
     make_table_of_frequent_codes(con, col='service_code', intable='public.three11',
-            outtable='public.frequentthree11_service_code', rnum=max_rnum)
+            outtable='public.frequentthree11_service_code', rnum=max_rnum,
+            coalesceto=coalescemissing)
 
     cur = con.cursor()
 
@@ -52,7 +55,7 @@ def make_three11_features(con, n_months, max_dist):
             SELECT parcel_id, inspection_date,
                    agency_responsible,
                    status,
-                   service_code,
+                   coalesce(service_code,{coalescemissing}) as service_code,
                    CASE WHEN description='Request entered through the Web. Refer to Intake Questions for further description.'
                         THEN 1 ELSE 0 END AS webrequest
             FROM insp2three11_{n_months}months_{max_dist}m i2e
@@ -125,7 +128,8 @@ def make_three11_features(con, n_months, max_dist):
             JOIN three11pivot_{n_months}months_{max_dist}m
             USING (parcel_id, inspection_date)
         ;
-    """.format(n_months=str(n_months), max_dist=str(max_dist))
+    """.format(n_months=str(n_months), max_dist=str(max_dist),
+               coalescemissing=coalescemissing)
 
     cur.execute(query)
     con.commit()
