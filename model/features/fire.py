@@ -96,7 +96,7 @@ def make_fire_features(con, n_months, max_dist):
                        count(*) as count
                    FROM joinedtable event
                    LEFT JOIN public.frequentfiretypes frequentfires
-                   ON frequentfires.raw_level = event.incident_type_desc
+                   ON frequentfires.raw_level = coalesce(event.incident_type_desc, {coalescemissing})
                    GROUP BY parcel_id, inspection_date, frequentfires.level
             ) t1
             RIGHT JOIN (
@@ -155,7 +155,8 @@ def make_fire_features(con, n_months, max_dist):
         ;
         """.format(insp2tablename=insp2tablename,
                    n_months=str(n_months),
-                   max_dist=str(max_dist))
+                   max_dist=str(max_dist),
+                   coalescemissing=coalescemissing)
 
     cur.execute(query)
     con.commit()
