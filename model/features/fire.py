@@ -27,6 +27,7 @@ def make_fire_features(con, n_months, max_dist):
     """
     dataset = 'fire'
     date_column = 'incident_date'
+    coalescemissing = "'missing'" 
 
     #Get the time window for which you can generate features
     min_insp, max_insp = check_date_boundaries(con, n_months, dataset, date_column)
@@ -52,6 +53,7 @@ def make_fire_features(con, n_months, max_dist):
     make_table_of_frequent_codes(con, col='incident_type_desc', 
             intable='public.fire',
             outtable='public.frequentfiretypes',
+            coalesce_to=coalescemissing,
             rnum=15)
 
     # also make sure that the fire data has an index on the description,

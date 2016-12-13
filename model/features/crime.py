@@ -34,6 +34,7 @@ def make_crime_features(con, n_months, max_dist):
     logger.info('Computing distance features for {}'.format(dataset))
 
     max_rnum = 15
+    coalescemissing = "'missing'" 
 
     # make a table of the more general offense frequencies so we can prune them
     # also include a column with an array of corresponding detailed levels
@@ -41,7 +42,7 @@ def make_crime_features(con, n_months, max_dist):
         DROP TABLE IF EXISTS public.frequentcrimes_orc;
         CREATE TABLE public.frequentcrimes_orc AS (
         WITH t as (
-        SELECT substring(orc from ' \((\w*)\) ') as orc_combined,
+        SELECT coalesce(substring(orc from ' \((\w*)\) '), {coalescemissing}) as orc_combined,
                array_agg(distinct orc) as all_orcs,
                count(*) as count
         FROM public.crime
@@ -55,7 +56,7 @@ def make_crime_features(con, n_months, max_dist):
             CASE WHEN row_number() OVER () <= {rnum} THEN t.orc_combined
             ELSE 'other' END AS level
         FROM t
-        );""".format(rnum=max_rnum)
+        );""".format(rnum=max_rnum,coalescemissing=coalescemissing)
 
     cur = con.cursor()
     cur.execute(query)
@@ -69,7 +70,7 @@ def make_crime_features(con, n_months, max_dist):
         -- join the inspections and crime
         CREATE TEMP TABLE joinedcrime_{n_months}months_{max_dist}m ON COMMIT DROP AS
             SELECT parcel_id, inspection_date,
-                   substring(event.orc from ' \((\w*)\) ') as orc_combined
+                   coalesce(substring(event.orc from ' \((\w*)\) '), {coalescemissing}) as orc_combined
             FROM insp2crime_{n_months}months_{max_dist}m i2e
             LEFT JOIN LATERAL (
                 SELECT * FROM public.crime s where s.id=i2e.id
@@ -138,7 +139,7 @@ def make_crime_features(con, n_months, max_dist):
             JOIN crimepivot_{n_months}months_{max_dist}m
             USING (parcel_id, inspection_date)
         ;
-    """.format(n_months=str(n_months), max_dist=str(max_dist))
+    """.format(n_months=str(n_months), max_dist=str(max_dist),coalescemissing=coalescemissing)
 
     cur.execute(query)
     con.commit()
