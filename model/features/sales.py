@@ -45,6 +45,9 @@ def make_sales_features(con, n_months, max_dist):
     # thus, make tables of value counts
     rnum = 15
 
+    coalescemissing_use_code = "11111" # use_code is an int, so hack this
+    coalescemissing = "'missing'" 
+
     to_dummify_columns = ['instrument_type',
                           'garage_type',
                           'style',
@@ -56,17 +59,18 @@ def make_sales_features(con, n_months, max_dist):
 
     for col in to_dummify_columns:
         make_table_of_frequent_codes(con, col=col, intable='public.sales',
-            outtable='public.frequentsales_%s'%col, rnum=rnum)
+            outtable='public.frequentsales_%s'%col, rnum=rnum,
+            coalesce_to=coalescemissing)
 
     # use_code needs special treatment because it's an int
     make_table_of_frequent_codes(con, col='use_code', intable='public.sales',
-            outtable='public.frequentsales_use_code', coalesceto="null",
+            outtable='public.frequentsales_use_code', coalesceto=coalescemissing_use_code,
             rnum=rnum, to_other="9999")
 
     cur = con.cursor()
 
     # let's generate all the 'simple' features we might want;
-    # each column will be named like 'avg_total_rooms'
+    # each column will be named similar to 'avg_total_rooms'
     coltemplate = "{fun}({col}) AS {fun}_{col}"
     cols = [
         'number_of_parcels',
@@ -100,7 +104,7 @@ def make_sales_features(con, n_months, max_dist):
     # insp2sales_Xmonths_Ym.
     unionall_template = """
         SELECT parcel_id, inspection_date, 
-              '{col}_'||coalesce(t2.level,'missing') as categ,
+              '{col}_'||coalesce(t2.level,{coalescemissing}) as categ,
               coalesce(t1.count, 0) as count
         FROM (
             SELECT parcel_id, inspection_date,
@@ -108,7 +112,7 @@ def make_sales_features(con, n_months, max_dist):
                    count(*) as count
             FROM joinedsales_{n_months}months_{max_dist}m event
             LEFT JOIN public.frequentsales_{col} fs
-            ON fs.raw_level = event.{col}
+            ON fs.raw_level = coalesce(event.{col},{coalescemissing})
             GROUP BY parcel_id, inspection_date, fs.level
         ) t1
         RIGHT JOIN (
@@ -123,7 +127,8 @@ def make_sales_features(con, n_months, max_dist):
     unionall_statements = '\n'.join([
                             'UNION ALL ( %s )'%unionall_template.format(col=col,
                                                                         n_months=str(n_months),
-                                                                        max_dist=str(max_dist)
+                                                                        max_dist=str(max_dist),
+                                                                        coalescemissing=coalescemissing
                                                                         )
                             for col in to_dummify_columns 
                             ])
@@ -161,7 +166,7 @@ def make_sales_features(con, n_months, max_dist):
         -- now, we have a few columns with too many levels; we restrict these levels to the 15 most common ones,
         -- using the tables of frequency counts for these levels that we created earlier
 
-        -- use_code is special, as it's an int (and we want it as varchar
+        -- use_code is special, as it's an int (and we want it as varchar)
         SELECT parcel_id, inspection_date, 
               'use_code_'||coalesce(t2.level::varchar,'missing') as categ,
               coalesce(t1.count, 0) as count
@@ -171,7 +176,7 @@ def make_sales_features(con, n_months, max_dist):
                    count(*) as count
             FROM joinedsales_{n_months}months_{max_dist}m event
             LEFT JOIN public.frequentsales_use_code fs
-            ON fs.raw_level = event.use_code
+            ON fs.raw_level = coalesce(event.use_code,{coalescemissing_use_code})
             GROUP BY parcel_id, inspection_date, fs.level
         ) t1
         RIGHT JOIN (
@@ -207,6 +212,7 @@ def make_sales_features(con, n_months, max_dist):
         ;
     """.format(n_months=str(n_months), max_dist=str(max_dist),
                 featureselects=featureselects,
+                coalescemissing_use_code=coalescemissing_use_code,
                 unionall_statements=unionall_statements)
 
     cur.execute(query)
