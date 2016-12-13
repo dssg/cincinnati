@@ -4,7 +4,10 @@ from copy import deepcopy
 from sqlalchemy import create_engine
 from lib_cinci.db import uri
 import pandas as pd
+import numpy as np
+import math
 from scipy import stats
+from itertools import combinations
 
 '''
     This file provides utility functions to evaluate
@@ -154,15 +157,73 @@ def load_inspections_for(start_year, end_year=None):
     inspections.set_index(['parcel_id', 'inspection_date'], inplace=True)
     return inspections
 
+def load_one_inspection_per_parcel(start, end=None, which='last'):
+    '''
+        Function to get inspections results for parcels in Cincinnati. 
+        
+        Takes inputs start and end demarcating the validation window.
+        If end is not specified, default will be today's date (i.e. all inspections after start).
+        Start and end should be in datetime date format e.g. '2016-01-01'.
+        
+        Returns a DataFrame with one row for each parcel in
+        features.parcels_inspections for the period between start and end.
+        
+        The DataFrame is indexed on parcel_id and has columns
+        inspection_date, viol_outcome (binary), and viol_count (integer-valued).
+        
+        If there are multiple inspections for a given parcel-period pair,
+        inspection_date will be the earliest date in the window,
+        viol_outcome will be 1 if there was at least one violation (else 0),
+        and viol_count will be summed over all inspections.
+
+    '''
+
+    query= '''
+        WITH sub AS(
+            SELECT *
+            FROM features.parcels_inspections AS insp
+            WHERE
+                insp.inspection_date>=%(start)s
+            AND 
+                insp.inspection_date<=%(end)s 
+            
+        ),
+        earliest AS(
+            SELECT *,
+               ROW_NUMBER() OVER(PARTITION BY sub.parcel_id ORDER BY sub.inspection_date ASC) AS rn,
+               SUM(viol_outcome) OVER(PARTITION BY sub.parcel_id) AS viol_count
+            FROM sub
+        ),
+        
+        any_last AS(
+            SELECT parcel_id, inspection_date, rn, viol_count,
+                   --replace viol_outcome
+                   CASE WHEN viol_count > 0 THEN 1 ELSE 0 END AS viol_outcome
+            FROM earliest
+        )
+        
+        SELECT insp.parcel_id, insp.viol_outcome, insp.viol_count
+            FROM any_last AS insp
+            WHERE rn = 1
+    '''
+
+    #If end is not provided, use today
+    end = date.today().strftime('%Y-%m-%d') if end is None else end
+    e = create_engine(uri)
+
+    inspections_df = pd.read_sql(query, e,
+        params={'start':start, 'end':end})
+    inspections_df.set_index(['parcel_id'], inplace=True)
+    return inspections_df
+
+
 def load_one_inspection_for(start, end=None, which='last'):
     '''
         Returns a DataFrame with one inspection for every parcel in
         features.parcels_inspections for the period given between start
         and end.
-
         'which' parameter determines how to select the inspection. Possible 
         values are first, last or any.
-
         first - load inspections for a given period and select the first one
         last - load inspections for a given period and select the last one
         any - inspections for a given period and label viol_outcome if there was
@@ -232,7 +293,6 @@ def load_one_inspection_for(start, end=None, which='last'):
             AND 
                 insp.inspection_date<=%(end)s 
         ),
-
         earliest AS(
             SELECT *,
                ROW_NUMBER() OVER(PARTITION BY sub.parcel_id ORDER BY sub.inspection_date ASC) AS rn,
@@ -272,11 +332,112 @@ def load_one_inspection_for(start, end=None, which='last'):
 def add_percentile_column(df, column_name):
     '''
         Given a DataFrame and a column_name
-	   return a new DataFrame with a new column including
-	   the percentile for the value in column_name 
+       return a new DataFrame with a new column including
+       the percentile for the value in column_name 
     '''
     df = deepcopy(df)
     col_vals = df[column_name]
     perc_col_name = '{}_percentile'.format(column_name)
     df[perc_col_name] = [stats.percentileofscore(col_vals, value, 'rank') for value in col_vals]
     return df
+
+def load_one_inspection_per_parcel(start, end=None):
+    '''
+        Function to get inspections results for parcels in Cincinnati. 
+        
+        Takes inputs start and end demarcating the validation window.
+        If end is not specified, default will be today's date (i.e. all inspections after start).
+        Start and end should be in datetime date format e.g. '2016-01-01'.
+        
+        Returns a DataFrame with one row for each parcel in
+        features.parcels_inspections for the period between start and end.
+        
+        The DataFrame is indexed on parcel_id and has columns
+        inspection_date, viol_outcome (binary), and viol_count (integer-valued).
+        
+        If there are multiple inspections for a given parcel-period pair,
+        inspection_date will be the earliest date in the window,
+        viol_outcome will be 1 if there was at least one violation (else 0),
+        and viol_count will be summed over all inspections.
+
+    '''
+
+    query= '''
+        WITH sub AS(
+            SELECT *
+            FROM features.parcels_inspections AS insp
+            WHERE
+                insp.inspection_date>=%(start)s
+            AND 
+                insp.inspection_date<=%(end)s 
+            
+        ),
+        earliest AS(
+            SELECT *,
+               ROW_NUMBER() OVER(PARTITION BY sub.parcel_id ORDER BY sub.inspection_date ASC) AS rn,
+               SUM(viol_outcome) OVER(PARTITION BY sub.parcel_id) AS viol_count
+            FROM sub
+        ),
+        
+        any_last AS(
+            SELECT parcel_id, inspection_date, rn, viol_count,
+                   --replace viol_outcome
+                   CASE WHEN viol_count > 0 THEN 1 ELSE 0 END AS viol_outcome
+            FROM earliest
+        )
+        
+        SELECT insp.parcel_id, insp.viol_outcome, insp.viol_count
+            FROM any_last AS insp
+            WHERE rn = 1
+    '''
+
+    #If end is not provided, use today
+    end = date.today().strftime('%Y-%m-%d') if end is None else end
+    e = create_engine(uri)
+
+    inspections_df = pd.read_sql(query, e,
+        params={'start':start, 'end':end})
+    inspections_df.set_index(['parcel_id'], inplace=True)
+    return inspections_df
+
+def distance_on_unit_sphere(coords1, coords2):
+    lat1, long1 = coords1
+    lat2, long2 = coords2
+    # Convert latitude and longitude to
+    # spherical coordinates in radians.
+    degrees_to_radians = math.pi/180.0
+
+    # phi = 90 - latitude
+    phi1 = (90.0 - lat1)*degrees_to_radians
+    phi2 = (90.0 - lat2)*degrees_to_radians
+
+    # theta = longitude
+    theta1 = long1*degrees_to_radians
+    theta2 = long2*degrees_to_radians
+    # Compute spherical distance from spherical coordinates.
+    # For two locations in spherical coordinates
+    # (1, theta, phi) and (1, theta', phi')
+    # cosine( arc length ) =
+    # sin phi sin phi' cos(theta-theta') + cos phi cos phi'
+    # distance = rho * arc length
+    cos = (math.sin(phi1)*math.sin(phi2)*math.cos(theta1 - theta2) +
+    math.cos(phi1)*math.cos(phi2))
+
+    if cos > 1.0:
+        cos = 1.0
+    if cos < -1.0:
+        cos = -1.0
+
+    arc = math.acos( cos )
+    # Remember to multiply arc by the radius of the earth
+    # in your favorite set of units to get length.
+    return arc*6373.0
+
+def avg_dist(m):
+    #Get coordinates as tuples
+    coords = list(m['top'][['latitude', 'longitude']].itertuples(index=False, name=None))
+    #Get every combination of coordinates pairs
+    pairs = combinations(coords, 2)
+    #Calculate distance for every pair
+    dists = [distance_on_unit_sphere(*p) for p in pairs]
+    return np.mean(dists), m['experiment_name']
