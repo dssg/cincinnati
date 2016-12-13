@@ -62,7 +62,7 @@ def predict_on_schema(model_id, schema):
     return df
 
 
-def get_predictions(model_id, schema):
+def get_predictions(model_id):
     output_folder = os.environ['OUTPUT_FOLDER']
     path_to_predictions = os.path.join(output_folder, "top_predictions_on_all_parcels")
 
