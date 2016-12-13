@@ -32,13 +32,16 @@ def make_three11_features(con, n_months, max_dist):
         min_insp, max_insp, n_months=n_months, max_dist=max_dist, load=False)
 
 
+    max_rnum = 15
+
     logger.info('Computing distance features for {}'.format(dataset))
+
+    coalescemissing = "'missing'" # needs to be double-quoted cause SQL-injection
 
     # frequent service_codes, so we can prune them (there are too many)
     make_table_of_frequent_codes(con, col='service_code', intable='public.three11',
-            outtable='public.frequentthree11_service_code')
-
-    max_rnum = 15
+            outtable='public.frequentthree11_service_code', rnum=max_rnum,
+            coalesceto=coalescemissing)
 
     cur = con.cursor()
 
@@ -52,7 +55,7 @@ def make_three11_features(con, n_months, max_dist):
             SELECT parcel_id, inspection_date,
                    agency_responsible,
                    status,
-                   service_code,
+                   coalesce(service_code,{coalescemissing}) as service_code,
                    CASE WHEN description='Request entered through the Web. Refer to Intake Questions for further description.'
                         THEN 1 ELSE 0 END AS webrequest
             FROM insp2three11_{n_months}months_{max_dist}m i2e
@@ -77,14 +80,32 @@ def make_three11_features(con, n_months, max_dist):
 
         -- make the categorical (dummified) features 
         CREATE TEMP TABLE three11features2_{n_months}months_{max_dist}m ON COMMIT DROP AS
-            -- restrict three11 levels to the {max_rnum} most common ones,
+
+            -- restrict three11 levels to the 15 most common ones,
             -- using the tables of frequency counts for these levels that we created earlier
-            SELECT parcel_id, inspection_date, 'service_code_'||coalesce(t.service_code,'missing') as categ, count(*) as count
-            FROM joinedthree11_{n_months}months_{max_dist}m t
-            LEFT JOIN public.frequentthree11_service_code freqcateg
-            ON freqcateg.service_code = t.service_code
-            WHERE freqcateg.rnum <= {max_rnum}
-            GROUP BY parcel_id, inspection_date, t.service_code
+            -- also make sure all levels always appear
+
+            SELECT 
+                t2.parcel_id, t2.inspection_date,
+                'service_code_'||t2.level AS categ,
+                coalesce(t1.count,0) as count   
+             FROM
+             (SELECT parcel_id, inspection_date,
+                     ft.level,
+                     count(*) as count
+              FROM joinedthree11_{n_months}months_{max_dist}m event
+              LEFT JOIN public.frequentthree11_service_code ft
+              ON ft.raw_level = event.service_code
+              GROUP BY parcel_id, inspection_date, ft.level
+             ) t1
+             RIGHT JOIN
+             (SELECT parcel_id, inspection_date, ft.level 
+                 FROM parcels_inspections
+                 JOIN 
+                     (select distinct level from public.frequentthree11_service_code) ft
+                 ON true
+             ) t2
+             USING (parcel_id, inspection_date,level)
         ;
 
         CREATE INDEX ON three11features2_{n_months}months_{max_dist}m (parcel_id, inspection_date);
@@ -108,7 +129,7 @@ def make_three11_features(con, n_months, max_dist):
             USING (parcel_id, inspection_date)
         ;
     """.format(n_months=str(n_months), max_dist=str(max_dist),
-                max_rnum = str(max_rnum))
+               coalescemissing=coalescemissing)
 
     cur.execute(query)
     con.commit()

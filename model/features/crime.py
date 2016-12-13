@@ -33,28 +33,34 @@ def make_crime_features(con, n_months, max_dist):
 
     logger.info('Computing distance features for {}'.format(dataset))
 
+    max_rnum = 15
+    coalescemissing = "'missing'" 
+
     # make a table of the more general offense frequencies so we can prune them
     # also include a column with an array of corresponding detailed levels
     query = """
         DROP TABLE IF EXISTS public.frequentcrimes_orc;
         CREATE TABLE public.frequentcrimes_orc AS (
         WITH t as (
-        SELECT substring(orc from ' \((\w*)\) ') as orc_combined,
+        SELECT coalesce(substring(orc from ' \((\w*)\) '), {coalescemissing}) as orc_combined,
                array_agg(distinct orc) as all_orcs,
                count(*) as count
         FROM public.crime
         GROUP BY orc_combined
         ORDER BY count desc
         )
-        SELECT row_number() OVER () as rnum, t.*
+        SELECT 
+            row_number() OVER () as rnum,
+            t.orc_combined,
+            t.all_orcs,
+            CASE WHEN row_number() OVER () <= {rnum} THEN t.orc_combined
+            ELSE 'other' END AS level
         FROM t
-        );"""
+        );""".format(rnum=max_rnum,coalescemissing=coalescemissing)
 
     cur = con.cursor()
     cur.execute(query)
     con.commit()
-
-    max_rnum = 15
 
     query = """
         DROP TABLE IF EXISTS crimefeatures1_{n_months}months_{max_dist}m;
@@ -64,7 +70,7 @@ def make_crime_features(con, n_months, max_dist):
         -- join the inspections and crime
         CREATE TEMP TABLE joinedcrime_{n_months}months_{max_dist}m ON COMMIT DROP AS
             SELECT parcel_id, inspection_date,
-                   substring(event.orc from ' \((\w*)\) ') as orc_combined
+                   coalesce(substring(event.orc from ' \((\w*)\) '), {coalescemissing}) as orc_combined
             FROM insp2crime_{n_months}months_{max_dist}m i2e
             LEFT JOIN LATERAL (
                 SELECT * FROM public.crime s where s.id=i2e.id
@@ -85,14 +91,32 @@ def make_crime_features(con, n_months, max_dist):
 
         -- make the categorical (dummified) features 
         CREATE TEMP TABLE crimefeatures2_{n_months}months_{max_dist}m ON COMMIT DROP AS
-            -- restrict crime levels to the {max_rnum} most common ones,
+
+            -- restrict crime levels to the 15 most common ones,
             -- using the tables of frequency counts for these levels that we created earlier
-            SELECT parcel_id, inspection_date, 'orc_combined_'||coalesce(t.orc_combined,'missing') as categ, count(*) as count
-            FROM joinedcrime_{n_months}months_{max_dist}m t
-            LEFT JOIN public.frequentcrimes_orc freqcateg
-            ON freqcateg.orc_combined = t.orc_combined
-            WHERE freqcateg.rnum <= {max_rnum}
-            GROUP BY parcel_id, inspection_date, t.orc_combined
+            -- also make sure all 15 levels appear
+
+            SELECT 
+                t2.parcel_id, t2.inspection_date,
+                'orc_combined_'||t2.level AS categ,
+                coalesce(t1.count,0) as count   
+             FROM
+             (SELECT parcel_id, inspection_date,
+                     ft.level,
+                     count(*) as count
+              FROM joinedcrime_{n_months}months_{max_dist}m event
+              LEFT JOIN public.frequentcrimes_orc ft
+              ON ft.orc_combined = event.orc_combined
+              GROUP BY parcel_id, inspection_date, ft.level
+             ) t1
+             RIGHT JOIN
+             (SELECT parcel_id, inspection_date, ft.level 
+                 FROM parcels_inspections
+                 JOIN 
+                     (select distinct level from public.frequentcrimes_orc) ft
+                 ON true
+             ) t2
+             USING (parcel_id, inspection_date,level)
         ;
 
         CREATE INDEX ON crimefeatures2_{n_months}months_{max_dist}m (parcel_id, inspection_date);
@@ -115,8 +139,7 @@ def make_crime_features(con, n_months, max_dist):
             JOIN crimepivot_{n_months}months_{max_dist}m
             USING (parcel_id, inspection_date)
         ;
-    """.format(n_months=str(n_months), max_dist=str(max_dist),
-                max_rnum = str(max_rnum))
+    """.format(n_months=str(n_months), max_dist=str(max_dist),coalescemissing=coalescemissing)
 
     cur.execute(query)
     con.commit()

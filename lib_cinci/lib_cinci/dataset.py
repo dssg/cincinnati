@@ -444,10 +444,10 @@ def get_testing_dataset(features, start_date, end_date, only_residential):
     return get_dataset(schema, features, start_date, end_date,
                        only_residential)
 
-def get_features_for_inspections_in_schema(schema, features):
+def get_features_for_inspections_in_schema(schema, features, only_residential=False):
     logger.info("Getting features for all inspections in {}".format(schema))
 
     start_date = datetime.datetime.strptime('01Jan1970', '%d%b%Y')
-    end_date = datetime.datetime.strptime('01Jan2020', '%d%b%Y')
+    end_date = datetime.datetime.strptime('01Jan2080', '%d%b%Y')
 
-    return get_dataset(schema, features, start_date, end_date, False)
+    return get_dataset(schema, features, start_date, end_date, only_residential)

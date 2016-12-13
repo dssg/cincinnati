@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 import pandas as pd
 import datetime
+from dateutil import relativedelta
+import re
 import yaml
 import os
 import logging
 import logging.config
 import copy
+import random
 import numpy as np
+from pydoc import locate
 from lib_cinci import dataset
 import evaluation
 from features import feature_parser
@@ -15,7 +19,7 @@ from sklearn import preprocessing
 from sklearn.externals import joblib
 from sklearn_evaluation.Logger import Logger
 from sklearn_evaluation.metrics import precision_at
-from grid_generator import grid_from_class
+from grid_generator import grid_from_class, _generate_grid
 
 from lib_cinci.config import main as cfg_main
 from lib_cinci.config import load
@@ -23,7 +27,8 @@ from lib_cinci.exceptions import MaxDateError, ConfigError, ExperimentExists
 from lib_cinci.folders import (path_to_predictions, path_to_pickled_models,
                                path_to_pickled_scalers,
                                path_to_pickled_imputers,
-                               path_to_dumps)
+                               path_to_dumps,
+                               path_to_top_predictions_on_all_parcels)
 from lib_cinci.features import (check_nas_threshold,
                                 boundaries_for_table_and_column)
 
@@ -42,7 +47,8 @@ logger = logging.getLogger()
 
 dirs = [path_to_predictions, path_to_pickled_models,
          path_to_pickled_scalers, path_to_pickled_imputers,
-         path_to_dumps]
+         path_to_dumps,
+         path_to_top_predictions_on_all_parcels]
 #Make directories if they don't exist
 for directory in dirs:
     if not os.path.exists(directory):
@@ -61,21 +67,21 @@ def configure_model(config_file):
 
     return cfg, copy.deepcopy(cfg)
 
-def make_datasets(config):
+def make_datasets(config, predictset=False):
     start_date = datetime.datetime.strptime(config["start_date"], '%d%b%Y')
     fake_today = datetime.datetime.strptime(config['fake_today'], '%d%b%Y')
 
-    if config["validation_window"] == "1Year":
-        validation_window = datetime.timedelta(days=365)
-    elif config["validation_window"] == "1Month":
-        validation_window = datetime.timedelta(days=30)
-    elif config["validation_window"] == "6Month":
-        validation_window = datetime.timedelta(days=30 * 6)
-    elif config["validation_window"] == "None":
-        validation_window = datetime.timedelta(days=0)
-    else:
-        raise ConfigError("Unsupported validation window: {}".format(
-                          config["validation_window"]))
+    # parse the validation window
+    dnum, units = re.match(r"(\d+)(\w+)", config["validation_window"]).groups() 
+    if float(dnum)%1 != 0:
+        raise ValueError("The validation window needs an integer!")
+    dnum = int(dnum)
+    units = units.lower()
+    unitdict = {'month':'M', 'day':'D'}
+    if units not in unitdict.keys():
+        raise ValueError("Validation window units need to be 'Month' or 'Day'!")
+    training_end = pd.date_range(start=fake_today, periods=2, 
+                                 freq='%d%s'%(dnum,unitdict[units]))[1]
 
     #Before proceeding, make sure dates for training and testing are 
     #May 05, 2015 at most. Further dates won't work since you don't
@@ -87,10 +93,10 @@ def make_datasets(config):
     
     if start_date > max_date:
         raise MaxDateError(('Error: Your start_date exceeds '
-             '{:%B %d, %Y}, which is the latest inspection in '
-             '"features.parcels_inspections" table').format(max_date))
+            '{:%B %d, %Y}, which is the latest inspection in '
+            '"features.parcels_inspections" table').format(max_date))
     #Check fake today + validation window
-    if fake_today + validation_window > max_date:
+    if training_end > max_date:
         raise MaxDateError('Error: your fake_today + validation_window exceeds '
              '{:%B %d, %Y}, which is the latest inspection in '
              '"features.parcels_inspections" table'.format(max_date))
@@ -104,7 +110,7 @@ def make_datasets(config):
 
     #Train set is built with a list of features, parsed from the configuration
     #file. Data is obtained between start date and fake today.
-    #it is possible to select residential parels only.
+    #it is possible to select residential parcels only.
     #Data is obtained from features schema
     train = dataset.get_training_dataset(
         features=features,
@@ -119,10 +125,21 @@ def make_datasets(config):
     test = dataset.get_testing_dataset(
         features=features,
         start_date=fake_today,
-        end_date=fake_today + validation_window,
+        end_date=training_end,
         only_residential=only_residential)
 
-    return train, test
+    if not predictset:
+        return train, test
+    else:
+        schema = "features_{}".format(
+                    (training_end) 
+                        .strftime('%d%b%Y')).lower()
+        preds = dataset.get_features_for_inspections_in_schema(
+                schema=schema,
+                features=features,
+                only_residential=only_residential)
+
+    return train, test, preds
 
 def output_evaluation_statistics(test, predictions):
     logger.info("Statistics with probability cutoff at 0.5")
@@ -157,6 +174,21 @@ def get_feature_importances(model):
                       'nor coef_ returning None'))
     return None
 
+def log_predictions_on_all(preds, predictions_on_all, mongo_id, topx):
+
+    # Dump test_labels, test_predictions and test_parcels to a csv file
+    parcel_id = [record[0] for record in preds.parcels]
+    inspection_date = [record[1] for record in preds.parcels]
+    dump = pd.DataFrame({'parcel_id': parcel_id,
+                         'inspection_date': inspection_date,
+                         'prediction': predictions_on_all})
+
+    # restrict to top X most risky predictions
+    dump = dump.sort_values(by='prediction', ascending=False)
+    dump = dump.head(int( pd.np.round( len(dump)*topx/100. ) ) )
+
+    # Dump predictions to CSV
+    dump.to_csv(os.path.join(path_to_top_predictions_on_all_parcels, mongo_id))
 
 def log_results(model, config, test, predictions, feature_importances,
                 imputer, scaler):
@@ -184,8 +216,6 @@ def log_results(model, config, test, predictions, feature_importances,
     ft_map = test.feature_mapping
 
     mongo_id = mongo_logger.log_model(model,
-                                      features=list(test.feature_names),
-                                      feature_importances=ft_imp,
                                       config=config,
                                       prec_at_1=prec_at_1,
                                       cutoff_at_1=cutoff_at_1,
@@ -195,8 +225,11 @@ def log_results(model, config, test, predictions, feature_importances,
                                       cutoff_at_10=cutoff_at_10,
                                       prec_at_20=prec_at_20,
                                       cutoff_at_20=cutoff_at_20,
-                                      experiment_name=experiment_name,
-                                      feature_mapping=ft_map)
+                                      experiment_name=experiment_name) #,
+                                      # features=list(test.feature_names),
+                                      # feature_mapping=ft_map,
+                                      # feature_importances=ft_imp)
+
 
     # Dump test_labels, test_predictions and test_parcels to a csv file
     parcel_id = [record[0] for record in test.parcels]
@@ -221,26 +254,44 @@ def log_results(model, config, test, predictions, feature_importances,
         logger.info('Pickling scaler: {}'.format(path_to_file))
         joblib.dump(scaler, path_to_file)
 
+    return mongo_id
+
 
 def main():
     config_file = args.path_to_config_file
     config, config_raw = configure_model(config_file)
 
+    if args.predicttop and args.notlog:
+        raise ValueError("You cannot save the top X predictions "
+                "on all parcels without also logging.")
+
     #If logging is enabled, check that there are no records for
     #the selected experiment
     if not args.notlog:
+
         logger_uri = cfg_main['logger']['uri']
         logger_db = cfg_main['logger']['db']
         logger_collection = cfg_main['logger']['collection']
         mongo_logger = Logger(logger_uri, logger_db, logger_collection)
+
         if mongo_logger.experiment_exists(config['experiment_name']):
-            raise ExperimentExists(config['experiment_name'])
+
+            # if the user hasn't selected to overwrite the record, throw error
+            if not args.overwritelog:
+                raise ExperimentExists(config['experiment_name'])
+            else:
+                mongo_logger.delete_experiment(config['experiment_name'])
 
     # datasets
     logger.info('Loading datasets...')
-    train, test  = make_datasets(config)
-    logger.debug('Train x shape: {} Test x shape: {}'.format(train.x.shape,
-        test.x.shape))
+    if not args.predicttop:
+        train, test  = make_datasets(config, predictset=False)
+        logger.debug('Train x shape: {} Test x shape: {}'.format(train.x.shape,
+            test.x.shape))
+    else:
+        train, test, preds = make_datasets(config, predictset=True)
+        logger.debug('Train x shape: {} Test x shape: {} Prediction x shape {}'\
+                .format(train.x.shape, test.x.shape, preds.x.shape))
 
     #Check percentage of NAs for every feature,
     #raise an error if at least one feature has more NAs than the
@@ -257,6 +308,9 @@ def main():
         logger.info('Dumping train and tests sets')
         datasets = [(train, 'train'), 
                     (test, 'test')]
+        if args.predicttop:
+            logger.info('Dumping prediction sets')
+            datasets.append((preds, 'prediction'))
         for data, name in datasets:
             if data is not None:
                 filename = '{}_{}.csv'.format(config["experiment_name"], name)
@@ -271,12 +325,18 @@ def main():
                 logger.info('{} is None, skipping dump...'.format(name))
 
     #Impute missing values (mean is the only strategy for now)
+    # Note that the features can specify imputation strategies;
+    # and if they don't, then they already got a default imputer,
+    # which imputes the median (for floats), or 0 (for integers)
     logger.info('Imputing values on train and test...')
     imputer = preprocessing.Imputer().fit(train.x)
     train.x = imputer.transform(train.x)
     test.x = imputer.transform(test.x)
     logger.debug('Train x shape: {} Test x shape: {}'.format(train.x.shape,
         test.x.shape))
+    if args.predicttop:
+        preds.x = imputer.transform(preds.x)
+        logger.debug('Prediction x shape: {}'.format(preds.x.shape))
 
     # Scale features to zero mean and unit variance
     logger.info('Scaling train, test...')
@@ -285,15 +345,39 @@ def main():
     test.x = scaler.transform(test.x)
     logger.debug('Train x shape: {} Test x shape: {}'.format(train.x.shape,
         test.x.shape))
+    if args.predicttop:
+        preds.x = scaler.transform(preds.x)
+        logger.debug('Prediction x shape: {}'.format(preds.x.shape))
 
     #Get size of grids
     grid_size = config["grid_size"]
     #Get list of models selected
     models_selected = config["models"]
-    #Get grid for each class
-    grids = [grid_from_class(m, size=grid_size) for m in models_selected]
-    #Flatten list
-    models = [a_grid for a_model_grid in grids for a_grid in a_model_grid]
+
+    models = []
+    for m in models_selected:
+        # if the model is a dict, the user has supplied parameters,
+        # over which we take the product
+        if type(m) == dict:
+            if len(m.keys()) > 1 or len(m.values()) > 1:
+                raise ValueError("A model is not specified correctly.")
+            modelclass = m.keys()[0]
+            paramdicts = _generate_grid(m.values()[0])
+
+            logging.info("%s has parameter ranges supplied; "
+                         "ignoring grid_size"%modelclass)
+
+            for paramdict in paramdicts:
+                models.append(
+                        locate(modelclass)(**paramdict)
+                        )
+        else:
+            # just use the pre-specified grid-class
+            for thism in grid_from_class(m, size=grid_size):
+                models.append(thism)
+
+    if args.shufflemodels:
+        random.shuffle(models)
 
     # fit each model for all of these
     for idx, model in enumerate(models):
@@ -322,10 +406,13 @@ def main():
         output_evaluation_statistics(test, predicted)
         feature_importances = get_feature_importances(model)
 
+        # predict on all parcels, if selected
+        if args.predicttop:
+            predicted_on_all = model.predict_proba(preds.x)[:,1]
+            # rank by risk, only keep the top X %
+
         # save results
         prefix = config["experiment_name"] if config["experiment_name"] else ''
-        outfile = "{prefix}{timestamp}.pkl".format(prefix=prefix,
-                                                   timestamp=timestamp)
         config_raw["parameters"] = model.get_params()
         
         #Log depending on user selection
@@ -335,8 +422,11 @@ def main():
             #Log parameters and metrics to MongoDB
             #Save predictions to CSV file
             #and pickle model
-            log_results(model, config_raw, test, predicted,
+            model_id = log_results(model, config_raw, test, predicted,
                 feature_importances, imputer, scaler)
+            if args.predicttop:
+                log_predictions_on_all(preds, predicted_on_all, 
+                                       model_id, float(args.predicttop))
 
 
 if __name__ == '__main__':
@@ -351,6 +441,9 @@ if __name__ == '__main__':
                                   "such flag. Defaults to -1 (all jobs possible)"))
     parser.add_argument("-nl", "--notlog", action="store_true",
                         help="Do not log results to MongoDB")
+    parser.add_argument("-ol", "--overwritelog", action="store_true",
+                        help="If the experiment already exists "
+                        "in the MongoDB, overwrite it.")
     parser.add_argument("-p", "--pickle", action="store_true",
                         help="Pickle model, imputer and scaler, "
                         "only valid if logging is activated")
@@ -359,5 +452,12 @@ if __name__ == '__main__':
                               "before imputation and scaling. "
                               "Output will be saved as "
                               "$OUTPUT_FOLDER/dumps/[experiment_name]_[train/test]"))
+    parser.add_argument("-pt", "--predicttop", type=int, default=None,
+                        help="Make predictions on all parcels, and "
+                        "store the top X percent. Will be saved to "
+                        "$OUTPUT_FOLDER/dumps/[experiment_name]_predict. " 
+                        "Requires that the corresponding features have been created.")
+    parser.add_argument("-sm", "--shufflemodels", action="store_true",
+                        help="Shuffle the order in which models are being run.")
     args = parser.parse_args()
     main()

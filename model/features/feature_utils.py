@@ -170,11 +170,13 @@ def load_colpivot(con):
     con.commit()
 
 def make_table_of_frequent_codes(con, col, intable, outtable, dropifexists=True,
-        coalesceto="'missing'"):
+        coalesceto="'missing'", rnum=15, to_other="'other'"):
     """ Make a table of codes and counts, so we can filter on them.
         If you don't want to coalesce missing codes to anything, pass
         coalescto="null". Note that strings must be double-quoted, as in 
         coaelsto's default argument ("'missing'").
+        All levels that are not among the top rnum most frequent ones will
+        be set to to_other (which also needs to double-quoted if it's a string).
     """
 
     cur = con.cursor()
@@ -189,16 +191,21 @@ def make_table_of_frequent_codes(con, col, intable, outtable, dropifexists=True,
     query = """
         CREATE TABLE {outtable} AS (
         WITH t as (
-        SELECT coalesce({col},{coalesceto}) AS {col}, count(*) AS count
+        SELECT coalesce({col},{coalesceto}) AS raw_level, count(*) AS count
         FROM {intable}
         GROUP BY {col}
         ORDER BY count desc
         )
-        SELECT row_number() OVER () as rnum, t.*
+        SELECT 
+            row_number() OVER () as rnum,
+            t.raw_level,
+            CASE WHEN row_number() OVER () <= {rnum} THEN t.raw_level
+            ELSE {to_other} END AS level
         FROM t
         );
+
     """.format(outtable=outtable, col=col, coalesceto=coalesceto,
-                intable=intable)
+                intable=intable, rnum=rnum, to_other=to_other)
 
     # if it already exists and hasn't been dropped above, don't re-run
     try:

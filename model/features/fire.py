@@ -27,6 +27,7 @@ def make_fire_features(con, n_months, max_dist):
     """
     dataset = 'fire'
     date_column = 'incident_date'
+    coalescemissing = "'missing'" 
 
     #Get the time window for which you can generate features
     min_insp, max_insp = check_date_boundaries(con, n_months, dataset, date_column)
@@ -51,7 +52,9 @@ def make_fire_features(con, n_months, max_dist):
     # types of incidents
     make_table_of_frequent_codes(con, col='incident_type_desc', 
             intable='public.fire',
-            outtable='public.frequentfiretypes')
+            outtable='public.frequentfiretypes',
+            coalesce_to=coalescemissing,
+            rnum=15)
 
     # also make sure that the fire data has an index on the description,
     # as we want to join on it
@@ -82,14 +85,27 @@ def make_fire_features(con, n_months, max_dist):
         CREATE INDEX ON joinedtable (parcel_id, inspection_date);
 
         -- group by inspections and fire types (we'll pivot later)
+        -- make sure to include all types
         CREATE TEMP TABLE firetypes_{n_months}months_{max_dist}m ON COMMIT DROP AS (
-            SELECT parcel_id, inspection_date, event.incident_type_desc,
-            count(*) as count
-            FROM joinedtable event
-            LEFT JOIN public.frequentfiretypes frequentfires 
-            ON frequentfires.incident_type_desc = event.incident_type_desc
-            WHERE frequentfires.rnum <= 15
-            GROUP BY parcel_id, inspection_date, event.incident_type_desc
+
+            SELECT t2.parcel_id, t2.inspection_date,
+                   'incident_type_'||t2.level AS incident_type_desc,
+                   coalesce(t1.count, 0) as count
+            FROM ( SELECT parcel_id, inspection_date,
+                       frequentfires.level,
+                       count(*) as count
+                   FROM joinedtable event
+                   LEFT JOIN public.frequentfiretypes frequentfires
+                   ON frequentfires.raw_level = coalesce(event.incident_type_desc, {coalescemissing})
+                   GROUP BY parcel_id, inspection_date, frequentfires.level
+            ) t1
+            RIGHT JOIN (
+                SELECT parcel_id, inspection_date, ft.level
+                FROM parcels_inspections
+                JOIN (SELECT DISTINCT level FROM public.frequentfiretypes) ft
+                ON true
+            ) t2
+            USING (parcel_id, inspection_date, level)
         );
 
         CREATE INDEX ON firetypes_{n_months}months_{max_dist}m (parcel_id, inspection_date);
@@ -139,7 +155,8 @@ def make_fire_features(con, n_months, max_dist):
         ;
         """.format(insp2tablename=insp2tablename,
                    n_months=str(n_months),
-                   max_dist=str(max_dist))
+                   max_dist=str(max_dist),
+                   coalescemissing=coalescemissing)
 
     cur.execute(query)
     con.commit()
