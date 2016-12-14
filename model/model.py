@@ -258,6 +258,16 @@ def log_results(model, config, test, predictions, feature_importances,
 
 
 def main():
+
+    if args.warninglog:
+        myhandler = logging.FileHandler(os.path.abspath(args.warninglog))
+        myhandler.setLevel('WARNING')
+        logger.addHandler(myhandler)
+    if args.debuglog:
+        myhandler2 = logging.FileHandler(os.path.abspath(args.debuglog))
+        myhandler2.setLevel('DEBUG')
+        logger.addHandler(myhandler2)
+
     config_file = args.path_to_config_file
     config, config_raw = configure_model(config_file)
 
@@ -459,5 +469,12 @@ if __name__ == '__main__':
                         "Requires that the corresponding features have been created.")
     parser.add_argument("-sm", "--shufflemodels", action="store_true",
                         help="Shuffle the order in which models are being run.")
+    parser.add_argument("-wl", "--warninglog", type=str, default=None,
+                        help="Specify a filepath to a log file for "
+                        "warnings. Does not affect the standard pipeline logging.")
+    parser.add_argument("-dl", "--debuglog", type=str, default=None,
+                        help="Specify a filepath to a log file for "
+                        "debug info. Does not affect the standard pipeline logging.")
     args = parser.parse_args()
     main()
+
