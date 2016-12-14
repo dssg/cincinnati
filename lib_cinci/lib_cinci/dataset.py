@@ -65,12 +65,12 @@ class FeatureLoader():
                       "419, 423, 431, 510, 520, 530, 550, 551, 552, "
                       "554, 555, 560, 599, 996) "
                       "AND inspection_date >= %(start_date)s "
-                      "AND inspection_date <= %(end_date)s")
+                      "AND inspection_date < %(end_date)s")
         else:
             labels = ("SELECT * "
                       "FROM parcels_inspections AS labels "
                       "WHERE  inspection_date >= %(start_date)s "
-                      "AND inspection_date <= %(end_date)s")
+                      "AND inspection_date < %(end_date)s")
 
         labels = pd.read_sql(labels, con=self.con, params={"start_date":
                              self.start_date, "end_date": self.end_date})
@@ -110,7 +110,7 @@ class FeatureLoader():
                  "JOIN parcels_inspections AS labels "
                  "ON feature.parcel_id = labels.parcel_id "
                  "WHERE labels.inspection_date >= %(start_date)s "
-                 "AND labels.inspection_date <= %(end_date)s")
+                 "AND labels.inspection_date < %(end_date)s")
 
         features = self.__read_feature_from_db(query, features_to_load,
                                                drop_duplicates=True)
@@ -124,7 +124,7 @@ class FeatureLoader():
         query = ("SELECT feature.* "
                  "FROM named_entities AS feature "
                  "WHERE feature.inspection_date >= %(start_date)s "
-                 "AND feature.inspection_date <= %(end_date)s")
+                 "AND feature.inspection_date < %(end_date)s")
 
         features = self.__read_feature_from_db(query, features_to_load,
                                                drop_duplicates=True)
@@ -140,7 +140,7 @@ class FeatureLoader():
                  "JOIN parcels_inspections AS labels "
                  "ON feature.parcel_id = labels.parcel_id "
                  "WHERE labels.inspection_date >= %(start_date)s "
-                 "AND labels.inspection_date <= %(end_date)s")
+                 "AND labels.inspection_date < %(end_date)s")
 
         features = self.__read_feature_from_db(query, features_to_load,
                                                drop_duplicates=True)
@@ -157,7 +157,7 @@ class FeatureLoader():
                  "JOIN parcels_inspections AS labels "
                  "ON feature.parcel_id = labels.parcel_id "
                  "WHERE labels.inspection_date >= %(start_date)s "
-                 "AND labels.inspection_date <= %(end_date)s")
+                 "AND labels.inspection_date < %(end_date)s")
 
         features = self.__read_feature_from_db(query, features_to_load,
                                                drop_duplicates=True)
@@ -171,7 +171,7 @@ class FeatureLoader():
         query = ("SELECT feature.* "
                  "FROM crime_old AS feature "
                  "WHERE feature.inspection_date >= %(start_date)s "
-                 "AND feature.inspection_date <= %(end_date)s")
+                 "AND feature.inspection_date < %(end_date)s")
 
         features = self.__read_feature_from_db(query, features_to_load,
                                                drop_duplicates=True)
@@ -185,7 +185,7 @@ class FeatureLoader():
         query = ("SELECT feature.* "
                  "FROM crime_new AS feature "
                  "WHERE feature.inspection_date >= %(start_date)s "
-                 "AND feature.inspection_date <= %(end_date)s")
+                 "AND feature.inspection_date < %(end_date)s")
 
         features = self.__read_feature_from_db(query, features_to_load,
                                                drop_duplicates=True)
@@ -199,7 +199,7 @@ class FeatureLoader():
         query = ("SELECT feature.* "
                  "FROM tax  AS feature "
                  "WHERE feature.inspection_date >= %(start_date)s "
-                 "AND feature.inspection_date <= %(end_date)s")
+                 "AND feature.inspection_date < %(end_date)s")
 
         features = self.__read_feature_from_db(query, features_to_load,
                                                drop_duplicates=True)
@@ -217,7 +217,7 @@ class FeatureLoader():
                  "JOIN parcels_inspections AS labels "
                  "ON feature.parcel_id = labels.parcel_id "
                  "WHERE labels.inspection_date >= %(start_date)s "
-                 "AND labels.inspection_date <= %(end_date)s")
+                 "AND labels.inspection_date < %(end_date)s")
 
         features = self.__read_feature_from_db(query, features_to_load,
                                                drop_duplicates=True)
@@ -241,7 +241,7 @@ class FeatureLoader():
             query = ("SELECT feature.* "
                      "FROM "+table_name+"  AS feature "
                      "WHERE feature.inspection_date >= %(start_date)s "
-                     "AND feature.inspection_date <= %(end_date)s")
+                     "AND feature.inspection_date < %(end_date)s")
     
             #Pass query and list of features to a function that returns the pandas
             #DataFrame
