@@ -112,8 +112,8 @@ small = {
 
 single = {
     "sklearn.ensemble.RandomForestClassifier": {
-        'n_estimators': [1000],
-        'max_depth': [100],
+        'n_estimators': [50],
+        'max_depth': [5],
         'max_features': ['sqrt'],
         'criterion': ['entropy']
     }
