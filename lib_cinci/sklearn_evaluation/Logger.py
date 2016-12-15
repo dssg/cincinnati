@@ -39,7 +39,7 @@ class Logger:
             and a key
         '''
         return (self.collection.find({"experiment_name": experiment_name})
-                    .sort("prec_at_1", pymongo.DESCENDING)[0])
+                    .sort(key, pymongo.DESCENDING)[0])
 
     def delete_experiment(self, experiment_name):
         ''' 
