@@ -66,6 +66,36 @@ def configure_model(config_file):
         cfg["residential_only"] = False
 
     return cfg, copy.deepcopy(cfg)
+    
+def get_models_from_config(models_selected, grid_size):
+    """
+    Args:
+        models_selected ([str]): List of models, as specified in the config YAML.
+        grid_size (str): Grid size, as given in the config YAML.
+    Returns ([dict]): List of models.
+    """
+    models = []
+    for m in models_selected:
+        # if the model is a dict, the user has supplied parameters,
+        # over which we take the product
+        if type(m) == dict:
+            if len(m.keys()) > 1 or len(m.values()) > 1:
+                raise ValueError("A model is not specified correctly.")
+            modelclass = m.keys()[0]
+            paramdicts = _generate_grid(m.values()[0])
+
+            logging.info("%s has parameter ranges supplied; "
+                         "ignoring grid_size"%modelclass)
+
+            for paramdict in paramdicts:
+                models.append(
+                        locate(modelclass)(**paramdict)
+                        )
+        else:
+            # just use the pre-specified grid-class
+            for thism in grid_from_class(m, size=grid_size):
+                models.append(thism)
+    return models
 
 def make_datasets(config, predictset=False):
     start_date = datetime.datetime.strptime(config["start_date"], '%d%b%Y')
@@ -364,33 +394,19 @@ def main():
     #Get list of models selected
     models_selected = config["models"]
 
-    models = []
-    for m in models_selected:
-        # if the model is a dict, the user has supplied parameters,
-        # over which we take the product
-        if type(m) == dict:
-            if len(m.keys()) > 1 or len(m.values()) > 1:
-                raise ValueError("A model is not specified correctly.")
-            modelclass = m.keys()[0]
-            paramdicts = _generate_grid(m.values()[0])
-
-            logging.info("%s has parameter ranges supplied; "
-                         "ignoring grid_size"%modelclass)
-
-            for paramdict in paramdicts:
-                models.append(
-                        locate(modelclass)(**paramdict)
-                        )
-        else:
-            # just use the pre-specified grid-class
-            for thism in grid_from_class(m, size=grid_size):
-                models.append(thism)
+    models = get_models_from_config(models_selected, grid_size)
 
     if args.shufflemodels:
         random.shuffle(models)
 
     # fit each model for all of these
-    for idx, model in enumerate(models):
+    idx = 0
+    len_models = len(models)
+
+    while len(models) > 0:
+
+        model = models.pop()
+
         #Try to run in parallel if possible
         if hasattr(model, 'n_jobs'):
             model.set_params(n_jobs=args.n_jobs)
@@ -403,7 +419,7 @@ def main():
 
         # train
         logger.info("{} out of {} - Training {}".format(idx+1,
-                                                        len(models),
+                                                        len_models,
                                                         model))
         model.fit(train.x, train.y)
 
@@ -419,7 +435,6 @@ def main():
         # predict on all parcels, if selected
         if args.predicttop:
             predicted_on_all = model.predict_proba(preds.x)[:,1]
-            # rank by risk, only keep the top X %
 
         # save results
         prefix = config["experiment_name"] if config["experiment_name"] else ''
@@ -435,9 +450,11 @@ def main():
             model_id = log_results(model, config_raw, test, predicted,
                 feature_importances, imputer, scaler)
             if args.predicttop:
+                # rank by risk, only keep the top X %
                 log_predictions_on_all(preds, predicted_on_all, 
                                        model_id, float(args.predicttop))
-
+        idx += 1
+        del model
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
