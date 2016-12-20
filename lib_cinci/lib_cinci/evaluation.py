@@ -65,13 +65,16 @@ def add_inspections_results_for(df, start, end):
     e = create_engine(uri)
     query = '''
         WITH sub AS(
-            SELECT *
+            SELECT parcel_id, inspection_date, 
+            MAX(CASE WHEN viol_outcome = 1 THEN 1 ELSE 0 END) viol_outcome 
             FROM features.parcels_inspections AS insp
             WHERE
                 insp.inspection_date >= %(start)s
             AND
                 insp.inspection_date <= %(end)s
-        )
+            GROUP BY 
+               parcel_id, inspection_date
+            )
 
         SELECT  parcel_id,
             SUM(CASE WHEN viol_outcome = 1 THEN 1 ELSE 0 END) violations,
