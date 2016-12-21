@@ -357,10 +357,9 @@ def main():
                 try:
                     #Try to convert to dataframe, it will fail if data is empty
                     df = data.to_df()
+                    df.to_csv(os.path.join(path_to_dumps, filename))
                 except Exception, e:
                     logger.info('Error saving {} as csv: {}'.format(filename, e))
-                finally:
-                    df.to_csv(os.path.join(path_to_dumps, filename))
             else:
                 logger.info('{} is None, skipping dump...'.format(name))
 
