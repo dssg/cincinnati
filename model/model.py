@@ -66,6 +66,36 @@ def configure_model(config_file):
         cfg["residential_only"] = False
 
     return cfg, copy.deepcopy(cfg)
+    
+def get_models_from_config(models_selected, grid_size):
+    """
+    Args:
+        models_selected ([str]): List of models, as specified in the config YAML.
+        grid_size (str): Grid size, as given in the config YAML.
+    Returns ([dict]): List of models.
+    """
+    models = []
+    for m in models_selected:
+        # if the model is a dict, the user has supplied parameters,
+        # over which we take the product
+        if type(m) == dict:
+            if len(m.keys()) > 1 or len(m.values()) > 1:
+                raise ValueError("A model is not specified correctly.")
+            modelclass = m.keys()[0]
+            paramdicts = _generate_grid(m.values()[0])
+
+            logging.info("%s has parameter ranges supplied; "
+                         "ignoring grid_size"%modelclass)
+
+            for paramdict in paramdicts:
+                models.append(
+                        locate(modelclass)(**paramdict)
+                        )
+        else:
+            # just use the pre-specified grid-class
+            for thism in grid_from_class(m, size=grid_size):
+                models.append(thism)
+    return models
 
 def make_datasets(config, predictset=False):
     start_date = datetime.datetime.strptime(config["start_date"], '%d%b%Y')
@@ -364,27 +394,7 @@ def main():
     #Get list of models selected
     models_selected = config["models"]
 
-    models = []
-    for m in models_selected:
-        # if the model is a dict, the user has supplied parameters,
-        # over which we take the product
-        if type(m) == dict:
-            if len(m.keys()) > 1 or len(m.values()) > 1:
-                raise ValueError("A model is not specified correctly.")
-            modelclass = m.keys()[0]
-            paramdicts = _generate_grid(m.values()[0])
-
-            logging.info("%s has parameter ranges supplied; "
-                         "ignoring grid_size"%modelclass)
-
-            for paramdict in paramdicts:
-                models.append(
-                        locate(modelclass)(**paramdict)
-                        )
-        else:
-            # just use the pre-specified grid-class
-            for thism in grid_from_class(m, size=grid_size):
-                models.append(thism)
+    models = get_models_from_config(models_selected, grid_size)
 
     if args.shufflemodels:
         random.shuffle(models)
