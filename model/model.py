@@ -357,10 +357,9 @@ def main():
                 try:
                     #Try to convert to dataframe, it will fail if data is empty
                     df = data.to_df()
+                    df.to_csv(os.path.join(path_to_dumps, filename))
                 except Exception, e:
                     logger.info('Error saving {} as csv: {}'.format(filename, e))
-                finally:
-                    df.to_csv(os.path.join(path_to_dumps, filename))
             else:
                 logger.info('{} is None, skipping dump...'.format(name))
 
@@ -400,7 +399,13 @@ def main():
         random.shuffle(models)
 
     # fit each model for all of these
-    for idx, model in enumerate(models):
+    idx = 0
+    len_models = len(models)
+
+    while len(models) > 0:
+
+        model = models.pop()
+
         #Try to run in parallel if possible
         if hasattr(model, 'n_jobs'):
             model.set_params(n_jobs=args.n_jobs)
@@ -413,7 +418,7 @@ def main():
 
         # train
         logger.info("{} out of {} - Training {}".format(idx+1,
-                                                        len(models),
+                                                        len_models,
                                                         model))
         model.fit(train.x, train.y)
 
@@ -429,7 +434,6 @@ def main():
         # predict on all parcels, if selected
         if args.predicttop:
             predicted_on_all = model.predict_proba(preds.x)[:,1]
-            # rank by risk, only keep the top X %
 
         # save results
         prefix = config["experiment_name"] if config["experiment_name"] else ''
@@ -445,9 +449,11 @@ def main():
             model_id = log_results(model, config_raw, test, predicted,
                 feature_importances, imputer, scaler)
             if args.predicttop:
+                # rank by risk, only keep the top X %
                 log_predictions_on_all(preds, predicted_on_all, 
                                        model_id, float(args.predicttop))
-
+        idx += 1
+        del model
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
