@@ -110,7 +110,7 @@ def make_datasets(config, predictset=False):
     unitdict = {'month':'M', 'day':'D'}
     if units not in unitdict.keys():
         raise ValueError("Validation window units need to be 'Month' or 'Day'!")
-    training_end = pd.date_range(start=fake_today, periods=2, 
+    test_end = pd.date_range(start=fake_today, periods=2, 
                                  freq='%d%s'%(dnum,unitdict[units]))[1]
 
     #Before proceeding, make sure dates for training and testing are 
@@ -126,7 +126,7 @@ def make_datasets(config, predictset=False):
             '{:%B %d, %Y}, which is the latest inspection in '
             '"features.parcels_inspections" table').format(max_date))
     #Check fake today + validation window
-    if training_end > max_date:
+    if test_end > max_date:
         raise MaxDateError('Error: your fake_today + validation_window exceeds '
              '{:%B %d, %Y}, which is the latest inspection in '
              '"features.parcels_inspections" table'.format(max_date))
@@ -155,14 +155,14 @@ def make_datasets(config, predictset=False):
     test = dataset.get_testing_dataset(
         features=features,
         start_date=fake_today,
-        end_date=training_end,
+        end_date=test_end,
         only_residential=only_residential)
 
     if not predictset:
         return train, test
     else:
         schema = "features_{}".format(
-                    (training_end) 
+                    (test_end) 
                         .strftime('%d%b%Y')).lower()
         preds = dataset.get_features_for_inspections_in_schema(
                 schema=schema,
