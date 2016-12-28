@@ -3,11 +3,14 @@ from copy import deepcopy
 
 from sqlalchemy import create_engine
 from lib_cinci.db import uri
+from lib_cinci.config import main as cfg
 import pandas as pd
 import numpy as np
 import math
 from scipy import stats
 from itertools import combinations
+from pymongo import MongoClient
+from bson.objectid import ObjectId
 
 '''
     This file provides utility functions to evaluate
@@ -272,3 +275,31 @@ def avg_dist(m):
     #Calculate distance for every pair
     dists = [distance_on_unit_sphere(*p) for p in pairs]
     return np.mean(dists), m['experiment_name']
+
+def get_model_across_splits(model_id):
+    """
+    Finds the IDs of all models that have been trained with the same config
+    and sklearn parameters as model_id, but that have been trained on a 
+    different temporal split than model_id.
+    Args:
+        model_id (str): The MongoDB ID for a single (sklearn) models.
+    Returns ([str]): A list of MongoDB IDs, corresponding to all models 
+                    that have identical YAML configs and sklearn paramters as 
+                    model_id, except for their start_date and fake_today.
+                    However, the returned list only includes models for which 
+                    the distance between start_date and fake_today is the same
+                    as for model_id.
+    """
+
+    logger_db = cfg['logger']['db']
+    logger_uri = cfg['logger']['uri']
+    mc = MongoClient(logger_uri) 
+    db = mc[logger_db] 
+    collection = db['cincinnati']
+
+    model_cfg = list(collection.find({'_id':ObjectId(model_id)}))
+    if len(model_cfg) > 1:
+        raise ValueError("There is more than one model config for '%s'!"%model_id)
+    else:
+        model_cfg = model_cfg[0]
+
