@@ -1,14 +1,14 @@
-from sklearn_evaluation.metrics import precision_at
-from copy import deepcopy
-
-from sqlalchemy import create_engine
-from lib_cinci.db import uri
-import pandas as pd
-import numpy as np
 import math
+import numpy as np
+import pandas as pd
+from copy import deepcopy
+from itertools import combinations
+from lib_cinci.db import uri
 from scipy import stats
 from itertools import combinations
 from sklearn.linear_model import LinearRegression
+from sklearn_evaluation.metrics import precision_at
+from sqlalchemy import create_engine
 
 '''
     This file provides utility functions to evaluate
@@ -274,6 +274,7 @@ def avg_dist(m):
     dists = [distance_on_unit_sphere(*p) for p in pairs]
     return np.mean(dists), m['experiment_name']
 
+<<<<<<< HEAD
 def density_rsquare(df, mdist, months):
     """
     Return the R^2 for a linear regression that uses 
@@ -327,6 +328,4 @@ def density_rsquare(df, mdist, months):
     r2 = linreg.score(X=mydf, y=y)
 
     return r2
-
-
 
