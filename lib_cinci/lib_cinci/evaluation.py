@@ -274,7 +274,6 @@ def avg_dist(m):
     dists = [distance_on_unit_sphere(*p) for p in pairs]
     return np.mean(dists), m['experiment_name']
 
-<<<<<<< HEAD
 def density_rsquare(df, mdist, months):
     """
     Return the R^2 for a linear regression that uses 
