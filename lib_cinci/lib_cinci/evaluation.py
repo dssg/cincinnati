@@ -276,6 +276,42 @@ def avg_dist(m):
     dists = [distance_on_unit_sphere(*p) for p in pairs]
     return np.mean(dists), m['experiment_name']
 
+def _flatten_dict(mydict, joinfunc=lambda a,b: '.'.join([a,b])):
+    """
+    Helper function to take a dictionary and flatten it. Key-value pairs
+    in nested dicts are being translated to top-level key-value pairs, where
+    the nested keys are joined.
+    For example, {'aa': 11, 'cc': {'aaa': 111, 'bbb': 222}, 'bb': 22} becomes
+    {'aa': 11, 'bb': 22, 'cc.aaa': 111, 'cc.bbb': 222}.
+    Args:
+        mydict (dict): Dictionary to be flattened.
+        joinfunc (func): A function that takes to keys and returns
+                         one key. By default, string joining with '.'
+    Returns (dict): The flattened dict.
+    """
+
+    for k in mydict.keys():
+        if '.' in k:
+            raise ValueError(("There is a '.' in %s. This will cause "
+                "problems, as '.' is part of the MongoDB search syntax.")%k)
+
+    simple_dict = {k:v for k,v in mydict.iteritems()
+                    if type(v)!=dict}
+
+    if len(simple_dict)==len(mydict):
+        return simple_dict
+
+    to_flatten = {k:v for k,v in mydict.iteritems()
+                    if type(v)==dict}
+
+    flattened = {joinfunc(k,kk):vv
+                    for k,v in to_flatten.iteritems()
+                    for kk,vv in _flatten_dict(v,joinfunc).iteritems()
+                    }
+
+    simple_dict.update(flattened)
+    return simple_dict
+
 def get_model_across_splits(model_id):
     """
     Finds the IDs of all models that have been trained with the same config
@@ -302,4 +338,6 @@ def get_model_across_splits(model_id):
         raise ValueError("There is more than one model config for '%s'!"%model_id)
     else:
         model_cfg = model_cfg[0]
+
+
 
