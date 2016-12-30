@@ -5,6 +5,8 @@ from copy import deepcopy
 from itertools import combinations
 from lib_cinci.db import uri
 from scipy import stats
+from itertools import combinations
+from sklearn.linear_model import LinearRegression
 from sklearn_evaluation.metrics import precision_at
 from sqlalchemy import create_engine
 
@@ -271,4 +273,58 @@ def avg_dist(m):
     #Calculate distance for every pair
     dists = [distance_on_unit_sphere(*p) for p in pairs]
     return np.mean(dists), m['experiment_name']
+
+def density_rsquare(df, mdist, months):
+    """
+    Return the R^2 for a linear regression that uses 
+    neighborhood-level information to fit the predicted scores
+    of a model.
+    Args:
+        df (pd.DataFrame): A dataframe that has columns 'prediction',
+                           and columns 'violation_rate_Xm_Ymonths' and
+                           'inspection_density_Xm_Ymonths', where X and Y
+                           are given by the following two arguments:
+        mdist (int): The spatial aggregation window for the neighborhood 
+                     metrics. Corresponding columns must be present in df.
+        months: (int): The temporal aggregation window for the neighborhood
+                       metrics. Corresponding columns must be present in df.
+    Returns (float): The R-square for a linear regression that fits 
+                     df['prediction'], using as features 
+                     df['inspection_density_Xm_Ymonths'] and
+                     df['violation_rate_Xm_Ymonths'], and their interaction.
+    """
+
+    insp_col = 'inspection_density_{mdist}m_{months}months'.format(mdist=mdist, 
+                                                            months=months)
+    viol_col = 'violation_rate_{mdist}m_{months}months'.format(mdist=mdist, 
+                                                        months=months)
+
+    if not ((insp_col in df.columns) and (viol_col in df.columns)):
+        raise ValueError("The corresponding inspection_density or violation_rate "
+                "column for %sm and %smonths is missing."%(str(mdist), str(months)))
+
+    if not 'prediction' in df.columns:
+        raise ValueError("The 'prediction' column is missing.")
+
+    mydf = df.loc[:,[insp_col, viol_col, 'prediction']].copy()
+
+    # if the model wasn't able to fit a datapoint, we drop that row
+    mydf = mydf.dropna(subset=['prediction'])
+    
+    # we impute with the median, as the input data are ratios
+    mydf = mydf.fillna(mydf.median())
+
+    y = mydf.pop('prediction')
+
+    # get the interaction term
+    mydf['interaction'] = mydf.prod(axis=1)
+
+    # fit the linear regression
+    linreg = LinearRegression()
+    linreg.fit(X=mydf, y=y)
+
+    # calculate the R^2
+    r2 = linreg.score(X=mydf, y=y)
+
+    return r2
 
