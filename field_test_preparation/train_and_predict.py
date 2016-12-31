@@ -18,6 +18,7 @@ import argparse
 import logging
 import logging.config
 from lib_cinci.config import load
+import pandas as pd
 
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
@@ -107,7 +108,7 @@ def train_on_config(myconfig, n_jobs=-1):
     return model, imputer, scaler, features
 
 
-def predict_on_date(prediction_schema, model, imputer, scaler, features):
+def predict_on_date(prediction_schema, model, imputer, scaler, features, return_features=False):
     """
     Given a fitted set of imputer, scaler, and model, and a list of features
     that the model needs, make predictions for all parcels, using the data
@@ -121,8 +122,12 @@ def predict_on_date(prediction_schema, model, imputer, scaler, features):
         imputer (sklearn imputer): Fitted sklearn imputer.
         scaler (sklearn scaler): Fitted sklearn scaler.
         features (list): List of features for the above model.
+        return_features (bool): If True, then the returned dataframe also
+                                contains all the features. If False, it only
+                                contains the predictions.
     Returns (pd.DataFrame):
-        DataFrame, indexed by parcel_id, that gives a prediction for each parcel.
+        DataFrame, indexed by parcel_id, that gives a prediction for each parcel;
+        if return_features==True, it also gives all the feature columns.
     """
 
     # fetch the features from the prediction_schema
@@ -131,19 +136,26 @@ def predict_on_date(prediction_schema, model, imputer, scaler, features):
     logging.info("Size of prediction dataset: %s."%str(dataset.x.shape))
 
     # apply the learned sklearn model
+    col_names = dataset.x.columns
     dataset.x = imputer.transform(dataset.x)
     dataset.x = scaler.transform(dataset.x)
     preds_proba = model.predict_proba(dataset.x)[:, 1]
 
+    dataset.x = pd.DataFrame(dataset.x, columns=col_names)
+
     # clean up the dataframe
-    df = dataset.to_df()[['viol_outcome']]
+    df = dataset.to_df()
     df['prediction'] = preds_proba
     df = df.reset_index().drop(['inspection_date','viol_outcome'],1)
+    df = df.set_index('parcel_id')
 
-    return df.set_index('parcel_id')
+    if return_features:
+        return df
+
+    return df[['prediction']]
 
 
-def main(model_id, train_end_date, prediction_schema, n_jobs=-1):
+def main(model_id, train_end_date, prediction_schema, n_jobs=-1, return_features=False):
     """
     Args:
         train_end_date (str): In format like '30Jun2016'
@@ -184,7 +196,7 @@ def main(model_id, train_end_date, prediction_schema, n_jobs=-1):
     model, imputer, scaler, features = train_on_config(myconfig, n_jobs)
 
     # predict on new date
-    return predict_on_date(prediction_schema,model,imputer,scaler,features)
+    return predict_on_date(prediction_schema,model,imputer,scaler,features,return_features)
 
 if __name__ == '__main__':
 
@@ -209,10 +221,13 @@ if __name__ == '__main__':
                               "$ROOT_FOLDER/field_test_preparation/predictions.csv"),
                         type=str, default=os.path.join(os.environ["ROOT_FOLDER"], 
                             "field_test_preparation","predictions.csv"))
+    parser.add_argument("-rf", "--return_features", action="store_true",
+                        help="If this flag is selected, the dump includes the "
+                        "full feature matrix, not just the predictions.", default=False)
     args = parser.parse_args()
 
     df = main(args.model_id, args.train_end_date, 
-            args.prediction_schema, args.n_jobs)
+            args.prediction_schema, args.n_jobs, args.return_features)
 
     if args.outfile:
         with open(args.outfile,'w') as fout:
