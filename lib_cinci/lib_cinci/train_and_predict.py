@@ -9,7 +9,7 @@ from sklearn_evaluation.Logger import Logger
 from lib_cinci.config import main as cfg
 from lib_cinci import dataset
 from lib_cinci.features import parse_feature_pattern_list
-from lib_cinci.dataset import get_features_for_inspections_in_schema
+from lib_cinci.exceptions import ConfigError
 import datetime
 from sklearn import preprocessing
 from pydoc import locate
@@ -53,6 +53,7 @@ def train_on_config(myconfig, n_jobs=-1):
         imputer (sklearn imputer): The fitted sklearn imputer.
         scaler (sklearn scaler): The fitted sklearn scaler.
         features (list): The parsed list of features from the config file.
+        column_names (list): The training data's column names
     """
     
     # parse the configuration dictionary 
@@ -71,6 +72,9 @@ def train_on_config(myconfig, n_jobs=-1):
         start_date=start_date,
         end_date=fake_today,
         only_residential=only_residential)
+
+    print train.x.columns
+    column_names = train.x.columns.tolist()
 
     logging.info("Size of training dataset: %s"%str(train.x.shape))
 
@@ -106,7 +110,7 @@ def train_on_config(myconfig, n_jobs=-1):
     model.fit(train.x, train.y)
     logging.info("Finished sklearn fitting.")
 
-    return model, imputer, scaler, features
+    return model, imputer, scaler, features, column_names
 
 
 def predict_on_date(prediction_schema, model, imputer, scaler, features, return_features=False):
@@ -132,20 +136,22 @@ def predict_on_date(prediction_schema, model, imputer, scaler, features, return_
     """
 
     # fetch the features from the prediction_schema
-    dataset = get_features_for_inspections_in_schema(prediction_schema, features)
+    dset = dataset.get_features_for_inspections_in_schema(prediction_schema, features)
 
-    logging.info("Size of prediction dataset: %s."%str(dataset.x.shape))
+    logging.info("Size of prediction dataset: %s."%str(dset.x.shape))
 
     # apply the learned sklearn model
-    col_names = dataset.x.columns
-    dataset.x = imputer.transform(dataset.x)
-    dataset.x = scaler.transform(dataset.x)
-    preds_proba = model.predict_proba(dataset.x)[:, 1]
+    col_names = dset.x.columns
+    dset.x = imputer.transform(dset.x)
+    dset.x = scaler.transform(dset.x)
+    preds_proba = model.predict_proba(dset.x)[:, 1]
 
-    dataset.x = pd.DataFrame(dataset.x, columns=col_names)
+    dset.x = pd.DataFrame(dset.x, columns=col_names)
+
+    print dset.x.columns
 
     # clean up the dataframe
-    df = dataset.to_df()
+    df = dset.to_df()
     df['prediction'] = preds_proba
     df = df.reset_index().drop(['inspection_date','viol_outcome'],1)
     df = df.set_index('parcel_id')
@@ -212,9 +218,16 @@ def main(model_id, train_end_date, prediction_schema, n_jobs=-1,
                                                                   '%d%b%Y')
 
     # train the model
-    model, imputer, scaler, features = train_on_config(myconfig, n_jobs)
+    model, imputer, scaler, features, column_names = train_on_config(myconfig, n_jobs)
 
     res_df = predict_on_date(prediction_schema,model,imputer,scaler,features,return_features) 
+
+    res_column_names = res_df.columns.tolist()
+    res_column_names.remove('prediction')
+
+    if res_column_names != column_names:
+        raise ConfigError("The columns between the training and the prediction "
+                           "don't match.")
 
     # predict on new date
     if not return_fitted:
