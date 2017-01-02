@@ -158,7 +158,19 @@ def predict_on_date(prediction_schema, model, imputer, scaler, features, return_
 def main(model_id, train_end_date, prediction_schema, n_jobs=-1, return_features=False):
     """
     Args:
-        train_end_date (str): In format like '30Jun2016'
+        model_id (str or ObjectId): ID of model to re-train
+        train_end_date (str): Like '30Jun2016'. Labels up to this date will be
+                              used to train the model.
+        prediction_schema (str): Name of a schema in the Postgres DB, like
+                                 'features_31aug2016'. This data will be used
+                                 for making predictions. The schema must have 
+                                 been run.
+        n_jobs (int): Maximum number of cores sklearn is allowed to use.
+        return_features (bool): If this flag is selected, the dump includes the 
+                                full feature matrix, not just the predictions. 
+    Returns (pd.DataFrame):
+        DataFrame, indexed by parcel_id, that gives a prediction for each parcel;
+        if return_features==True, it also gives all the feature columns.
     """
 
     myconfig = get_config(model_id)
