@@ -19,6 +19,7 @@ import logging
 import logging.config
 from lib_cinci.config import load
 import pandas as pd
+import pickle
 
 logging.config.dictConfig(load('logger_config.yaml'))
 logger = logging.getLogger()
@@ -155,7 +156,8 @@ def predict_on_date(prediction_schema, model, imputer, scaler, features, return_
     return df[['prediction']]
 
 
-def main(model_id, train_end_date, prediction_schema, n_jobs=-1, return_features=False):
+def main(model_id, train_end_date, prediction_schema, n_jobs=-1, 
+        return_features=False, return_fitted=False):
     """
     Args:
         model_id (str or ObjectId): ID of model to re-train
@@ -166,11 +168,16 @@ def main(model_id, train_end_date, prediction_schema, n_jobs=-1, return_features
                                  for making predictions. The schema must have 
                                  been run.
         n_jobs (int): Maximum number of cores sklearn is allowed to use.
-        return_features (bool): If this flag is selected, the dump includes the 
+        return_features (bool): If this flag is selected, returns a df with the 
                                 full feature matrix, not just the predictions. 
+        return_fitted (bool): If this flag is selected, a second return value 
+                              is provided: a dictionary with keys 'model', 
+                              'imputer', and 'scaler', giving the corresponding,
+                              fitted sklearn objects.
     Returns (pd.DataFrame):
         DataFrame, indexed by parcel_id, that gives a prediction for each parcel;
-        if return_features==True, it also gives all the feature columns.
+        if return_features==True, it also gives all the feature columns;
+        if return_fitted==True, also gives a dictionary of fitted sklearn objects.
     """
 
     myconfig = get_config(model_id)
@@ -207,8 +214,13 @@ def main(model_id, train_end_date, prediction_schema, n_jobs=-1, return_features
     # train the model
     model, imputer, scaler, features = train_on_config(myconfig, n_jobs)
 
+    res_df = predict_on_date(prediction_schema,model,imputer,scaler,features,return_features) 
+
     # predict on new date
-    return predict_on_date(prediction_schema,model,imputer,scaler,features,return_features)
+    if not return_fitted:
+        return res_df
+
+    return res_df, {'model':model, 'imputer':imputer, 'scaler':scaler}
 
 if __name__ == '__main__':
 
@@ -236,12 +248,31 @@ if __name__ == '__main__':
     parser.add_argument("-rf", "--return_features", action="store_true",
                         help="If this flag is selected, the dump includes the "
                         "full feature matrix, not just the predictions.", default=False)
+    parser.add_argument("-psp", "--pickle_sklearn_path",
+                        help=("Optional path to folder for fitted sklearn imputer, "
+                            "scaler, and model. If given, a folder with that name "
+                            "will be created, and corresponding pickle dumps saved "
+                            "in it."),
+                        type=str, default=None)
     args = parser.parse_args()
 
-    df = main(args.model_id, args.train_end_date, 
-            args.prediction_schema, args.n_jobs, args.return_features)
+    dump_sklearn = True if args.pickle_sklearn_path else False
+
+    res = main(args.model_id, args.train_end_date, args.prediction_schema, 
+                       args.n_jobs, args.return_features, dump_sklearn)
+
+    if dump_sklearn:
+        df, fitted = res
+    else:
+        df = res
 
     if args.outfile:
         with open(args.outfile,'w') as fout:
             df.to_csv(fout, index=True)
+
+    if dump_sklearn:
+        os.makedirs(args.pickle_sklearn_path)
+        for k,v in fitted.iteritems():
+            with open(os.path.join(args.pickle_sklearn_path, k+'.p'),'w') as fout:
+                pickle.dump(v, fout)
 
