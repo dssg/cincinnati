@@ -267,7 +267,7 @@ def distance_on_unit_sphere(coords1, coords2):
 
 def avg_dist(m):
     #Get coordinates as tuples
-    coords = list(m['top'][['latitude', 'longitude']].itertuples(index=False, name=None))
+    coords = list(m[['latitude', 'longitude']].itertuples(index=False, name=None))
     #Get every combination of coordinates pairs
     pairs = combinations(coords, 2)
     #Calculate distance for every pair
