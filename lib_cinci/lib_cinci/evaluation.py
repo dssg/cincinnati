@@ -272,7 +272,7 @@ def avg_dist(m):
     pairs = combinations(coords, 2)
     #Calculate distance for every pair
     dists = [distance_on_unit_sphere(*p) for p in pairs]
-    return np.mean(dists), m['experiment_name']
+    return np.mean(dists)
 
 def density_rsquare(df, mdist, months):
     """
