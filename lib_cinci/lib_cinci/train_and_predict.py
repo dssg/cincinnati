@@ -73,7 +73,6 @@ def train_on_config(myconfig, n_jobs=-1):
         end_date=fake_today,
         only_residential=only_residential)
 
-    print train.x.columns
     column_names = train.x.columns.tolist()
 
     logging.info("Size of training dataset: %s"%str(train.x.shape))
@@ -132,7 +131,8 @@ def predict_on_date(prediction_schema, model, imputer, scaler, features, return_
                                 contains the predictions.
     Returns (pd.DataFrame):
         DataFrame, indexed by parcel_id, that gives a prediction for each parcel;
-        if return_features==True, it also gives all the feature columns.
+        if return_features==True, it also gives all the feature columns (un-imputed,
+        un-scaled).
     """
 
     # fetch the features from the prediction_schema
@@ -140,26 +140,27 @@ def predict_on_date(prediction_schema, model, imputer, scaler, features, return_
 
     logging.info("Size of prediction dataset: %s."%str(dset.x.shape))
 
+    # remember the un-imputed, un-scaled features
+    raw_df = dset.to_df()
+
     # apply the learned sklearn model
     col_names = dset.x.columns
     dset.x = imputer.transform(dset.x)
     dset.x = scaler.transform(dset.x)
     preds_proba = model.predict_proba(dset.x)[:, 1]
 
+    # get the column names back, as dset.x is now a np.array
     dset.x = pd.DataFrame(dset.x, columns=col_names)
 
-    print dset.x.columns
-
-    # clean up the dataframe
-    df = dset.to_df()
-    df['prediction'] = preds_proba
-    df = df.reset_index().drop(['inspection_date','viol_outcome'],1)
-    df = df.set_index('parcel_id')
+    # clean up the dataframe of raw features
+    raw_df['prediction'] = preds_proba
+    raw_df = raw_df.reset_index().drop(['inspection_date','viol_outcome'],1)
+    raw_df = raw_df.set_index('parcel_id')
 
     if return_features:
-        return df
+        return raw_df
 
-    return df[['prediction']]
+    return raw_df[['prediction']]
 
 
 def main(model_id, train_end_date, prediction_schema, n_jobs=-1, 
@@ -182,7 +183,8 @@ def main(model_id, train_end_date, prediction_schema, n_jobs=-1,
                               fitted sklearn objects.
     Returns (pd.DataFrame):
         DataFrame, indexed by parcel_id, that gives a prediction for each parcel;
-        if return_features==True, it also gives all the feature columns;
+        if return_features==True, it also gives all the feature columns (un-imputed,
+        un-scaled)
         if return_fitted==True, also gives a dictionary of fitted sklearn objects.
     """
 
@@ -220,6 +222,7 @@ def main(model_id, train_end_date, prediction_schema, n_jobs=-1,
     # train the model
     model, imputer, scaler, features, column_names = train_on_config(myconfig, n_jobs)
 
+    # predict on new date
     res_df = predict_on_date(prediction_schema,model,imputer,scaler,features,return_features) 
 
     res_column_names = res_df.columns.tolist()
@@ -229,7 +232,6 @@ def main(model_id, train_end_date, prediction_schema, n_jobs=-1,
         raise ConfigError("The columns between the training and the prediction "
                            "don't match.")
 
-    # predict on new date
     if not return_fitted:
         return res_df
 
@@ -260,7 +262,8 @@ if __name__ == '__main__':
                             "field_test_preparation","predictions.csv"))
     parser.add_argument("-rf", "--return_features", action="store_true",
                         help="If this flag is selected, the dump includes the "
-                        "full feature matrix, not just the predictions.", default=False)
+                        "full feature matrix (un-imputed, un-scaled), "
+                        "not just the predictions.", default=False)
     parser.add_argument("-psp", "--pickle_sklearn_path",
                         help=("Optional path to folder for fitted sklearn imputer, "
                             "scaler, and model. If given, a folder with that name "
