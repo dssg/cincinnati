@@ -82,6 +82,12 @@ class Logger:
         return (self.collection.find({"experiment_name": experiment_name})
                     .sort(key, pymongo.DESCENDING)[0])
 
+    def get_all_from_experiment(self, experiment_name):
+        '''
+           Returns all models from one experiment
+        '''
+        return (self.collection.find({"experiment_name": experiment_name})[:])
+
     def delete_experiment(self, experiment_name):
         ''' 
             Delete an experiment by key
