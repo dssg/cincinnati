@@ -86,7 +86,9 @@ class Logger:
         '''
            Returns all models from one experiment
         '''
-        return (self.collection.find({"experiment_name": experiment_name})[:])
+        models = self.collection.find({"experiment_name": experiment_name})
+        n_models = models.count() 
+        return ( list(models[:]))
 
     def delete_experiment(self, experiment_name):
         ''' 
