@@ -129,6 +129,11 @@ class Logger:
                               (in that case, the sklearn model's random seed 
                               might be different, and thus also the logged
                               model predicions). 
+                        Note: You will also get duplicates if you are running
+                              identical configurations with different 
+                              experiment_names, as the experiment_names
+                              are (necessarily) disregarded when searching
+                              across temporal splits.
         """
 
         # fetch the document for this model_id
