@@ -13,7 +13,7 @@ def _flatten_dict(mydict, joinfunc=lambda a,b: '.'.join([a,b])):
     {'aa': 11, 'bb': 22, 'cc.aaa': 111, 'cc.bbb': 222}.
     Args:
         mydict (dict): Dictionary to be flattened.
-        joinfunc (func): A function that takes to keys and returns
+        joinfunc (func): A function that takes two keys and returns
                          one key. By default, string joining with '.'
     Returns (dict): The flattened dict.
     """
@@ -74,6 +74,14 @@ class Logger:
         model_count = self.collection.find(model).count()
         return model_count > 0
 
+    def experiment_counts(self, experiment_name):
+        '''
+            Count how many times an experiment has been logged in the DB.
+        '''
+        model = {'experiment_name':experiment_name}
+        model_count = self.collection.find(model).count()
+        return model_count
+
     def get_best_from_experiment(self, experiment_name, key):
         '''
             Returns entry for the best model given an experiment_name
@@ -84,7 +92,11 @@ class Logger:
 
     def get_all_from_experiment(self, experiment_name):
         '''
-           Returns all models from one experiment
+           Returns all models from one experiment.
+           Note: The returned list includes both different hyperparameter 
+                 sets (from the various sklearn models), but also full duplicate
+                 runs (except for random seed) if the experiment was run multiple 
+                 times.
         '''
         models = self.collection.find({"experiment_name": experiment_name})
         n_models = models.count() 
@@ -111,6 +123,12 @@ class Logger:
                         However, the returned list only includes models for which 
                         the distance between start_date and fake_today is the same
                         as for model_id.
+                        Note: The returned list is NOT unique in model name, sklearn
+                              parameters, and model configuration, because that 
+                              exact combination might have been run multiple times
+                              (in that case, the sklearn model's random seed 
+                              might be different, and thus also the logged
+                              model predicions). 
         """
 
         # fetch the document for this model_id
