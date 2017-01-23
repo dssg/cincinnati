@@ -106,7 +106,7 @@ class Logger:
         Args:
             model_id (str): The MongoDB ID for a single (sklearn) models.
         Returns ([ObjectId]): A list of MongoDB IDs, corresponding to all models 
-                        that have identical YAML configs and sklearn paramters as 
+                        that have identical YAML configs and sklearn parameters as 
                         model_id, except for their start_date and fake_today.
                         However, the returned list only includes models for which 
                         the distance between start_date and fake_today is the same

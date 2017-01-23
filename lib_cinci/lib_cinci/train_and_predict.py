@@ -26,7 +26,7 @@ logger = logging.getLogger()
 
 def get_config(model_id):
     """ Give a model_id (string or ObjectId), return the entire MongoDB log
-        gor that model.
+        for that model.
     """
 
     logger = Logger(host=cfg['logger']['uri'],
