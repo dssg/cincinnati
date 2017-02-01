@@ -112,7 +112,7 @@ def train_on_config(myconfig, n_jobs=-1):
     return model, imputer, scaler, features, column_names
 
 
-def predict_on_date(prediction_schema, model, imputer, scaler, features, return_features=False):
+def predict_on_date(prediction_schema, model, imputer, scaler, features, return_features=False, only_residential=False):
     """
     Given a fitted set of imputer, scaler, and model, and a list of features
     that the model needs, make predictions for all parcels, using the data
@@ -136,7 +136,7 @@ def predict_on_date(prediction_schema, model, imputer, scaler, features, return_
     """
 
     # fetch the features from the prediction_schema
-    dset = dataset.get_features_for_inspections_in_schema(prediction_schema, features)
+    dset = dataset.get_features_for_inspections_in_schema(prediction_schema, features, only_residential=only_residential)
 
     logging.info("Size of prediction dataset: %s."%str(dset.x.shape))
 
@@ -223,7 +223,8 @@ def main(model_id, train_end_date, prediction_schema, n_jobs=-1,
     model, imputer, scaler, features, column_names = train_on_config(myconfig, n_jobs)
 
     # predict on new date
-    res_df = predict_on_date(prediction_schema,model,imputer,scaler,features,return_features) 
+    res_df = predict_on_date(prediction_schema,model,imputer,scaler,features,return_features,
+            only_residential=myconfig['config']['residential_only']) 
 
     res_column_names = res_df.columns.tolist()
     res_column_names.remove('prediction')
