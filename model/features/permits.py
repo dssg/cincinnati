@@ -54,13 +54,16 @@ def make_permits_features(con, n_months, max_dist):
             'permittype'
             ]
 
+    coalescemissing = "'missing'" 
+
     for col in cols:
         make_table_of_frequent_codes(con, col=col, intable='public.permits',
-                outtable='public.frequentpermit_%s'%col, rnum=15)
+                outtable='public.frequentpermit_%s'%col, rnum=15,
+                coalesce_to=coalescemissing)
 
     unionall_template = """
         SELECT parcel_id, inspection_date, 
-              '{col}_'||coalesce(t2.level,'missing') as categ,
+              '{col}_'||coalesce(t2.level,{coalescemissing}) as categ,
               coalesce(t1.count, 0) as count
         FROM (
             SELECT parcel_id, inspection_date,
@@ -68,7 +71,7 @@ def make_permits_features(con, n_months, max_dist):
                    count(*) as count
             FROM joinedpermits_{n_months}months_{max_dist}m event
             LEFT JOIN public.frequentpermit_{col} fs
-            ON fs.raw_level = event.{col}
+            ON fs.raw_level = coalesce(event.{col},{coalescemissing})
             GROUP BY parcel_id, inspection_date, fs.level
         ) t1
         RIGHT JOIN (
@@ -82,12 +85,14 @@ def make_permits_features(con, n_months, max_dist):
 
     unionall_statements = unionall_template.format(col=cols[0],
                                                   n_months=str(n_months),
-                                                  max_dist=str(max_dist)
+                                                  max_dist=str(max_dist),
+                                                  coalescemissing=coalescemissing
                                                   ) + \
                           '\n'.join([
                             'UNION ALL ( %s )'%unionall_template.format(col=col,
                                                                         n_months=str(n_months),
-                                                                        max_dist=str(max_dist)
+                                                                        max_dist=str(max_dist),
+                                                                        coalescemissing=coalescemissing
                                                                         )
                             for col in cols[1:]
                             ])

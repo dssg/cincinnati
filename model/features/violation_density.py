@@ -2,7 +2,7 @@ from lib_cinci.features import tables_in_schema
 import logging
 import logging.config
 from feature_utils import make_inspections_latlong_nmonths_table, compute_frequency_features
-from feature_utils import format_column_names, group_and_count_from_db, make_table_of_frequent_codes
+from feature_utils import format_column_names, group_and_count_from_db
 from lib_cinci.config import load
 from lib_cinci.features import check_date_boundaries
 import pandas as pd
@@ -87,7 +87,7 @@ def make_inspections_features(con, n_months, max_dist):
                 SELECT  
                     feature_y.parcel_id,
                     feature_y.inspection_date,
-                    realinspections.event,
+                    coalesce(realinspections.event,'missing') as event,
                     count(*) as count
                 FROM (
                     SELECT t.*, p.geom, ih.parcels
@@ -113,12 +113,12 @@ def make_inspections_features(con, n_months, max_dist):
             (SELECT parcel_id, inspection_date, ft.event, parcels
                 FROM parcels_inspections
                 JOIN 
-                    (select distinct event from inspections_views.events_parcel_id) ft
+                    (select distinct coalesce(event,'missing') as event from inspections_views.events_parcel_id) ft
                 ON true
                 JOIN insp2houses_{max_dist}m
                 USING (parcel_id)
             ) t2
-            USING (parcel_id, inspection_date,event)
+            USING (parcel_id, inspection_date, event)
         ;
 
         CREATE TEMP TABLE inspfeatures2_{n_months}months_{max_dist}m ON COMMIT DROP AS (
