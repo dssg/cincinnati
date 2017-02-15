@@ -80,7 +80,7 @@ CREATE TABLE ${schema}.${table_name} AS(
             inspection_date,
             SUM(CASE WHEN viol_outcome = 1 THEN 1 ELSE 0 END) unique_violations,
             SUM(CASE WHEN viol_outcome = 0 THEN 1 ELSE 0 END) unique_non_violations,
-            COUNT(*) AS unique_inspections
+            COUNT(DISTINCT parcel_id_b) AS unique_inspections
         FROM unique_matches
         GROUP BY parcel_id, inspection_date
     ),
