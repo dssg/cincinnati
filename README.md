@@ -1,8 +1,8 @@
-#Cincinnati
+# Cincinnati Blight
 
 This is the continuation of the Cincinnati [summer project](https://github.com/dssg/cincinnati2015-public) done during DSSG 2015.
 
-##About
+## About
 
 First settled in 1788, Cincinnati is one of the oldest American cities west of the original colonies. Today, the 
 city struggles with aging home stock, stifling economic redevelopment in some neighborhoods. 
@@ -11,9 +11,9 @@ DSSG is working with the City of Cincinnati to identify properties at risk of co
 that early intervention strategies can prevent further damage and stimulate neighborhood revitalization. Read more about
 our project [here](http://dssg.uchicago.edu/2015/08/20/cincy-blight-prevention.html). 
 
-##Setup
+## Setup
 
-###Select folders for the code, data and output
+### Select folders for code, data, and output
 
 The code relies on three environment variables, before you start running the code, decide where are you going to store the *raw data*,  *code* and *output*, a sample file `env_sample.sh`, which looks like this:
 
@@ -29,9 +29,11 @@ export OUTPUT_FOLDER="/path/to/output/"
 export PYTHONPATH=$PYTHONPATH:$ROOT_FOLDER/lib_cinci
 ```
 
-Modify the three environment variables, the `PYTHONPATH` line is also necessary since it includes many functions used across the project. Consider adding that to your shell profile, so they get loaded automatically.
+Modify the three environment variables as appropriate. The `PYTHONPATH` line 
+is also necessary since it includes many functions used across the project. 
+Consider adding that to your shell profile, so they get loaded automatically.
 
-###Clone the repo
+### Clone the repo
 
 Clone the repo in `$ROOT_FOLDER`
 
@@ -39,15 +41,15 @@ Clone the repo in `$ROOT_FOLDER`
 git clone https://github.com/dssg/cincinnati $ROOT_FOLDER
 ```
 
-###Put the data following the repo structure
+### Organize Data According to Repo Structure
 
 The pipeline follows certain simple conventions to make the code easy to understand. It is assumed that a file in `$ROOT_FOLDER/etl/something/` will get its raw data from `$DATA_FOLDER/etl/something/`.
 
-Having, said that it's easy to know where to store the raw data. For example, the code that loads all taxes data is `$ROOT_FOLDER/etl/taxes/taxes.sh`, then, your raw taxes files should be stores in `$DATA_FOLDER/etl/taxes/`
+It should be straightforward to know where to store the raw data. For example, the code that loads all taxes data is `$ROOT_FOLDER/etl/taxes/taxes.sh`, then, your raw taxes files should be stores in `$DATA_FOLDER/etl/taxes/`
 
 The other convention is that intermediate files are stored on a `tmp/` folder, for example, since we need to preprocess the taxes files before uploading them to the database, the intermediate csv files will be on `$DATA_FOLDER/etl/taxes/tmp/`.
 
-###Provide config.yaml, logger_config.yaml and pgpass
+### Provide `config.yaml`, `logger_config.yaml` and `.pgpass`
 
 The code loads some parameters from a `config.yaml` file stored in the `$ROOT_FOLDER`. `logger_config.yaml` configures the logger for the Python interpreter.
 
@@ -56,7 +58,7 @@ Use the `config_sample.yaml` file to see the structure and then rename it to `co
 `.pgpass` (note the dot) is needed if your are going to use the Docker image and it will take
 the file in `$ROOT_FOLDER/.pgpass` to build it. If you are not going to use Docker, just make sure that a standard `.pgpass` file is on your home folder. See `.pgpass_sample` for syntax details.
 
-###Build docker ETL image
+### Build Docker ETL image
 
 The ETL step depends on these programs:
 
@@ -82,7 +84,7 @@ docker build -t cincinnati .
 
 This process takes a while since it needs to download and install all dependencies, but with a decent internet connection is should take less than 1 hour.
 
-###Run docker image
+### Run Docker image
 
 Once the image is ready, run it: 
 
@@ -92,7 +94,7 @@ docker run -v $DATA_FOLDER:/root/data -v $ROOT_FOLDER:/root/code -v $OUTPUT_FOLD
 
 Note that we are passing our three environment variables, and linking them to three folders inside the container. The purpose of the Docker container is to run code but not to store anything (not code and of course not data).
 
-##Data Pipeline
+## Data Pipeline
 
 Once you have set up your environment, you can start usng the pipeline, the general procedure is the following (specific instructions for each step are available inside each subfolder):
 
@@ -102,5 +104,5 @@ Once you have set up your environment, you can start usng the pipeline, the gene
 2. Explore the data
 3. [Generate features](model/features) from the data
 4. Run some experiments. Use `model.py` inside [model](model/) to train models. `model.py` requires you to provide a configuration file, see `default.yaml` in this folder for reference.  [experiments](model/experiments) folder contains more examples.
-5. Evaluate experiments
-6. Prepare a new field test using the tools in [field_test_preparation](field_test_preparation/)
+5. Evaluate model performance and generate lists for field tests using the
+[model exploration](model_exploration/) directory.
