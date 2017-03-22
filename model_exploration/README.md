@@ -55,4 +55,14 @@ the average of those features across the top-ranked parcels for each model.
 It's possible that you'd end up with the same list of parcels to inspect, 
 regardless of the model. To investigate this, we look at the *overlap* between
 the top *k* parcels chosen by each model up for consideration.
-  
+ 
+
+# Running the Code 
+1. Start virtualenv, install requirements:
+```
+virtualenv --no-site-packages cinci-venv
+source cinci-venv/bin/activate
+pip install -r requirements.txt
+```
+2. Adapt `env_sample.sh` as appropriate
+3. `source env.sh` 
