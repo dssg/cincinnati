@@ -2,8 +2,8 @@
 **_So I've trained a bunch of models ... now what?_**
 Once you've run some experiments and have some preliminary results, you'll 
 want to narrow down the field so that you can look more closely and analyze 
-your results. The [model selection and exploration](model-selection-and-exploration.ipynb) 
-notebook contains the code to do this.
+your results. The [model exploration and selection](model-exploration-and-selection.py)
+script does this.
 
 - **Input**: Directory housing your experiments, `space_delta` and `time_delta` 
 (specifying the level of space & time you want to cover in the neighborhood
