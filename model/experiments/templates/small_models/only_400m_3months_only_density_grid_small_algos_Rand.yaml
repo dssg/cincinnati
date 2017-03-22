@@ -1,0 +1,18 @@
+experiment_name: fall2016_{startdate}_{faketoday}_{validationwindow}_only_400m_3months_only_density_grid_small_algos_Rand
+fake_today: '{faketoday}'
+features:
+- tax.%
+- census_2010.rate_%
+- named_entities.%
+- parc_area.%
+- parc_year.%
+- house_type.%
+- quarter.%
+- sixweeksweather.%
+- density_400m_3months.%
+grid_size: small
+models:
+- sklearn.ensemble.RandomForestClassifier
+residential_only: false
+start_date: '{startdate}'
+validation_window: '{validationwindow}'

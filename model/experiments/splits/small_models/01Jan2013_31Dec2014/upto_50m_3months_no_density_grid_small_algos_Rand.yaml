@@ -1,0 +1,22 @@
+experiment_name: fall2016_01Jan2013_31Dec2014_6Month_upto_50m_3months_no_density_grid_small_algos_Rand
+fake_today: '31Dec2014'
+features:
+- tax.%
+- census_2010.rate_%
+- named_entities.%
+- parc_area.%
+- parc_year.%
+- house_type.%
+- quarter.%
+- sixweeksweather.%
+- fire_50m_3months.%
+- crime_50m_3months.%
+- sales_50m_3months.%
+- permits_50m_3months.%
+- three11_50m_3months.%
+grid_size: small
+models:
+- sklearn.ensemble.RandomForestClassifier
+residential_only: false
+start_date: '01Jan2013'
+validation_window: '6Month'
