@@ -7,8 +7,9 @@ script does this.
 
 - **Input**: Directory housing your experiments, `space_delta` and `time_delta` 
 (specifying the level of space & time you want to cover in the neighborhood
-history), and `k` (the level at which to calculate precision, or how many parcels
-will be included in the list of inspections).
+history), `k` (the level at which to calculate precision, or how many parcels
+will be included in the list of inspections), `validation_feature_schema` (used to
+get neighborhood information for all parcels).
 
 - **Output**: `model-results-grouped.csv`, a file with all of the models and their
 results on a variety of training and testing windows. A model is defined by
