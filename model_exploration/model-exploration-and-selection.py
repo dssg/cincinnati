@@ -75,8 +75,7 @@ for root, dirnames, filenames in os.walk(experiment_directory):
 experiments = {experiment_config: get_config_parameters(experiment_config) 
                                   for experiment_config in experiment_configs}
 
-#experiment_names = map(lambda v: v['experiment_name'][0], experiments.values())
-experiment_names = map(lambda v: v['experiment_name'][0], experiments.values())[0:5]
+experiment_names = map(lambda v: v['experiment_name'][0], experiments.values())
 
 # get all models for each experiment
 all_models_by_experiment = [logger.get_all_from_experiment(exp_name) for exp_name in experiment_names]
@@ -132,6 +131,7 @@ for model in all_models:
     # get validation precision and labeled percent
     model['validation_precision_at_p'] =  100.0*top_k_inspected.viol_outcome.sum()/top_k_inspected.shape[0]
     model['validation_labeled_percent'] = 100.0*(top_k_inspected.shape[0])/k
+
 
 #save results to CSV
 all_models_df = pd.DataFrame(all_models)
