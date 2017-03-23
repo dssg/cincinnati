@@ -17,17 +17,24 @@ from dateutil import relativedelta
 from lib_cinci.evaluation import (load_one_inspection_per_parcel, 
                                   add_latlong_to_df)
 
-#enter where you are saving experiments
+from lib_cinci.config import load, get_config_parameters 
+
+from sklearn_evaluation.metrics import precision_at
+
+import ast
+import itertools
+
+#directory location of experiment configs
 experiment_directory = os.path.join(os.getcwd(), 'medium_models')
 
-#space_delta, time_delta
+#space and time windows for neighborhood history
 space_delta = '400m'
 time_delta = '12months'
 
 # where to save model results
 results_filepath = 'model-results-' + str(date.today()) + '.csv'
 
-# 5% of all parcels 
+# k - number of parcels to use for precision and neighborhood metrics
 k = 7500
 
 # validation schema
@@ -42,14 +49,6 @@ f = open(path, 'r')
 text = f.read()
 main = yaml.load(text)
 
-def load(name):
-    folder = os.environ['ROOT_FOLDER']
-    path = "%s/%s" % (folder, name)
-    with open(path, 'r') as f:
-        text = f.read()
-    dic = yaml.load(text)
-    return dic
-
 connparams = load('config.yaml')['db']
 uri = '{dialect}://{user}:{password}@{host}:{port}/{database}'.format(**connparams)
 libpq_uri = 'dbname={database} user={user} host={host} password={password} port={port}'.format(**connparams)
@@ -57,13 +56,6 @@ libpq_uri = 'dbname={database} user={user} host={host} password={password} port=
 engine = create_engine(uri)
 logger = Logger(host=main['logger']['uri'], db=main['logger']['db'], 
                 collection=main['logger']['collection'])
-
-# function to get the parameters from the yaml config file 
-def get_config_parameters(experiment_config):
-    with open(experiment_config, 'r') as f:
-        df = pd.io.json.json_normalize(yaml.load(f))
-        df.set_index('experiment_name', drop=False, inplace=True)
-        return df
 
 # get all experiment configs from the directory
 experiment_configs = []
@@ -92,21 +84,16 @@ neighborhood_history = pd.read_sql_table(neighborhood_table, engine,
 neighborhood_history.drop('inspection_date', axis=1, inplace=True)
 
 neighborhood_history['violations_per_house'] = neighborhood_history.unique_violations/neighborhood_history.houses
-neighborhood_history['violations_per_inspection'] = neighborhood_history.unique_violations/neighborhood_history.unique_inspections
-neighborhood_history['inspection_density'] = neighborhood_history.unique_inspections/neighborhood_history.houses
-
-inspection_density_first_quartile = neighborhood_history['inspection_density'].quantile(0.25)
 violations_per_house_first_quartile = neighborhood_history['violations_per_house'].quantile(0.25)
-violations_per_inspection_first_quartile = neighborhood_history['violations_per_inspection'].quantile(0.25)
 
-neighborhood_with_location = add_latlong_to_df(neighborhood_history[['violations_per_house', 
-                                                                     'violations_per_inspection',
-                                                                     'inspection_density']])
+neighborhood_history['inspection_density'] = neighborhood_history.unique_inspections/neighborhood_history.houses
+inspection_density_first_quartile = neighborhood_history['inspection_density'].quantile(0.25)
      
-#get predictions on top k parcels for validation start date                                                                        
+#get saved model predictions as of validation date
 output_folder = os.environ['OUTPUT_FOLDER']
 path_to_predictions = os.path.join(output_folder, 'top_predictions_on_all_parcels')
 
+i=1
 for model in all_models:
     # get validation start, end 
     test_start = re.split('_', model['experiment_name'])[2].lower()
@@ -117,23 +104,44 @@ for model in all_models:
     
     # get saved scores
     model_top_k = pd.read_csv(os.path.join(path_to_predictions, model['model_id']), 
-                              nrows=k+1, 
-                              usecols=['parcel_id', 'prediction']) 
+                              nrows=k+1,
+                              index_col='parcel_id',
+                              usecols=['parcel_id','prediction']) 
     
     # load inspection results from validation window 
     validation_inspections = load_one_inspection_per_parcel(validation_start, validation_end)
-    validation_inspections.reset_index(inplace=True)
     
     # get intersection of this model's top k with parcels that were inspected
     # during validation window, and the results of those inspections
-    top_k_inspected = validation_inspections[validation_inspections['parcel_id'].isin(model_top_k['parcel_id'])]
+    top_k_inspected = model_top_k.join(validation_inspections)
     
     # get validation precision and labeled percent
-    model['validation_precision_at_p'] =  100.0*top_k_inspected.viol_outcome.sum()/top_k_inspected.shape[0]
+    model['validation_precision_at_p'] =  precision_at(top_k_inspected.viol_outcome,
+                                                       model_top_k.prediction,
+                                                       percent=1.0, # precision is calculated on top k, so use 100%
+                                                       ignore_nas=True) # not all parcels in top k will have inspections
     model['validation_labeled_percent'] = 100.0*(top_k_inspected.shape[0])/k
 
+    # add neighborhood info - mean and std dev of inspection density and violations per house 
+    # on top k parcels for this model
+
+    top_k_neighborhood = model_top_k.join(neighborhood_history)
+
+    model['top_5_inspection_density_mean'] = top_k_neighborhood['inspection_density'].mean()
+    model['top_5_inspection_density_std_dev'] = top_k_neighborhood['inspection_density'].std()
+    model['top_5_low_inspection_density_percent'] = (top_k_neighborhood['inspection_density'] < inspection_density_first_quartile).mean()
+
+    model['top_5_violations_per_house_mean'] = top_k_neighborhood['violations_per_house'].mean()
+    model['top_5_violations_per_house_std_dev'] = top_k_neighborhood['violations_per_house'].std()
+    model['top_5_low_violations_per_house_percent'] = (top_k_neighborhood['violations_per_house'] < violations_per_house_first_quartile).mean()
+
+    print "finished model {0} of {1}".format(i, len(all_models))
+    i+=1
 
 #save results to CSV
 all_models_df = pd.DataFrame(all_models)
+config_dict = all_models_df['config'].map(str).apply(ast.literal_eval)
+config_df = pd.DataFrame(config_dict.to_dict()).T
+config_df.to_csv('configs.csv')
 all_models_df.to_csv(results_filepath, index=False)
 
