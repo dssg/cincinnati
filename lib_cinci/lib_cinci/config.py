@@ -1,5 +1,6 @@
 import os
 import yaml
+import pandas as pd 
 
 # load the config.yaml file
 folder = os.environ['ROOT_FOLDER']
@@ -17,3 +18,10 @@ def load(name):
         text = f.read()
     dic = yaml.load(text)
     return dic
+
+def get_config_parameters(experiment_config):
+    with open(experiment_config, 'r') as f:
+        df = pd.io.json.json_normalize(yaml.load(f))
+        df.set_index('experiment_name', drop=False, inplace=True)
+        return df
+
