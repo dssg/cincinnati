@@ -5,22 +5,22 @@ want to narrow down the field so that you can look more closely and analyze
 your results. The [model exploration and selection](model-exploration-and-selection.py)
 script does this.
 
-- **Input**: Directory housing your experiments, `space_delta` and `time_delta` 
-(specifying the level of space & time you want to cover in the neighborhood
-history), `k` (the level at which to calculate precision, or how many parcels
+- **Input**: Directory location of your experiment config files, `space_delta` and 
+`time_delta` (specifying the level of space & time you want to cover in the neighborhood
+history metrics), `k` (the level at which to calculate precision, or how many parcels
 will be included in the list of inspections), `validation_feature_schema` (used to
 get neighborhood information for all parcels).
 
-- **Output**: `model-results-grouped.csv`, a file with all of the models and their
-results on a variety of training and testing windows. A model is defined by
-the model type (e.g. Logistic Regression, Random Forest), the parameters used
-for that model, and the features and their respective aggregations used (e.g. 
-Census up to 400m). 
+- **Output**: A CSV of models listing their results on various model performance
+and neighborhood inspection and violation density on a variety of training and 
+testing windows. A model is defined by the model type (e.g. Logistic Regression, 
+Random Forest), the hyperparameters used, the features included, and the various
+levels of feature aggregations used (e.g. "Census up to 400m"). 
 
 Based on these model results, we did some hands-on analysis (primarily using Tableau)
 to choose 5 models that did the best with respect to precision (finding the 
-most violations), 5 models that identified inspections that had a lower
-inspection density, 5 models that identified parcels to inspect with a lower
+most violations), 5 models that identified parcels in neighborhoods that had a low
+inspection density, 5 models that identified parcels that had a low
 neighborhood violation rate, and 5 models that seemed to balance these three 
 aspects fairly well. 
 
@@ -67,3 +67,5 @@ pip install -r requirements.txt
 ```
 2. Adapt `env_sample.sh` as appropriate
 3. `source env.sh` 
+4. Adapt `model-exploration-and-selection.py` as necessary and then run:
+`python model-exploration-and-selection.py`
