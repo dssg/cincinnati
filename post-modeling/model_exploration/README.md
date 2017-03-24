@@ -32,12 +32,13 @@ aspects fairly well.
 ## Retrain Models
 Once you've chosen your final model(s), you'll want to retrain them using all
 the most recent data (in our case, the most recent data update was August 31,
-2016). The [`retrain_models.py`](retrain-models.py) script does this. 
+2016). The [`retrain_models.py`](retrain_models.py) script does this. 
 
 - **Input**: `model_groups` (the model or models found by hand at the end of the step above)
 - **Output**: `all_top5.csv` (a CSV with a list of the 7500 top-ranked parcels
 for each model, model scores and pertinent neighborhood
-information for all parcels).
+information for all parcels), directory of all features and importances for all
+models, stored in `$OUTPUT_FOLDER/feature_importances`.
 
 ## Feature Crosstabs
 **_What types of parcels are ranked highly by a given model?_**
@@ -71,5 +72,4 @@ pip install -r requirements.txt
 ```
 2. Adapt `env_sample.sh` as appropriate
 3. `source env.sh` 
-4. Adapt `model-exploration-and-selection.py` as necessary and then run:
-`python model-exploration-and-selection.py`
+
