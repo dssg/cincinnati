@@ -1,5 +1,6 @@
 #Numpy and sklearn
 import numpy as np
+import pandas as pd
 #Metric for confusion matrix
 from sklearn.metrics import confusion_matrix
 #Metric for ROC
@@ -245,3 +246,35 @@ def precision_at_proportions(test_labels, test_predictions, ax=None, **kwargs):
     ax.set_ylabel('Precision')
     ax.set_xlabel('Proportion')
     return ax
+
+
+def compute_similarity(prediction_matrix, percent=True):
+        """ Given a matrix of individuals classified as positive from different
+        models, return a correlation-matrix-like matrix of jaccard similarities.
+        :param prediction_matrix: lists of top X indiviudals with highest risk
+                                  scores according to different models
+        :type prediction_matrix: pandas DataFrame 
+        :returns: jaccard matrix
+        :rtype: pandas DataFrame
+        """
+
+        jaccard_matrix = pd.DataFrame(index = prediction_matrix.columns.values,
+                                      columns = prediction_matrix.columns.values)
+        for col_a in prediction_matrix.columns:
+            position = prediction_matrix.columns.get_loc(col_a)
+            for col_b in prediction_matrix.ix[:,position:]:
+                intersection_cardinality = len(set.intersection(*[set(prediction_matrix[col_a]),
+                                               set(prediction_matrix[col_b])]))
+                
+                
+                if percent:
+                    jaccard = intersection_cardinality/float(k)
+                else:
+                    union_cardinality = len(set.union(*[set(prediction_matrix[col_a]),
+                                        set(prediction_matrix[col_b])]))
+                    jaccard = intersection_cardinality/float(union_cardinality)
+                
+                jaccard_matrix.loc[col_a, col_b] = jaccard
+                jaccard_matrix.loc[col_b, col_a] = jaccard
+
+        return(jaccard_matrix.astype(float))
