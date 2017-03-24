@@ -93,7 +93,6 @@ inspection_density_first_quartile = neighborhood_history['inspection_density'].q
 output_folder = os.environ['OUTPUT_FOLDER']
 path_to_predictions = os.path.join(output_folder, 'top_predictions_on_all_parcels')
 
-i=1
 for model in all_models:
     # get validation start, end 
     test_start = re.split('_', model['experiment_name'])[2].lower()
@@ -135,13 +134,14 @@ for model in all_models:
     model['top_5_violations_per_house_std_dev'] = top_k_neighborhood['violations_per_house'].std()
     model['top_5_low_violations_per_house_percent'] = (top_k_neighborhood['violations_per_house'] < violations_per_house_first_quartile).mean()
 
-    print "finished model {0} of {1}".format(i, len(all_models))
-    i+=1
 
-#save results to CSV
 all_models_df = pd.DataFrame(all_models)
+all_models_df.set_index('model_id', inplace=True)
+
+#turn config dict into columns in the all models dataframe
 config_dict = all_models_df['config'].map(str).apply(ast.literal_eval)
 config_df = pd.DataFrame(config_dict.to_dict()).T
-config_df.to_csv('configs.csv')
-all_models_df.to_csv(results_filepath, index=False)
+
+models_with_config = all_models_df.drop(['parameters', 'experiment_name', '_id'], axis=1).join(config_df)
+models_with_config.to_csv(results_filepath, index=False)
 
