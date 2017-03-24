@@ -75,7 +75,6 @@ for model_id in model_ids:
 
 all_top5 = pd.concat(all_top_k.values())
 all_top5['violations_per_house'] = all_top5['violation_rate'] * all_top5['inspection_density'] 
-all_top5.drop('Unnamed: 0', axis=1, inplace=True)
 all_top5.to_csv('all_top5.csv')
 
 # make feature crosstabs
