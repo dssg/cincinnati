@@ -115,11 +115,11 @@ for model in all_models:
     top_k_inspected = model_top_k.join(validation_inspections)
     
     # get validation precision and labeled percent
-    model['validation_precision_at_p'] =  precision_at(top_k_inspected.viol_outcome,
+    model['validation_precision_at_p'], model['validation_labeled_percent'] =  precision_at(top_k_inspected.viol_outcome,
                                                        model_top_k.prediction,
                                                        percent=1.0, # precision is calculated on top k, so use 100%
                                                        ignore_nas=True) # not all parcels in top k will have inspections
-    model['validation_labeled_percent'] = 100.0*(top_k_inspected.shape[0])/k
+    #model['validation_labeled_percent'] = 100.0*(top_k_inspected.shape[0])/k
 
     # add neighborhood info - mean and std dev of inspection density and violations per house 
     # on top k parcels for this model
