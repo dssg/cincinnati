@@ -5,7 +5,24 @@ import os
 
 import seaborn as sns
 import matplotlib.pyplot as plt
+import sklearn_evaluation
+from sklearn_evaluation.plots import compute_similarity
 
+k = 7500
+
+model_groups = [18711, 1120, 14613, 5716, 
+                27039, 7111, 28879, 26523, 
+                1309, 12547, 10062, 28108, 
+                11814, 7068, 29230, 25683, 7520]
+
+all_top5 = pd.read_csv('all_top5.csv')
+
+top_k = {}
+
+for model_group in model_groups:
+    top_k[model_group] = all_top5[all_top5['model_group'] == model_group]['parcel_id']
+
+ 
 top_k_keys = {10062: 'ID (10062)', 
               12547: 'ID (12547)',  
               7111: 'ID (7111)',
