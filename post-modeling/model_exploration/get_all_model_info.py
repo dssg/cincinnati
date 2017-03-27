@@ -20,6 +20,7 @@ from lib_cinci.evaluation import (load_one_inspection_per_parcel,
 from lib_cinci.config import load, get_config_parameters 
 
 from sklearn_evaluation.metrics import precision_at
+from sklearn_evaluation.Logger import Logger
 
 import ast
 import itertools
@@ -41,7 +42,6 @@ k = 7500
 validation_feature_schema = 'features_31aug2016'
 
 #setup database configuration and DB connection
-from sklearn_evaluation.Logger import Logger
 folder = os.environ['ROOT_FOLDER']
 name = 'config.yaml'
 path = "%s/%s" % (folder, name)
