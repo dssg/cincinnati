@@ -268,7 +268,7 @@ def compute_similarity(prediction_matrix, percent=True):
                 
                 
                 if percent:
-                    jaccard = intersection_cardinality/float(k)
+                    jaccard = intersection_cardinality/len(set(prediction_matrix[col_a]))
                 else:
                     union_cardinality = len(set.union(*[set(prediction_matrix[col_a]),
                                         set(prediction_matrix[col_b])]))
