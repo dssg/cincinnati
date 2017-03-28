@@ -27,7 +27,7 @@ parcel_info = pd.read_csv('parcels-with-neighborhood-info.csv', index_col='parce
 #for model_id in model_ids:
 for model_group in model_groups:
     model_id = models_grouped.loc[model_group, model_id_columns].dropna()[0]
-
+    model_group = str(model_group)
     # Retrain model and get predictions on all parcels
     trained_model_df, trained_model_dict = main(model_id=model_id, 
                                                 train_end_date='30Aug2016',  
@@ -41,6 +41,7 @@ for model_group in model_groups:
     all_top_k[model_group] = model_predictions.head(7500)
 
     # Save feature importances to CSV
+    model_name = all_models.loc[model_id, 'name']
     if model_name == 'LogisticRegression':
         feature_importances = pd.DataFrame(data=[trained_model_df.columns[:-1],
                                                  trained_model_dict['model'].coef_]).T
