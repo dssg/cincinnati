@@ -32,7 +32,8 @@ all_features = {}
 for t in list(all_tables.table_name):
     query = 'SELECT * FROM features_31aug2016.{table};'.format(table=t)
     features = pd.read_sql(query, engine, index_col = 'parcel_id')
-    features.drop('inspection_date', axis=1, inplace=True)
+    if 'inspection_date' in features.columns:
+        features.drop('inspection_date', axis=1, inplace=True)
     features.columns = [t + '.' + str(col) for col in features.columns]
     all_features[t] = features 
 
@@ -41,13 +42,13 @@ all_features_df = pd.concat(all_features.values())
 
 #get mean over all parcels
 all_features_mean = all_features_df.mean(axis=0)
-
+print(all_features_mean.head())
 #add a column for model group 
-all_features_mean = all_features_mean.append(pd.Series([1.0], index=['model_group'])
-all_features_mean_df = all_features_mean.to_frame().T                                                                          
+all_features_mean = all_features_mean.append(pd.Series([1.0]), index=['model_group']).to_frame().T
+#all_features_mean_df = all_features_mean.to_frame().T
 
 #get features averages on top 5% for each model
-feature_averages = {}
+feature_average = {}
 
 for m in model_groups:                                                   
     list_name = str(m)
