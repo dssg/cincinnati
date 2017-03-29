@@ -20,7 +20,7 @@ engine = create_engine(uri)
 # get all tables from feature schema, excluding
 # 'insp2' tables - they are lookups, not features
 query = '''
-        SELECT DISTINCT (table_name) 
+        SELECT DISTINCT table_name 
         FROM information_schema.tables
         WHERE table_schema = 'features_31aug2016'
         AND SUBSTRING(table_name FROM 1 FOR 5) != 'insp2';
@@ -29,47 +29,43 @@ query = '''
 all_tables = pd.read_sql(query, engine)
 all_features = {}
 
-for t in list(all_tables.table_name):
-    query = 'SELECT * FROM features_31aug2016.{table};'.format(table=t)
-    features = pd.read_sql(query, engine, index_col = 'parcel_id')
-    if 'inspection_date' in features.columns:
-        features.drop('inspection_date', axis=1, inplace=True)
-    features.columns = [t + '.' + str(col) for col in features.columns]
-    all_features[t] = features 
+## FOR MODEL FEATURE AVERAGES
+for table in all_tables.table_name.values[0:2]:
+    column_query = '''
+              SELECT DISTINCT column_name 
+              FROM information_schema.columns
+              WHERE table_schema = 'features_31aug2016'
+              AND table_name = '{table}' 
+              AND column_name != 'parcel_id'
+              AND column_name != 'inspection_date'
+              AND data_type IN ('double precision', 'bigint', 'integer');
+              '''.format(table=table)
+    columns = pd.read_sql(column_query, engine)
 
-#combine all features
-all_features_df = pd.concat(all_features.values())
+    model_query = 'SELECT model_number, ' 
+    all_query = 'SELECT 1 as model_number, '
 
-#get mean over all parcels
-all_features_mean = all_features_df.mean(axis=0)
-print(all_features_mean.head())
-#add a column for model group 
-all_features_mean = all_features_mean.append(pd.Series([1.0]), index=['model_group']).to_frame().T
-#all_features_mean_df = all_features_mean.to_frame().T
+    for col in list(columns.column_name.values)[:-1]:
+        model_query += 'AVG({col}) AS {table}_{col}, '.format(table=table, col=col)
+        all_query += 'AVG({col}) AS {table}_{col}, '.format(table=table, col=col)
 
-#get features averages on top 5% for each model
-feature_average = {}
+    model_query += '''
+        AVG ({col}) AS {table}_{col}
+        FROM all_top_five 
+        JOIN features_31aug2016.{table} t
+        ON all_top_five.parcel_id = t.parcel_id
+        GROUP BY model_number
+        '''.format(col=columns.column_name.values[-1], table=table)
 
-for m in model_groups:                                                   
-    list_name = str(m)
-    # change this to get top k from all_top5
-    model_features = all_features[all_features.index.isin(top_k[list_name].index)].mean(axis=0)
-    model_features = model_features.to_frame().T
+    all_query += 'AVG ({col}) AS {table}_{col} FROM features_31aug2016.{table} GROUP BY model_number;'.format(col=columns.column_name.values[-1], table=table)
+        
+    average_top_five = pd.read_sql(model_query, engine, index_col = 'model_number')
+    average_top_five['table_name'] = table
+    average_top_five['group'] = 'all parcel average'
+    
+    average_all_parcels = pd.read_sql(all_query, engine, index_col = 'model_number')
+    average_all_parcels['table_name'] = table
+    average_all_parcels['group'] = 'top k average' 
 
-    feature_averages[list_name + ' Top 5'] = model_features
-    feature_averages[list_name + ' Top 5']['model_group'] = list_name
-    feature_averages[list_name + ' Top 5']['subset'] = 'Top 5 Average'
-    feature_averages[list_name + ' Top 5']['list'] = 'All Parcels'
-
-    feature_averages[list_name + ' Ratio'] = model_features.divide(all_features_mean_df, axis=1)
-    feature_averages[list_name + ' Ratio']['model_group'] = list_name
-    feature_averages[list_name + ' Ratio']['subset'] = 'Ratio'
-    feature_averages[list_name + ' Ratio']['list'] = 'All Parcels'
-
-crosstabs = pd.concat(feature_averages.values())
-crosstabs = crosstabs.append(all_features_mean_df)
-crosstabs.set_index(['model_group','list','subset'], inplace=True)
-crosstabs.reset_index(inplace=True)
-crosstabs['new_index'] = crosstabs['model_group'].map(int).map(str) + ' ' + crosstabs['list'] + ' ' + crosstabs['subset']
-crosstabs.set_index('new_index', inplace=True)
-crosstabs.T.to_csv('feature_crosstabs.csv')
+    all_features[table] = pd.concat([average_all_parcels, average_top_five])
+pd.concat(all_features.values()).to_csv('feature_crosstabs_test.csv')
