@@ -1,0 +1,25 @@
+experiment_name: fall2016_30Jun2013_30Jun2015_6Month_upto_50m_3months_with_density_grid_medium_algos_RandExtrLogi
+fake_today: '30Jun2015'
+features:
+- tax.%
+- census_2010.rate_%
+- named_entities.%
+- parc_area.%
+- parc_year.%
+- house_type.%
+- quarter.%
+- sixweeksweather.%
+- fire_50m_3months.%
+- crime_50m_3months.%
+- sales_50m_3months.%
+- permits_50m_3months.%
+- three11_50m_3months.%
+- density_50m_3months.%
+grid_size: medium
+models:
+- sklearn.ensemble.RandomForestClassifier
+- sklearn.ensemble.ExtraTreesClassifier
+- sklearn.linear_model.LogisticRegression
+residential_only: false
+start_date: '30Jun2013'
+validation_window: '6Month'
