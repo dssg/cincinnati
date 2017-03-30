@@ -2,32 +2,27 @@ import pandas as pd
 import os
 from lib_cinci.train_and_predict import main, predict_on_date, train_on_config
 
-output_folder = os.environ['OUTPUT_FOLDER']
+k = 7500 # top 5% of parcels in Cincinnati
 
-#specify which models you want to retrain
-model_groups = [18711, 1120, 14613, 5716, 
-                27039, 7111, 28879, 26523, 
-                1309, 12547, 10062, 28108, 
-                11814, 7068, 29230, 25683, 7520]
+top_models = pd.read_csv('top_model_reason_lookup.csv')
+model_groups = top_models.model_group.values 
 
-k = 7500 # top 5% of parcels
-
-# TODO : merge these?
-all_models = pd.read_csv('model-results-2017-03-23.csv', index_col='model_id')
 models_grouped = pd.read_csv('model-results-grouped.csv')
+parcel_info = pd.read_csv('parcels_with_neighborhood_info.csv', index_col='parcel_id')
 
-# get model ids from model columns
+# get model ids and names from model columns
 model_id_columns = [col for col in list(models_grouped) if col.startswith('model_id')]
+model_name_columns = [col for col in list(models_grouped) if col.startswith('name')]
 
 all_top_k = {}
 all_feature_importances = {}
 
-parcel_info = pd.read_csv('parcels-with-neighborhood-info.csv', index_col='parcel_id')
-
-#for model_id in model_ids:
 for model_group in model_groups:
     model_id = models_grouped.loc[model_group, model_id_columns].dropna()[0]
+    model_name = models_grouped.loc[model_group, model_name_columns].dropna()[0]
+
     model_group = str(model_group)
+
     # Retrain model and get predictions on all parcels
     trained_model_df, trained_model_dict = main(model_id=model_id, 
                                                 train_end_date='30Aug2016',  
@@ -40,8 +35,7 @@ for model_group in model_groups:
     model_predictions = trained_model_df[['prediction']].join(parcel_info)
     all_top_k[model_group] = model_predictions.head(7500)
 
-    # Save feature importances to CSV
-    model_name = all_models.loc[model_id, 'name']
+    # Get feature importances (or coefficients for Logistic Regression)
     if model_name == 'LogisticRegression':
         feature_importances = pd.DataFrame(data=[trained_model_df.columns[:-1],
                                                  trained_model_dict['model'].coef_]).T
@@ -52,15 +46,11 @@ for model_group in model_groups:
 
     feature_importances.columns = ['feature', 'feature_importance']
     feature_importances['model_group'] = model_group
-    output_path = os.path.join(output_folder, 
-                               'feature_importances', 
-                               'feature_importances_' + model_group + '.csv')
-    feature_importances.to_csv(output_path)
-    
+
     all_feature_importances[model_group] = feature_importances
 
     # Get list of top k parcels below median ID
-    inspection_density_median = model_predictions['inspection_density'].median()
+    inspection_density_median = model_predictions.inspection_density.median()
     median_mask = model_predictions.inspection_density < inspection_density_median
     below_median_ID = model_predictions[median_mask].head(k)
     all_top_k[model_group + ' Below Median ID'] = below_median_ID
