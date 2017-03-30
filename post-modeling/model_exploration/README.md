@@ -25,20 +25,18 @@ to choose 5 models that did the best with respect to precision (finding the
 most violations), 5 models that identified parcels in neighborhoods that had a low
 inspection density, 5 models that identified parcels that had a low
 neighborhood violation rate, and 5 models that seemed to balance these three 
-aspects fairly well. 
+aspects fairly well. We store them in a CSV along with their respective reasons
+for selections for the following steps: [`top_model_reason_lookup.csv`](top_model_reason_lookup.csv).
 
 # Retraining Models & Providing Lists
 
 ## Retrain Models
-Once you've chosen your final model(s), you'll want to retrain them using all
-the most recent data (in our case, the most recent data update was August 31,
-2016). The [`retrain_models.py`](retrain_models.py) script does this. 
-
-- **Input**: `model_groups` (the model or models found by hand at the end of the step above)
-- **Output**: `all_top5.csv` (a CSV with a list of the 7500 top-ranked parcels
-for each model, model scores and pertinent neighborhood
-information for all parcels), directory of all features and importances for all
-models, stored in `$OUTPUT_FOLDER/feature_importances`.
+Once you've chosen your final model(s), you'll want to retrain them using 
+the most recent data available (in our case, the most recent data update was August 31,
+2016). The [`retrain_models.py`](retrain_models.py) script does this, creating
+`all_top5.csv` (a CSV with a list of the 7500 top-ranked parcels for each model, 
+model scores and pertinent neighborhood information for all parcels), as well as a CSV of the 
+feature importances for all features used by all models (`feature_importances.csv`).
 
 ## Feature Crosstabs
 **_What types of parcels are ranked highly by a given model?_**
@@ -70,6 +68,6 @@ virtualenv cinci-venv
 source cinci-venv/bin/activate
 pip install -r requirements.txt
 ```
-2. Adapt `env_sample.sh` as appropriate
-3. `source env.sh` 
+2. Adapt `../../env_sample.sh` as appropriate
+3. `source ../../env.sh` 
 

@@ -71,10 +71,10 @@ for model_group in model_groups:
     below_quartile_ID = model_predictions[first_quartile_mask].head(k)
     all_top_k[model_group + ' Below First Quartile ID'] = below_quartile_ID
     
-all_top5 = pd.concat(all_top_k.values(), keys= all_top_k.keys())
+all_top5 = pd.concat(all_top_k.values(), keys=all_top_k.keys())
 all_top5['violations_per_house'] = all_top5['violation_rate'] * all_top5['inspection_density'] 
 all_top5.to_csv('all_top5.csv')
 
 all_features_csv = pd.concat(all_feature_importances.values())
-all_features_csv.set_index(['feature','model_group']).unstack().to_csv('features_test.csv')
+all_features_csv.set_index(['feature','model_group']).unstack().to_csv('feature_importances.csv')
 
