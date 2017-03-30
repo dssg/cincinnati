@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS all_top_five;
+DROP TABLE IF EXISTS model_results.all_top_five;
 
-CREATE TABLE all_top_five (
+CREATE TABLE model_results.all_top_five (
        model_number VARCHAR(29) NOT NULL, 
        parcel_id VARCHAR(14) NOT NULL, 
        prediction DECIMAL NOT NULL, 
@@ -11,4 +11,4 @@ CREATE TABLE all_top_five (
        violations_per_house DECIMAL
 );
 
-\COPY all_top_five FROM all_top5.csv WITH CSV HEADER;
+\COPY model_results.all_top_five FROM all_top5.csv WITH CSV HEADER;
