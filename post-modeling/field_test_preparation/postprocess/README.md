@@ -7,9 +7,10 @@ were inspected on some specific date. This directory contains the sourcecode nec
 ## How to use this?
 
 1. Download all additional property info from the database by running
-
+```
     ./download_parcel_info
-    
-2. Select your inspections list file and add the parcel data (file must have a parcel_id as its first column)
-
+```  
+2. Select your inspections list file and add the parcel data (file must have `parcel_id` as its first column)
+```
    ./add_parcel_info PATH_TO_INSPECTIONS_LIST
+```
