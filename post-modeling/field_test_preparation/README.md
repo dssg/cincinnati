@@ -1,4 +1,4 @@
-#Preparing results for a field test [WORK IN PROGRESS]
+# Preparing Results for a Field Test [WORK IN PROGRESS]
 
 This folder contains tools to create a list of inspections using a previously trained model.
 
