@@ -10,19 +10,14 @@ matplotlib.use('Agg')
 import sklearn_evaluation
 from sklearn_evaluation.plots import compute_similarity
 
-k = 7500
-model_groups = [18711, 1120, 14613, 5716, 
-                27039, 7111, 28879, 26523, 
-                1309, 12547, 10062, 28108, 
-                11814, 7068, 29230, 25683, 7520]
-
 all_top5 = pd.read_csv('all_top5.csv', index_col=0)
+top_models = pd.read_csv('top_model_reason_lookup.csv')
+model_groups = top_models.model_group.values
 
 top_k = {}
 for model_group in model_groups:
     model_group = str(model_group)
-    top_k[model_group] = all_top5.loc[model_group]['parcel_id'] 
-
+    top_k[model_group] = all_top5.loc[model_group]
 
 top_k_keys = {'10062': 'ID (10062)', 
               '12547': 'ID (12547)',  
@@ -43,15 +38,14 @@ top_k_keys = {'10062': 'ID (10062)',
               '25683': 'VR (25683)'
              }
 
-d = {k: v.index.values for k,v in top_k.iteritems()}
+d = {k: v.parcel_id.values for k,v in top_k.iteritems()}
 top_k_dict = {top_k_keys[k]: v for k, v in d.items()}
 prediction_matrix = pd.DataFrame.from_dict(top_k_dict)
 df = compute_similarity(prediction_matrix)
-
 cmap = sns.cubehelix_palette(dark=0, light=1, start=.5, rot=-.75, as_cmap=True)
 
 f,ax = plt.subplots(figsize=(20, 15))
 
 ax = sns.heatmap(df,linewidths=0.5, vmin=0, vmax=1, cmap=cmap)
 plt.xticks(rotation=45, ha='right')
-ax.figure.savefig('percent_similarity_top_' + str(k))
+ax.figure.savefig('list_overlap_heatmap.png')
