@@ -7,8 +7,8 @@ k = 7500 # top 5% of parcels in Cincinnati
 top_models = pd.read_csv('top_model_reason_lookup.csv')
 model_groups = top_models.model_group.values 
 
-models_grouped = pd.read_csv('model-results-grouped.csv')
-parcel_info = pd.read_csv('parcels_with_neighborhood_info.csv', index_col='parcel_id')
+models_grouped = pd.read_csv('model-results-grouped.csv', index_col='group_number')
+parcel_info = pd.read_csv('parcels-with-neighborhood-info.csv', index_col='parcel_id')
 
 # get model ids and names from model columns
 model_id_columns = [col for col in list(models_grouped) if col.startswith('model_id')]
