@@ -251,9 +251,11 @@ def precision_at_proportions(test_labels, test_predictions, ax=None, **kwargs):
 def compute_similarity(prediction_matrix, percent=True):
         """ Given a matrix of individuals classified as positive from different
         models, return a correlation-matrix-like matrix of jaccard similarities.
-        :param prediction_matrix: lists of top X indiviudals with highest risk
+        :param prediction_matrix: lists of top X individuals with highest risk
                                   scores according to different models
         :type prediction_matrix: pandas DataFrame 
+        :param percent: Flag to return percent overlap instead of Jaccard similarity
+        :type percent: boolean
         :returns: jaccard matrix
         :rtype: pandas DataFrame
         """
@@ -266,9 +268,8 @@ def compute_similarity(prediction_matrix, percent=True):
                 intersection_cardinality = len(set.intersection(*[set(prediction_matrix[col_a]),
                                                set(prediction_matrix[col_b])]))
                 
-                
                 if percent:
-                    jaccard = intersection_cardinality/len(set(prediction_matrix[col_a]))
+                    jaccard = intersection_cardinality/float(len(prediction_matrix[col_a]))
                 else:
                     union_cardinality = len(set.union(*[set(prediction_matrix[col_a]),
                                         set(prediction_matrix[col_b])]))
