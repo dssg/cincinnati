@@ -103,7 +103,7 @@ for model in all_models:
     
     # get saved scores
     model_top_k = pd.read_csv(os.path.join(path_to_predictions, model['model_id']), 
-                              nrows=k+1,
+                              nrows=k,
                               index_col='parcel_id',
                               usecols=['parcel_id','prediction']) 
     
@@ -113,13 +113,13 @@ for model in all_models:
     # get intersection of this model's top k with parcels that were inspected
     # during validation window, and the results of those inspections
     top_k_inspected = model_top_k.join(validation_inspections)
-    
+
     # get validation precision and labeled percent
-    model['validation_precision_at_p'], model['validation_labeled_percent'] =  precision_at(top_k_inspected.viol_outcome,
+    model['validation_precision_at_p'] =  precision_at(top_k_inspected.viol_outcome,
                                                        model_top_k.prediction,
                                                        percent=1.0, # precision is calculated on top k, so use 100%
-                                                       ignore_nas=True) # not all parcels in top k will have inspections
-    #model['validation_labeled_percent'] = 100.0*(top_k_inspected.shape[0])/k
+                                                       ignore_nas=True)[0] # not all parcels in top k will have inspections
+    model['validation_labeled_percent'] = 100.0*(top_k_inspected.viol_outcome.notnull().sum())/k
 
     # add neighborhood info - mean and std dev of inspection density and violations per house 
     # on top k parcels for this model
@@ -134,14 +134,25 @@ for model in all_models:
     model['top_5_violations_per_house_std_dev'] = top_k_neighborhood['violations_per_house'].std()
     model['top_5_low_violations_per_house_percent'] = (top_k_neighborhood['violations_per_house'] < violations_per_house_first_quartile).mean()
 
-
 all_models_df = pd.DataFrame(all_models)
 all_models_df.set_index('model_id', inplace=True)
 
 #turn config dict into columns in the all models dataframe
 config_dict = all_models_df['config'].map(str).apply(ast.literal_eval)
 config_df = pd.DataFrame(config_dict.to_dict()).T
+config_df.drop(['models', 'residential_only', 'parameters'], axis=1, inplace=True)
 
-models_with_config = all_models_df.drop(['parameters', 'experiment_name', '_id'], axis=1).join(config_df)
-models_with_config.to_csv(results_filepath, index=False)
+#calculate trainining window (length between train start and test start)
+config_df['fake_today'] = config_df['fake_today'].apply(lambda x: datetime.strptime(x, '%d%b%Y'))
+config_df['start_date'] = config_df['start_date'].apply(lambda x: datetime.strptime(x, '%d%b%Y'))
+config_df['training_window'] = config_df['fake_today'] - config_df['start_date']
+
+param_dict = all_models_df['parameters'].map(str).apply(ast.literal_eval)
+param_df = pd.DataFrame(param_dict.to_dict()).T
+
+all_models = all_models_df.drop(['parameters', 'experiment_name', 'config'], axis=1)
+all_models = all_models.join(config_df)
+all_models = all_models.join(param_df)
+
+all_models.to_csv(results_filepath)
 
