@@ -1,27 +1,17 @@
 import pandas as pd
 import numpy as np
-
 import os
 import fnmatch
 import re
-
 from sqlalchemy import create_engine
 import yaml
-import pymongo
-from pymongo import MongoClient
-
 from datetime import date, datetime
 import dateutil
 from dateutil import relativedelta
-
-from lib_cinci.evaluation import (load_one_inspection_per_parcel, 
-                                  add_latlong_to_df)
-
+from lib_cinci.evaluation import load_one_inspection_per_parcel 
 from lib_cinci.config import load, get_config_parameters 
-
 from sklearn_evaluation.metrics import precision_at
 from sklearn_evaluation.Logger import Logger
-
 import ast
 import itertools
 
