@@ -31,5 +31,7 @@ cmap = sns.cubehelix_palette(dark=0, light=1, start=.5, rot=-.75, as_cmap=True)
 f,ax = plt.subplots(figsize=(20, 15))
 
 ax = sns.heatmap(df,linewidths=0.5, vmin=0, vmax=1, cmap=cmap)
-plt.xticks(rotation=45, ha='right')
+plt.xticks(rotation=45, ha='right', fontsize=12)
+plt.yticks(fontsize=12)
+
 ax.figure.savefig('list_overlap_heatmap.png')
