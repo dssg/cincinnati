@@ -2,25 +2,22 @@
 **_So I've trained a bunch of models ... now what?_**
 Once you've run some experiments and have some preliminary results, you'll 
 want to narrow down the field so that you can look more closely and analyze 
-your results. The [`get_all_model_info.py`](get_all_model_info.py) script does
-this.
+your results. 
 
-- **Input**: Directory location of your experiment config files, `space_delta` and 
+The [`get_model_groups.py`](get_model_groups.py) script does calculates a 
+variety of model performance metrics and measures of inspection and violation 
+density for each of the model's training and testing
+windows. One model is defined by the model type (e.g. Logistic Regression,
+Random Forest), the hyperparameters used, the feature sets included, and the
+various levels of spatial and temporal feature aggregations used.   
+
+Specify the directory location of your experiment config files, `space_delta` and 
 `time_delta` (specifying the level of space & time you want to cover in the neighborhood
 history metrics), `k` (the level at which to calculate precision, or how many parcels
-will be included in the list of inspections), `validation_feature_schema` (used to
+will be included in the list of inspections), and `validation_feature_schema` (used to
 get neighborhood information for all parcels).
 
-- **Output**: A CSV of all models listing their results on various model performance
-and neighborhood inspection and violation density on a variety of training and 
-testing windows. A model is defined by the model type (e.g. Logistic Regression, 
-Random Forest), the hyperparameters used, the features included, and the various
-levels of feature aggregations used (e.g. "Census up to 400m"). 
-
-To connect models over time, use the [`get_model_groups.py`](get_model_groups.py) 
-script.
-
-Based on these model results, we did some hands-on analysis (primarily using Tableau)
+Based on these results, we did some hands-on analysis (primarily using Tableau)
 to choose 5 models that did the best with respect to precision (finding the 
 most violations), 5 models that identified parcels in neighborhoods that had a low
 inspection density, 5 models that identified parcels that had a low
@@ -39,7 +36,7 @@ model scores and pertinent neighborhood information for all parcels), as well as
 feature importances for all features used by all models (`feature_importances.csv`).
 
 ## Feature Crosstabs
-**_What types of parcels are ranked highly by a given model?_**
+**_Which types of parcels are ranked highly by each model?_**
 We'd like to analyze how the models are making decisions, but sometimes 
 interpreting ML models isn't totally straightforward, and sometimes it's 
 hard to know if you're comparing "apples to apples." One way we analyze models
