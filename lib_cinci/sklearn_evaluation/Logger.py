@@ -1,6 +1,8 @@
 from pymongo import MongoClient
 from utils import get_model_name
 import datetime
+import monthdelta
+from dateutil.relativedelta import relativedelta
 import pymongo
 from bson.objectid import ObjectId
 
@@ -151,7 +153,7 @@ class Logger:
                 model_cfg['config'].pop('start_date'), '%d%b%Y')
         fake_today = datetime.datetime.strptime(
                 model_cfg['config'].pop('fake_today'), '%d%b%Y')
-        train_len = fake_today - start_date
+        train_len = monthdelta.monthmod(start_date, fake_today)[0]
         experiment_name = model_cfg['config'].pop('experiment_name')
 
         # we want all documents that are identical in a subset of 
@@ -174,8 +176,7 @@ class Logger:
                                                          '%d%b%Y')
             this_fake_today = datetime.datetime.strptime(r['config']['fake_today'],
                                                          '%d%b%Y')
-
-            if (this_fake_today - this_start_date) == train_len:
+            if monthdelta.monthmod(this_start_date, this_fake_today)[0] == train_len:
                 res_ids.append(r['_id'])
 
         return res_ids
