@@ -18,19 +18,15 @@ connparams)
 
 engine = create_engine(uri)
 
-model_id = '53454 Below Median ID'
-all_top_five = pd.read_csv('all_top5.csv', index_col=0)
-predictions = all_top_five.loc[model_id]
-predictions.reset_index(inplace=True)
-predictions.set_index('parcel_id', inplace=True)
+model_id = '53454'
 
-path_to_postprocess = os.path.join(os.environ['OUTPUT_FOLDER'], 'postprocess')
-path_to_parcel_info = os.path.join(path_to_postprocess, 'parcel_info.csv')
-parcel_info = pd.read_csv(path_to_parcel_info, index_col='parcel_id', 
-                          usecols=['residential', 'address', 'tract', 'parcel_id'])
+query = '''
+        SELECT * 
+        FROM model_results.all_top_k
+        LEFT JOIN model_results.parcel_info
+        USING parcel_id
+        WHERE top_k.model_group = '{}'
+        '''.format(model_id=model_id)
 
-query = 'SELECT parcel_id, unique_inspections,unique_violations, houses FROM features_31aug2016.neighborhood_score_400m_12months;'
-neighborhood_info = pd.read_sql(query, engine, index_col='parcel_id')
-
-model_list = predictions.join(parcel_info).join(neighborhood_info)
+model_list = pd.read_sql(query, engine, index_col='parcel_id')
 model_list.to_csv('inspection_list.csv')

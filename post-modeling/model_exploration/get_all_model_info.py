@@ -7,9 +7,10 @@ from sqlalchemy import create_engine
 import yaml
 from datetime import date, datetime
 import dateutil
-from dateutil import relativedelta
+from dateutil.relativedelta import relativedelta
 from lib_cinci.evaluation import load_one_inspection_per_parcel 
 from lib_cinci.config import load, get_config_parameters 
+#from lib_cinci import db
 from sklearn_evaluation.metrics import precision_at
 from sklearn_evaluation.Logger import Logger
 import ast
@@ -22,14 +23,17 @@ experiment_directory = os.path.join(os.getcwd(), 'medium_models')
 space_delta = '400m'
 time_delta = '12months'
 
-# where to save model results
-results_filepath = 'model-results-' + str(date.today()) + '.csv'
+# where to save model results and where to get predictions
+output_folder = os.environ['OUTPUT_FOLDER']
+path_to_output = os.path.join(output_folder, 'all_models.csv')
+path_to_predictions = os.path.join(output_folder, 'top_predictions_on_all_parcels')
 
 # k - number of parcels to use for precision and neighborhood metrics
 k = 7500
 
 # validation schema
 validation_feature_schema = 'features_31aug2016'
+validation_months = 6
 
 #setup database configuration and DB connection
 folder = os.environ['ROOT_FOLDER']
@@ -67,29 +71,25 @@ for m in all_models:
     m['model_id'] = str(m['_id'])
 
 #get neighborhood feature table 
-neighborhood_table = 'neighborhood_score_' + space_delta + '_' + time_delta
-neighborhood_history = pd.read_sql_table(neighborhood_table, engine,
-                                         schema = validation_feature_schema,
-                                         index_col = 'parcel_id')
-neighborhood_history.drop('inspection_date', axis=1, inplace=True)
+#neighborhood_table = 'neighborhood_score_' + space_delta + '_' + time_delta
+#neighborhood_history = pd.read_sql_table(neighborhood_table, engine,
+#                                         schema = validation_feature_schema,
+#                                         index_col = 'parcel_id')
+#neighborhood_history.drop('inspection_date', axis=1, inplace=True)
 
-neighborhood_history['violations_per_house'] = neighborhood_history.unique_violations/neighborhood_history.houses
-violations_per_house_first_quartile = neighborhood_history['violations_per_house'].quantile(0.25)
+#neighborhood_history['violations_per_house'] = neighborhood_history.unique_violations/neighborhood_history.houses
+#violations_per_house_first_quartile = neighborhood_history['violations_per_house'].quantile(0.25)
 
-neighborhood_history['inspection_density'] = neighborhood_history.unique_inspections/neighborhood_history.houses
-inspection_density_first_quartile = neighborhood_history['inspection_density'].quantile(0.25)
-     
-#get saved model predictions as of validation date
-output_folder = os.environ['OUTPUT_FOLDER']
-path_to_predictions = os.path.join(output_folder, 'top_predictions_on_all_parcels')
+#neighborhood_history['inspection_density'] = neighborhood_history.unique_inspections/neighborhood_history.houses
+#inspection_density_first_quartile = neighborhood_history['inspection_density'].quantile(0.25)
 
 for model in all_models:
-    # get validation start, end 
+    # get validation start date, end date 
     test_start = re.split('_', model['experiment_name'])[2].lower()
     model['test_start'] = test_start
 
-    validation_start = datetime.strptime(test_start, '%d%b%Y') + relativedelta.relativedelta(months=6)
-    validation_end = validation_start + relativedelta.relativedelta(months=6) 
+    validation_start = datetime.strptime(test_start, '%d%b%Y') + relativedelta(months=validation_months)
+    validation_end = validation_start + relativedelta(months=validation_months) 
     
     # get saved scores
     model_top_k = pd.read_csv(os.path.join(path_to_predictions, model['model_id']), 
@@ -114,15 +114,15 @@ for model in all_models:
     # add neighborhood info - mean and std dev of inspection density and violations per house 
     # on top k parcels for this model
 
-    top_k_neighborhood = model_top_k.join(neighborhood_history)
+#    top_k_neighborhood = model_top_k.join(neighborhood_history)
 
-    model['top_5_inspection_density_mean'] = top_k_neighborhood['inspection_density'].mean()
-    model['top_5_inspection_density_std_dev'] = top_k_neighborhood['inspection_density'].std()
-    model['top_5_low_inspection_density_percent'] = (top_k_neighborhood['inspection_density'] < inspection_density_first_quartile).mean()
+ #   model['top_5_inspection_density_mean'] = top_k_neighborhood['inspection_density'].mean()
+ #   model['top_5_inspection_density_std_dev'] = top_k_neighborhood['inspection_density'].std()
+ #   model['top_5_low_inspection_density_percent'] = (top_k_neighborhood['inspection_density'] < inspection_density_first_quartile).mean()
 
-    model['top_5_violations_per_house_mean'] = top_k_neighborhood['violations_per_house'].mean()
-    model['top_5_violations_per_house_std_dev'] = top_k_neighborhood['violations_per_house'].std()
-    model['top_5_low_violations_per_house_percent'] = (top_k_neighborhood['violations_per_house'] < violations_per_house_first_quartile).mean()
+  #  model['top_5_violations_per_house_mean'] = top_k_neighborhood['violations_per_house'].mean()
+  #  model['top_5_violations_per_house_std_dev'] = top_k_neighborhood['violations_per_house'].std()
+  #  model['top_5_low_violations_per_house_percent'] = (top_k_neighborhood['violations_per_house'] < violations_per_house_first_quartile).mean()
 
 all_models_df = pd.DataFrame(all_models)
 all_models_df.set_index('model_id', inplace=True)
@@ -135,7 +135,7 @@ config_df.drop(['models', 'residential_only', 'parameters'], axis=1, inplace=Tru
 #calculate trainining window (length between train start and test start)
 config_df['fake_today'] = config_df['fake_today'].apply(lambda x: datetime.strptime(x, '%d%b%Y'))
 config_df['start_date'] = config_df['start_date'].apply(lambda x: datetime.strptime(x, '%d%b%Y'))
-config_df['training_window'] = config_df['fake_today'] - config_df['start_date']
+config_df['training_window'] = (config_df['fake_today'] - config_df['start_date']).astype('timedelta64[M]').map(int).map(str) + ' Months' 
 
 param_dict = all_models_df['parameters'].map(str).apply(ast.literal_eval)
 param_df = pd.DataFrame(param_dict.to_dict()).T
@@ -144,5 +144,15 @@ all_models = all_models_df.drop(['parameters', 'experiment_name', 'config'], axi
 all_models = all_models.join(config_df)
 all_models = all_models.join(param_df)
 
-all_models.to_csv(results_filepath)
+all_models.drop(['_id', 'cutoff_at_1', 'cutoff_at_10', 'cutoff_at_20',
+       'cutoff_at_5', 'datetime', 'fake_today'], 
+                axis=1, inplace=True)
+
+all_models['model_number'] = all_models.test_start.map({'31dec2013': 1,
+                                                        '30jun2014': 2,
+                                                        '31dec2014': 3,
+                                                        '30jun2015': 4,
+                                                        '31dec2015': 5})
+
+all_models.to_csv(path_to_output)
 

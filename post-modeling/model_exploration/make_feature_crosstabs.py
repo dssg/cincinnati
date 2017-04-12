@@ -5,6 +5,10 @@ import yaml
 from lib_cinci.config import load
 
 folder = os.environ['ROOT_FOLDER']
+output_folder = os.environ['OUTPUT_FOLDER']
+
+path_to_output = os.path.join(output_folder, 'feature_crosstabs.csv')
+
 name = 'config.yaml'
 path = "%s/%s" % (folder, name)
 f = open(path, 'r')
@@ -25,7 +29,8 @@ query = '''
         FROM information_schema.tables
         WHERE table_schema = 'features_31aug2016'
         AND SUBSTRING(table_name FROM 1 FOR 5) != 'insp2'
-        AND table_name NOT IN ('parc_year', 'parcels_inspections', 'named_entities');
+        AND table_name NOT IN ('parc_year', 'parcels_inspections', 
+                               'named_entities');
         '''
 
 all_tables = pd.read_sql(query, engine)
@@ -45,8 +50,8 @@ for table in all_tables.table_name.values:
     columns = pd.read_sql(column_query, engine)
     column_names = list(columns.column_name.values)
 
-    model_query = 'SELECT model_number, ' 
-    all_query = 'SELECT 1 as model_number, '
+    model_query = 'SELECT model_group, subset, ' 
+    all_query = '''SELECT 1 as model_group, 'All Parcels' as subset,'''
     
     if len(column_names) > 1:    
         for col in list(columns.column_name.values)[:-1]:
@@ -55,45 +60,48 @@ for table in all_tables.table_name.values:
 
         model_query += '''
                         AVG ("{col}") AS "{table}_{col}"
-                        FROM all_top_five 
+                        FROM model_results.all_top_k top_k
                         JOIN features_31aug2016.{table} t
-                        ON all_top_five.parcel_id = t.parcel_id
-                        GROUP BY model_number;
+                        ON top_k.parcel_id = t.parcel_id
+                        GROUP BY model_group, subset;
                        '''.format(col=column_names[-1], table=table)
 
         all_query += '''
                         AVG ("{col}") AS "{table}_{col}" 
                         FROM features_31aug2016.{table} 
-                        GROUP BY model_number;
+                        GROUP BY model_group, subset;
                       '''.format(col=column_names[-1], table=table)
     
     elif len(column_names) == 1:
          model_query = '''
-                       SELECT model_number, AVG("{col}") AS "{table}_{col}" 
-                       FROM all_top_five 
+                       SELECT model_group,
+                       subset, 
+                       AVG("{col}") AS "{table}_{col}" 
+                       FROM model_results.all_top_k top_k
                        JOIN features_31aug2016.{table} t
-                       ON all_top_five.parcel_id = t.parcel_id 
-                       GROUP BY model_number
+                       ON top_k.parcel_id = t.parcel_id 
+                       GROUP BY model_group, subset;
                        '''.format(col=column_names[0], table=table)
          
          all_query = '''
-                     SELECT 1 AS model_number, AVG("{col}") AS "{table}_{col}"
+                     SELECT 1 AS model_group, 
+                     'All Parcels' as subset,
+                     AVG("{col}") AS "{table}_{col}"
                      FROM features_31aug2016.{table} 
-                     GROUP BY model_number;
+                     GROUP BY model_group, subset;
                      '''.format(col=column_names[0], table=table)
 
     elif len(column_names) == 0:
         continue
 
-    average_top_five = pd.read_sql(model_query, engine, index_col = 'model_number')
-    average_all_parcels = pd.read_sql(all_query, engine, index_col = 'model_number')
-    ratio_top_five_to_all = average_top_five.divide(average_all_parcels.loc[1], axis=1)
+    average_top_five = pd.read_sql(model_query, engine, index_col = ['model_group', 'subset'])
+    average_all_parcels = pd.read_sql(all_query, engine, index_col = ['model_group', 'subset'])
 
-    all_features[table] = pd.concat([average_top_five, average_all_parcels, ratio_top_five_to_all],
-                                     keys=['Model Top 5% Average', 'All Parcel Average', 'Ratio'],
-                                     names=['value'])
+    all_features[table] = pd.concat([average_top_five, average_all_parcels],
+                                     keys=['Model Top 5% Average', 'All Parcel Average'], 
+                                     names=['quantity'])
 
-all_crosstabs = pd.concat(all_features.values(), axis=1)
-all_crosstabs.reset_index(inplace=True)
-all_crosstabs.sort_values('model_number').T.to_csv('feature_crosstabs.csv', header=False)
-
+ct = pd.concat(all_features.values(), axis=1)
+ct.reset_index(inplace=True)
+all_crosstabs = pd.melt(ct, id_vars=['model_group','quantity','subset'], var_name ='feature')
+all_crosstabs.to_csv(path_to_output, index=False)
