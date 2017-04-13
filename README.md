@@ -13,9 +13,17 @@ our project [here](http://dssg.uchicago.edu/2015/08/20/cincy-blight-prevention.h
 
 ## Setup
 
+### Clone the repo
+
+Clone the repo in `$ROOT_FOLDER`
+
+```bash
+git clone https://github.com/dssg/cincinnati $ROOT_FOLDER
+```
+
 ### Select folders for code, data, and output
 
-The code relies on three environment variables, before you start running the code, decide where are you going to store the *raw data*,  *code* and *output*, a sample file `env_sample.sh`, which looks like this:
+The code relies on four bash environment variables (`ROOT_FOLDER`, `DATA_FOLDER`, and `OUTPUT_FOLDER`, and `PYTHONPATH`), which define where this repo, your raw data, and your outputs live. There is an example file,`env_sample.sh`, which looks like this:
 
 ```bash
 #Where to store the code
@@ -31,78 +39,32 @@ export PYTHONPATH=$PYTHONPATH:$ROOT_FOLDER/lib_cinci
 
 Modify the three environment variables as appropriate. The `PYTHONPATH` line 
 is also necessary since it includes many functions used across the project. 
-Consider adding that to your shell profile, so they get loaded automatically.
-
-### Clone the repo
-
-Clone the repo in `$ROOT_FOLDER`
-
-```bash
-git clone https://github.com/dssg/cincinnati $ROOT_FOLDER
-```
-
-### Organize Data According to Repo Structure
-
-The pipeline follows certain simple conventions to make the code easy to understand. It is assumed that a file in `$ROOT_FOLDER/etl/something/` will get its raw data from `$DATA_FOLDER/etl/something/`.
-
-It should be straightforward to know where to store the raw data. For example, the code that loads all taxes data is `$ROOT_FOLDER/etl/taxes/taxes.sh`, then, your raw taxes files should be stores in `$DATA_FOLDER/etl/taxes/`
-
-The other convention is that intermediate files are stored on a `tmp/` folder, for example, since we need to preprocess the taxes files before uploading them to the database, the intermediate csv files will be on `$DATA_FOLDER/etl/taxes/tmp/`.
+Consider adding that to your shell profile, so they get loaded automatically, or `source` the file before running the pipeline.
 
 ### Provide `config.yaml`, `logger_config.yaml` and `.pgpass`
 
-The code loads some parameters from a `config.yaml` file stored in the `$ROOT_FOLDER`. `logger_config.yaml` configures the logger for the Python interpreter.
+The code loads some parameters from a `config.yaml` file stored in the `$ROOT_FOLDER`. This file lists your connection parameters to a Postgres DB and a Mongo DB, which will be used in throughout the pipeline. Use the `config_sample.yaml` file to see the structure and then rename it to `config.yaml`. Make sure that the file is stored in your `$ROOT_FOLDER`. 
 
-Use the `config_sample.yaml` file to see the structure and then rename it to `config.yaml`, make sure that the file is stored in your `$ROOT_FOLDER`. Do the same for `logger_config.yaml`.
+`logger_config.yaml` configures the logger for the Python interpreter. Customize it as you please; it is git-ignored.
 
-`.pgpass` (note the dot) is needed if your are going to use the Docker image and it will take
-the file in `$ROOT_FOLDER/.pgpass` to build it. If you are not going to use Docker, just make sure that a standard `.pgpass` file is on your home folder. See `.pgpass_sample` for syntax details.
+For parts of the ETL, you will also need a `.pgpass` file (note the dot). This file needs to be saved as `$ROOT_FOLDER/.pgpass` to build it. If you are not going to use Docker, just make sure that a standard `.pgpass` file is on your home folder. See `.pgpass_sample` for syntax details. This file gives the connection parameters for your Postgres DB.
 
-### Build Docker ETL image
+### Resources
 
-The ETL step depends on these programs:
+This project relies on a data dump from the City of Cincinnati. Some of the data is publicly available, and pulled from the city's open data API. Some data is private, and was delivered by the City of Cincinnati. More details on the data layout can be found in the [pre-modeling folder](pre-modeling/etl).
 
-* Python 2.7.11
-* GDAL 1.11.2
-* Java 1.8
-* psql (PostgreSQL) 9.3.10
-* PostGIS 2.1.4
-* mdbtools 0.7.1 
-* gnumeric 1.12.9
-* stanford-ner-2015-12-09
-* ...and many Python packages
+The pipeline makes use of a Postgres DB, used for storing the raw data and generated features. Some of the feature generation (especially aggregations over spatial features) are computationally expensive (and not optimized), and might take a medium-sized Postgres server several days to complete. The pipeline also requires a (small) Mongo DB, which is used a logger for model outputs. Here, we used [MLab](https://mlab.com/) for convenience.
 
-To ease the setup, a Dockerfile is provided which builds an Ubuntu 14.04 image with all dependencies included and properly configured.
+The pipeline conducts a naive gridsearch over several hyperparameters, replicated across several temporal splits for temporal cross-validation. The model fitting happens in Python (using [scikit-learn](http://scikit-learn.org/stable/). We ran the model fitting on several large AWS machines, broken up by temporal ranges.
 
-Most dependencies are needed for the ETL step, after the raw data is on the database, only Python (and a few packages) and psql is needed, hence, if you want, you can use the Docker image for the ETL phase only. For information on how to setup Docker, see the [official docs](https://docs.docker.com/).
+## Overall Data Pipeline
 
-Once Docker is properly setup, go to your `$ROOT_FOLDER` and run:
-
-```bash
-docker build -t cincinnati .
-```
-
-This process takes a while since it needs to download and install all dependencies, but with a decent internet connection is should take less than 1 hour.
-
-### Run Docker image
-
-Once the image is ready, run it: 
-
-```bash
-docker run -v $DATA_FOLDER:/root/data -v $ROOT_FOLDER:/root/code -v $OUTPUT_FOLDER:/root/output -i -t cincinnati /bin/bash
-```
-
-Note that we are passing our three environment variables, and linking them to three folders inside the container. The purpose of the Docker container is to run code but not to store anything (not code and of course not data).
-
-## Data Pipeline
-
-Once you have set up your environment, you can start usng the pipeline, the general procedure is the following (specific instructions for each step are available inside each subfolder):
+Once you have set up your environment, you can start using the pipeline, the general procedure is the following (specific instructions for each step are available inside each subfolder):
 
 1. Load data into the database 
-   1. Use the [ETL folder](etl/) to upload all the data to the database
-   2. Perform geocoding on some datasets. Use the [bulk_geocode](bulk_geocoder/) for this.
-2. Explore the data
-3. [Generate features](model/features) from the data
+   1. Use the [pre-modeling folder](pre-modeling/) to upload all the data to the database
+   2. Perform geocoding on some datasets. Use the [bulk_geocoder](pre-modeling/bulk_geocoder/) for this.
+2. [Generate features](model/features) from the data
 4. Run some experiments. Use `model.py` inside [model](model/) to train models. `model.py` requires you to provide a configuration file, see `default.yaml` in this folder for reference.  [experiments](model/experiments) folder contains more examples.
 5. Evaluate model performance and generate lists for field tests using the
-[model exploration](model_exploration/) directory.
+[post-modeling](post-modeling/) directory.
