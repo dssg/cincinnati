@@ -14,7 +14,7 @@ Importantly, choosing features for temporal splits or spatial ranges that have n
 
 ## `model.py`
 
-`model.py` is the main interface for training models. The actual experimental configuration (which features to use, for which dates to train/test, which radii to aggregate over, etc) is handled via the YAML config that is being passed to `model.py`. 
+`model.py` is the main interface for training models (once you have finished generating features, and specifying experiments, as mentioned above); the actual experimental configuration (which features to use, for which dates to train/test, which radii to aggregate over, etc) is handled via the YAML config that is being passed to `model.py`. 
 
 In our experience, it is easy to end up with dozens of YAML configurations that need to be run, each resulting in one call to `model.py`. As the calls are independent of one another, you can split these calls across machines for parallelization.
 
