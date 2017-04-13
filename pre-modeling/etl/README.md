@@ -1,3 +1,41 @@
+## Docker Setup
+
+### Build Docker ETL image
+
+The ETL step depends on these programs:
+
+* Python 2.7.11
+* GDAL 1.11.2
+* Java 1.8
+* psql (PostgreSQL) 9.3.10
+* PostGIS 2.1.4
+* mdbtools 0.7.1 
+* gnumeric 1.12.9
+* stanford-ner-2015-12-09
+* ...and many Python packages
+
+To ease the setup, a Dockerfile is provided which builds an Ubuntu 14.04 image with all dependencies included and properly configured.
+
+Most dependencies are needed for the ETL step, after the raw data is on the database, only Python (and a few packages) and psql is needed, hence, if you want, you can use the Docker image for the ETL phase only. For information on how to setup Docker, see the [official docs](https://docs.docker.com/).
+
+Once Docker is properly setup, go to your `$ROOT_FOLDER` and run:
+
+```bash
+docker build -t cincinnati .
+```
+
+This process takes a while since it needs to download and install all dependencies, but with a decent internet connection is should take less than 1 hour.
+
+### Run Docker image
+
+Once the image is ready, run it: 
+
+```bash
+docker run -v $DATA_FOLDER:/root/data -v $ROOT_FOLDER:/root/code -v $OUTPUT_FOLDER:/root/output -i -t cincinnati /bin/bash
+```
+
+Note that we are passing our three environment variables, and linking them to three folders inside the container. The purpose of the Docker container is to run code but not to store anything (not code and of course not data).
+
 ## ETL
 
 Here you will find one subfolders for each dataset that we used. For each folder, a shell script named `run` is provided which performs the etl for that dataset (it also contains an explanation on each step performed). For example, to load the CAGIS data, run:
