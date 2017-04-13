@@ -12,10 +12,10 @@ Importantly, choosing features for temporal splits or spatial ranges that have n
 
 [Neighborhood Scores](neighborhood_score/) provides the [`neighborhood_score.py` script](neighborhood_score/neighborhood_score.py) to generate estimates of inspection and violation density for parcels. These numbers are useful for post-modeling evaluation, but are not intended to be used as a feature, even though you will notice that the script's parameters (and what it does) is quite similar to `featurebot.py`, except for the absence of an as-of ('fake-today') date. Quite similarly to `featurebot.py`, you need to run `neighborhood_score.py` for all spatial radii and time intervals that you would like to investigate in the post-modeling.
 
-# Logging Model Results
+## `model.py`
 
-Each time you run a model, the pipeline will store the results. There are different things you can save (training set, model parameters, etc.), some are sent to a MongoDB database and others to your `$OUTPUT_FOLDER`.
+`model.py` is the main interface for training models. The actual experimental configuration (which features to use, for which dates to train/test, which radii to aggregate over, etc) is handled via the YAML config that is being passed to `model.py`. 
 
-[mongolab](https://mongolab.com) provides a free MongoDB database that you can use, make sure you provide a valid mongo URI in the config.yaml file.
+In our experience, it is easy to end up with dozens of YAML configurations that need to be run, each resulting in one call to `model.py`. As the calls are independent of one another, you can split these calls across machines for parallelization.
 
-**Note**: Pickling model, imputer and transformer objects will use much space in disk. The `model.py` script allows you to set several parameters that limit what is being saved.
+`model.py` offers several parameters to handle what output of the model training are being preserved. (Saving all results can quickly result in TBs of data, especially as large, fitted Random Forests can take up a lot of storage, and is thus not advised.) Generally, you will want to leave logging to the MongoDB activated, as this only saves the model hyperparameters and experimental configuration, together with several test set statistics, but does not save the fitted model objects. This alone will thus allow you to rule out many poorly performing models. Next, you might want to use the `--predicttop` flag. For example, passing `--predicttop=20` will save the the `parcel_id`s and risk scores for the 20% parcels with the highest predicted risk. These lists are dumped on the hard disk at `$OUTPUT_FOLDER/dumps/[experiment_name]_predict`. Finally, you can use the `--pickle` flag to save the fitted model sklearn model objects (these can be large). For model and data exploration, it can be useful to inspect the training data; the `--dump` flag saves un-imputed, un-scaled train and test sets to the hard drive.
