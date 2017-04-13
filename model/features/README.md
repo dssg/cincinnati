@@ -1,30 +1,22 @@
 # Feature generation
 
+This folder contains several functions that calculate various features, all following the same convention. To generate features, you'll interface with the `featurebot.py` script.
+
 ## Generating features
 
 Once you have uploaded all the data, you will be able to generate features for the model, for more information run:
 
 `./model/features/featurebot.py --help`
 
-## Generating features for arbitrary inspections list
+In short, `featurebot.py` takes three main arguments: The name of the feature you wish to generate, the spatial radius over which that feature should aggregate (if the feature is spatial), the temporal window over which the feature should aggregate, and the as-of date, i.e., the last day for which the feature should use data.
 
-When training models, we select a training size and a validation window, this gives us a way to calculate metrics for our models and rank them according to our precision ad 1% metric.
+This pipeline makes an important design decision regarding the as-of ('`fake_today`') dates: When you choose an as-of date, then the pipeline calculates the given feature, using available data up to that as-of date, *for each parcel in the city*. Generally, inspections in the pipeline are identified by the tuple consisting of (`parcel_id`, `inspection_date`). Thus, when generating features up to a given as-of date, the pipeline pretends that there is an inspection (`parcel_id`, `<as_of_date>`) for every possible `parcel_id`. However, when *no* date is given to `featurebot.py`, then the pipeline calculates features only for inspections that *actually happened*, using the `inspection_date` as the as-of date. In other words, when passing no date to `featurebot.py`, then the pipeline calculates features for each (`parcel_id`, `inspection_date`), where the spatial aggregations are performed for the chosen radius around `parcel_id`'s location, and the temporal aggregations are performed going backward in time from `inspection_date`. Thus, in a sense, every inspection carries its own as-of date. (This is a design decision that we do not generally recommend.)
 
-However, we want to also be able to predict on other sets than the one we get from the validation window:
+## Inspecting the Postgres DB after Feature Generation
 
-1. Predict on inspections from field tests. We currently have a list of 100+ new inspections conducted as a result of the summer project, this list can also serve as a testing set for our models
-2. Predict on all parcels for a given data. When preparing a new inspection list for our partner, we want to generate features for all parcels in Cincinnati
+After feature generation, you will find several new schemas in the Postgres DB. The `features` schema contains the features that were calculated for inspections that actually happened, the as-of date always set to the inspection's `inspection_date`. The number of rows in this schema's tables will be identical to the number of inspections in your dataset. The `parcels_inspections` table in this schema contains all inspections from our partner's database, thus features are generated for every *real* inspection. This schema is used for training models.
 
-For doing that, we organized features on different database schemas, which are explained below.
-
-## About feature schemas
-
-Features are stored in different database schemas to ease data manipulation. Every schema storing features needs to have a `parcels_inspections` table, and features are generated for those inspections only. There are four types of schemas:
-
-* General schema (`features`): the `parcels_inspections` table in this schema contains all inspections from our partner's database, thus features are generated for every *real* inspection. This schema is used for training models.
-* General schema with fake date (`features_DATE`): the `parcels_inspections` table in this schema also contains all inspections from our partner's database, but the inspection date is changed to `DATE`. This schema is used to generate predictions from a trained model.
-* Field test inspections (`features_field_test`): this schema includes inspections that happened after the summer project ended, the objective is to use this as an alternative test set for our models, given that those inspections happened in Ausgust 2015 (and we don't have all the data for generating for that year), we need to fake the inspection date, and that's the purpose of the last schema.
-* Field test insepctions with fake date (`features_field_test_DATE`): this schema uses the list of inspections that happened during the summer and changes the date for something that we can use for generating features, this schema can be used as an alternative test set for our models.
+There will also be schemas with names following the pattern of `features_31dec2015`. One such schema should exist for each date that you passed to `featurebot.py`. These schemas contain the features that were calculated using data up to the specific date (the '`fake_today`'). Note that each table in each of these schemas will have one row *for each `parcel_id` in Cincinnati*. The `inspection_date` will be set to the as-of date for all these parcels. These schemas are used to generate predictions from a trained model.
 
 ## Adding new features
 
@@ -33,7 +25,6 @@ Add features for `featurebot.py`:
 *  Define a new feature to generate in `featurebot.features_to_generate()`. 
 *  Add feature generation code in a separate file `<feature_name>.py`
 *  Start `featurebot` to populate the database with features.
-
 
 ## Note on feature loading
 
