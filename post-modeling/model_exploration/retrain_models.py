@@ -44,17 +44,19 @@ all_models = pd.read_sql_table('all_models',
                                 schema='model_results', 
                                 index_col='model_id')
 
-parcel_info = pd.read_sql_table('neighborhood_score_400m_12months',
+neighborhood = pd.read_sql_table('neighborhood_score_400m_12months',
                                  con=uri, 
                                  schema=validation_schema,
                                  index_col='parcel_id')
 
-parcel_info['inspection_density'] = parcel_info['unique_inspections']/\
-                                    parcel_info['houses']
-parcel_info['violation_rate'] = parcel_info['unique_violations']/\
-                                parcel_info['unique_inspections']
-parcel_info['violations_per_house'] = parcel_info['unique_violations']/\
-                                      parcel_info['houses']
+parcel_info = pd.DataFrame()
+
+parcel_info['inspection_density'] = neighborhood['unique_inspections']/\
+                                    neighborhood['houses']
+parcel_info['violation_rate'] = neighborhood['unique_violations']/\
+                                neighborhood['unique_inspections']
+parcel_info['violations_per_house'] = neighborhood['unique_violations']/\
+                                      neighborhood['houses']
 
 all_top_k = {}
 all_feature_importances = {}
@@ -108,8 +110,8 @@ for model_group in model_groups:
     below_quartile_ID['subset'] = 'Below Insp. Density First Quartile'
     all_top_k[model_group + ' Below First Quartile ID'] = below_quartile_ID
     
-all_top5 = pd.concat(all_top_k.values())
-all_top5.to_csv(path_to_all_top_k)
+all_top = pd.concat(all_top_k.values())
+all_top.to_csv(path_to_all_top_k)
 
 all_features_csv = pd.concat(all_feature_importances.values())
 all_features_csv.set_index(['feature','model_group']).\
