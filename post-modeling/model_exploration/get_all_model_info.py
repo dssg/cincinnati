@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
+import sys
 import fnmatch
 import re
 from sqlalchemy import create_engine
@@ -10,14 +11,13 @@ import dateutil
 from dateutil.relativedelta import relativedelta
 from lib_cinci.evaluation import load_one_inspection_per_parcel 
 from lib_cinci.config import load, get_config_parameters 
-#from lib_cinci import db
 from sklearn_evaluation.metrics import precision_at
 from sklearn_evaluation.Logger import Logger
 import ast
 import itertools
 
 #directory location of experiment configs
-experiment_directory = os.path.join(os.getcwd(), 'medium_models')
+experiment_directory = sys.argv[0]
 
 #space and time windows for neighborhood history
 space_delta = '400m'

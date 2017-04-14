@@ -1,5 +1,6 @@
 POSTPROCESSING := ../field_test_preparation/postprocess
 RESULTS_SCHEMA := model_results
+EXPERIMENT_DIRECTORY := ./medium_models
 
 ; run input SQL file and touch output
 psql()
