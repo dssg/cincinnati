@@ -81,4 +81,10 @@ pip install -r requirements.txt
 ```
 2. Adapt `../../env_sample.sh` as appropriate
 3. `source ../../env.sh` 
+4. `drake` 
 
+## Creating an Inspection List
+Once you have chosen a model and which list subset you want (options: `'All Parcels'`, 
+`'Below Insp. Density First Quartile'`, or `'Below Insp. Density Median'`), run
+`get_inspection_list.py` to create a list (`inspection_list.csv`). 
+`python get_inspection_list.py '23049' 'All Parcels'` 

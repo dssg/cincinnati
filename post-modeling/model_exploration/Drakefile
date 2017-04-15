@@ -1,3 +1,4 @@
+
 POSTPROCESSING := ../field_test_preparation/postprocess
 RESULTS_SCHEMA := model_results
 EXPERIMENT_DIRECTORY := ./medium_models
@@ -68,6 +69,3 @@ $[OUTPUT_FOLDER]/tables/copied/parcel_info <- $[OUTPUT_FOLDER]/postprocess/parce
 list_overlap_heatmap.png <- $[OUTPUT_FOLDER]/tables/copied/all_top_k, $[OUTPUT_FOLDER]/top_model_reason_lookup
    python make_list_overlap_heatmap.py
 
-; generate a list 
-;inspection_list <- all_top_k
-;python make_inspection_list.py

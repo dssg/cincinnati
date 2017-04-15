@@ -1,6 +1,7 @@
 import pandas as pd
 from sqlalchemy import create_engine
 import os
+import sys
 import yaml
 from lib_cinci.config import load
 
@@ -18,15 +19,17 @@ connparams)
 
 engine = create_engine(uri)
 
-model_id = '53454'
+model_group = sys.argv[1]
+subset = sys.argv[2]
 
 query = '''
         SELECT * 
-        FROM model_results.all_top_k
+        FROM model_results.all_top_k top_k
         LEFT JOIN model_results.parcel_info
-        USING parcel_id
-        WHERE top_k.model_group = '{}'
-        '''.format(model_id=model_id)
+        USING (parcel_id)
+        WHERE top_k.model_group = '{model_group}'
+        AND subset = '{subset}'
+        '''.format(model_group=model_group, subset=subset)
 
 model_list = pd.read_sql(query, engine, index_col='parcel_id')
 model_list.to_csv('inspection_list.csv')
