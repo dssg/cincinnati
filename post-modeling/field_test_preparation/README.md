@@ -41,7 +41,7 @@ script.
 ### List Overlap Between Models: **_Does it really matter which model I choose?_**
 It's possible that you'd end up with the same list of parcels to inspect, 
 regardless of the model. To investigate this, we use [`make_list_overlap_heatmap.py`](make_list_overlap_heatmap.py)
-to create a heatmap displaying *overlap* between the top `k` parcels chosen 
+to create a heatmap displaying *overlap* between the top *k* parcels chosen 
 by each model. Example [here](list_overlap_heatmap.png).
 
 # Running the Code
