@@ -27,7 +27,7 @@ $[OUTPUT_FOLDER]/tables/created/parcel_info <- tables/create_table_parcel_info.s
 
 ; collect all model info for experiment directory
 $[OUTPUT_FOLDER]/all_models.csv <- [-timecheck]
-  python get_all_model_info.py $[EXPERIMENT_DIRECTORY] $[SPACE_DELTA] $[TIME_DELTA]
+  python get_all_model_info.py $[EXPERIMENT_DIRECTORY] $[SPACE_DELTA] $[TIME_DELTA] $[VALIDATION_SCHEMA]
 
 ; copy that table to database
 TABLE=all_models

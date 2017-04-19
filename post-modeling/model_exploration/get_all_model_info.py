@@ -31,7 +31,7 @@ path_to_predictions = os.path.join(output_folder, 'top_predictions_on_all_parcel
 k = 7500
 
 # validation schema
-validation_feature_schema = 'features_31aug2016'
+validation_feature_schema = sys.argv[4]
 validation_months = 6
 
 #setup database configuration and DB connection
