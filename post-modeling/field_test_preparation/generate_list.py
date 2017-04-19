@@ -32,4 +32,6 @@ query = '''
         '''.format(model_group=model_group, subset=subset)
 
 model_list = pd.read_sql(query, engine, index_col='parcel_id')
+engine.dispose()
+
 model_list.to_csv('inspection_list.csv')
