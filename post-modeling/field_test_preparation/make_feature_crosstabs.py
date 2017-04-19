@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 import os
 import yaml
 from lib_cinci.config import load
-
+import sys
 
 folder = os.environ['ROOT_FOLDER']
 output_folder = os.environ['OUTPUT_FOLDER']
@@ -14,7 +14,7 @@ connparams = load('config.yaml')['db']
 uri = '{dialect}://{user}:{password}@{host}:{port}/{database}'.format(**connparams)
 engine = create_engine(uri)
 
-validation_schema = 'features_31aug2016'
+validation_schema = sys.argv[1]
 
 # get all tables from feature schema, excluding
 # 'insp2' tables (they are lookups, not features),
