@@ -24,11 +24,6 @@ Given a model group number and a subset of the parcel population to inspect,
 this will generate a list of parcels to inspect, along with address, latitude, longitude, 
 and number of inspections and violations in the neighborhood of that parcel.
 
-Once you have chosen a model and which list subset you want (options: `'All Parcels'`, 
-`'Below Insp. Density First Quartile'`, or `'Below Insp. Density Median'`), run
-`generate_list.py` to create a list (`inspection_list.csv`). Example: 
-> python generate_list.py '23049' 'All Parcels'
-
 ## Model Comparison and Interpretation
 ### Feature Crosstabs: **_Which types of parcels are ranked highly by each model?_**
 We'd like to analyze how the models are making decisions, but sometimes 
@@ -40,19 +35,30 @@ these risky parcels differs from what we know about the general population of pa
 this by gathering all of the information we have (all features) for all 
 parcels, taking the average across all parcels, and then comparing that to
 the average of those features across the top-ranked parcels for each model.  
-
-To make the feature crosstabs, run the [`make_feature_crosstabs.py`](make_feature_crosstabs.py)
+This occurs in the [`make_feature_crosstabs.py`](make_feature_crosstabs.py)
 script. 
 
 ### List Overlap Between Models: **_Does it really matter which model I choose?_**
 It's possible that you'd end up with the same list of parcels to inspect, 
 regardless of the model. To investigate this, we use [`make_list_overlap_heatmap.py`](make_list_overlap_heatmap.py)
-to create a heatmap displaying *overlap* between the top `k` parcels chosen 
+to create a heatmap displaying *overlap* between the top *k* parcels chosen 
 by each model. Example [here](list_overlap_heatmap.png).
 
 # Running the Code
+## Retraining Models & Generating Evaluations
 There is a Drakefile specifying the steps to run this part of the pipeline.
-To run the code:
+1. Activate virtualenv (see [model_exploration/README.md](../model_exploration/README.md) 
+for setup instructions):
+> `source cinci-venv/bin/activate` 
+2. Update [Drakefile](Drakefile) variables `VALIDATION_SCHEMA`, `SPACE_DELTA`, and `TIME_DELTA`
+as necessary and then call drake:
 > `drake`
-Note: The Drakefile depends on environmental variables common to the rest of the
-project pipeline; see [env_sample.sh](../../env_sample.sh) for an example.
+
+*Note: The Drakefile depends on environmental variables common to the rest of the
+project pipeline; see [env_sample.sh](../../env_sample.sh) for an example.*
+
+## Creating an Inspections List
+Once you have chosen a model and which list subset you want (options: `'All Parcels'`,
+`'Below Insp. Density First Quartile'`, or `'Below Insp. Density Median'`), run
+`generate_list.py` to create a list (which will be saved as `inspection_list.csv`). Example:
+> `python generate_list.py '23049' 'All Parcels'`
