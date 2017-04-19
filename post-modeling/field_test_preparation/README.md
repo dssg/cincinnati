@@ -15,7 +15,15 @@ respective reasons for selection before running the following steps.
 ## Retrain Models & Make a List
 Once you've chosen your final model(s), you'll want to retrain them using 
 the most recent data available (in our case, the most recent data update was August 31,
-2016). The [`retrain_models.py`](retrain_models.py) script does this, creating
+2016). 
+
+There is a Drakefile specifying the steps to run this part of the pipeline.
+To run the code:
+> `drake` 
+Note: The Drakefile depends on environmental variables common to the rest of the 
+project; see [env_sample.sh](../../env_sample.sh) for an example.
+
+The [`retrain_models.py`](retrain_models.py) script does this, creating
 a list of the top *k* parcels for each model, as well as a list of the 
 model-specific feature importances.
 
@@ -48,3 +56,4 @@ It's possible that you'd end up with the same list of parcels to inspect,
 regardless of the model. To investigate this, we use [`make_list_overlap_heatmap.py`](make_list_overlap_heatmap.py)
 to create a heatmap displaying *overlap* between the top `k` parcels chosen 
 by each model. Example [here](list_overlap_heatmap.png).
+

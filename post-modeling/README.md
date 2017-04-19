@@ -1,8 +1,7 @@
 # Model Selection & Exploration
-## **_So I've trained a bunch of models ... now what?_**
-Once you've run some experiments and have some preliminary results, you'll 
-want to narrow down the field so that you can look more closely and analyze 
-your results. 
+Once you've run some experiments and obtained some preliminary results, you'll 
+want to narrow down the field of models, analyze their performance, and 
+eventually generate an inspection list based on your results.
 
 First, go through all of your trained models, compute metrics, and compare.
 Choose a few based on precision, inspection density, violation rate,

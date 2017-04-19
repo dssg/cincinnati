@@ -37,35 +37,6 @@ $[OUTPUT_FOLDER]/model_groups.csv <- get_model_groups.py, $[OUTPUT_FOLDER]/table
 TABLE=model_groups
 $[OUTPUT_FOLDER]/tables/copied/model_groups <- $[OUTPUT_FOLDER]/model_groups.csv, $[OUTPUT_FOLDER]/tables/created/model_groups [method:psql_header]
 
-; add top model reason lookup to db
-TABLE=model_reasons
-$[OUTPUT_FOLDER]/tables/copied/model_reasons <- top_model_reason_lookup.csv, $[OUTPUT_FOLDER]/tables/created/model_reasons [method:psql_header]
 
-; retrain models
-$[OUTPUT_FOLDER]/feature_importances.csv, $[OUTPUT_FOLDER]/all_top_k.csv <- $[OUTPUT_FOLDER]/tables/copied/model_groups, $[OUTPUT_FOLDER]/tables/copied/all_models, $[OUTPUT_FOLDER]/tables/copied/model_reasons
-    python retrain_models.py
-
-; add feature importances and all_top_k to db
-TABLE=feature_importances
-$[OUTPUT_FOLDER]/tables/copied/feature_importances <- $[OUTPUT_FOLDER]/feature_importances.csv, $[OUTPUT_FOLDER]/tables/created/feature_importances [method:psql_header]
-TABLE=all_top_k
-$[OUTPUT_FOLDER]/tables/copied/all_top_k <- $[OUTPUT_FOLDER]/all_top_k.csv, $[OUTPUT_FOLDER]/tables/created/all_top_k [method:psql_header]
-
-; make feature crosstabs
-$[OUTPUT_FOLDER]/feature_crosstabs.csv <- $[OUTPUT_FOLDER]/tables/copied/all_top_k
-    python make_feature_crosstabs.py
-;add feature crosstabs to db
-TABLE=feature_crosstabs
-$[OUTPUT_FOLDER]/tables/copied/feature_crosstabs <- $[OUTPUT_FOLDER]/feature_crosstabs.csv, $[OUTPUT_FOLDER]/tables/created/feature_crosstabs [method:psql_header]
-
-; download parcel info
-$[OUTPUT_FOLDER]/postprocess/parcel_info.csv <- $[POSTPROCESSING]/download_parcel_info
-    bash $INPUT 
-; add parcel info to db
-TABLE=parcel_info
-$[OUTPUT_FOLDER]/tables/copied/parcel_info <- $[OUTPUT_FOLDER]/postprocess/parcel_info.csv, $[OUTPUT_FOLDER]/tables/created/parcel_info [method:psql_header] 
-
-; create heatmap
-list_overlap_heatmap.png <- $[OUTPUT_FOLDER]/tables/copied/all_top_k, $[OUTPUT_FOLDER]/top_model_reason_lookup
-   python make_list_overlap_heatmap.py
+					 
 
