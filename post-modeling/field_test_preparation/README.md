@@ -8,9 +8,9 @@ that did the best with respect to precision (finding the
 most violations), 5 models that identified parcels in neighborhoods that had a low
 inspection density, 5 models that identified parcels that had a low
 neighborhood violation rate, and 5 models that seemed to balance these three 
-aspects fairly well. Update the CSV here with model group numbers with their respective 
-reasons for selection in a table ([`top_model_reason_lookup.csv`](top_model_reason_lookup.csv))
-to be used for the following steps.
+aspects fairly well. Update the CSV here ([`top_model_reason_lookup.csv`](top_model_reason_lookup.csv)) 
+with the group numbers of these models and their respective reasons for selection
+before running the following steps.
 
 ## Retrain Models & Make a List
 Once you've chosen your final model(s), you'll want to retrain them using 
@@ -26,8 +26,8 @@ the neighborhood of that parcel.
 
 Once you have chosen a model and which list subset you want (options: `'All Parcels'`, 
 `'Below Insp. Density First Quartile'`, or `'Below Insp. Density Median'`), run
-`generate_list.py` to create a list (`inspection_list.csv`). 
-`python generate_list.py '23049' 'All Parcels'` 
+`generate_list.py` to create a list (`inspection_list.csv`). Example: 
+> `python generate_list.py '23049' 'All Parcels'` 
 
 ## Feature Crosstabs: **_Which types of parcels are ranked highly by each model?_**
 We'd like to analyze how the models are making decisions, but sometimes 
