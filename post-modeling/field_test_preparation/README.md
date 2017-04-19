@@ -53,11 +53,12 @@ for setup instructions):
 2. Update [Drakefile](Drakefile) variables `VALIDATION_SCHEMA`, `SPACE_DELTA`, and `TIME_DELTA`
 as necessary and then call drake:
 > `drake`
-Note: The Drakefile depends on environmental variables common to the rest of the
-project pipeline; see [env_sample.sh](../../env_sample.sh) for an example.
+
+*Note: The Drakefile depends on environmental variables common to the rest of the
+project pipeline; see [env_sample.sh](../../env_sample.sh) for an example.*
 
 ## Creating an Inspections List
 Once you have chosen a model and which list subset you want (options: `'All Parcels'`,
 `'Below Insp. Density First Quartile'`, or `'Below Insp. Density Median'`), run
 `generate_list.py` to create a list (which will be saved as `inspection_list.csv`). Example:
-> python generate_list.py '23049' 'All Parcels'
+> `python generate_list.py '23049' 'All Parcels'`
