@@ -4,7 +4,6 @@ import os
 import sys
 import fnmatch
 import re
-from sqlalchemy import create_engine
 import yaml
 from datetime import date, datetime
 import dateutil
@@ -17,11 +16,11 @@ import ast
 import itertools
 
 #directory location of experiment configs
-experiment_directory = sys.argv[0]
+experiment_directory = sys.argv[1]
 
 #space and time windows for neighborhood history
-space_delta = '400m'
-time_delta = '12months'
+space_delta = sys.argv[2]
+time_delta = sys.argv[3]
 
 # where to save model results and where to get predictions
 output_folder = os.environ['OUTPUT_FOLDER']
@@ -32,7 +31,7 @@ path_to_predictions = os.path.join(output_folder, 'top_predictions_on_all_parcel
 k = 7500
 
 # validation schema
-validation_feature_schema = 'features_31aug2016'
+validation_feature_schema = sys.argv[4]
 validation_months = 6
 
 #setup database configuration and DB connection
@@ -45,7 +44,6 @@ main = yaml.load(text)
 
 connparams = load('config.yaml')['db']
 uri = '{dialect}://{user}:{password}@{host}:{port}/{database}'.format(**connparams)
-#libpq_uri = 'dbname={database} user={user} host={host} password={password} port={port}'.format(**connparams)
 
 logger = Logger(host=main['logger']['uri'], db=main['logger']['db'], 
                 collection=main['logger']['collection'])
@@ -108,7 +106,8 @@ config_df.drop(['models', 'residential_only', 'parameters'], axis=1, inplace=Tru
 #calculate trainining window (length between train start and test start)
 config_df['fake_today'] = config_df['fake_today'].apply(lambda x: datetime.strptime(x, '%d%b%Y'))
 config_df['start_date'] = config_df['start_date'].apply(lambda x: datetime.strptime(x, '%d%b%Y'))
-config_df['training_window'] = (config_df['fake_today'] - config_df['start_date']).astype('timedelta64[M]').map(int).map(str) + ' Months' 
+config_df['training_window'] = (config_df['fake_today'] - config_df['start_date'])\
+                                .astype('timedelta64[M]').map(int).map(str) + ' Months' 
 
 param_dict = all_models_df['parameters'].map(str).apply(ast.literal_eval)
 param_df = pd.DataFrame(param_dict.to_dict()).T

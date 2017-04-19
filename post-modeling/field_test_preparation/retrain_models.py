@@ -4,12 +4,17 @@ from lib_cinci.train_and_predict import main, predict_on_date, train_on_config
 from lib_cinci.config import load
 from sklearn_evaluation.Logger import Logger
 import yaml
+from sqlalchemy import create_engine
+import sys
 
-validation_schema = 'features_31aug2016'
+validation_schema = sys.argv[1]
+space_delta = sys.argv[2]
+time_delta = sys.argv[3]
 
 connparams = load('config.yaml')['db']
 uri = '{dialect}://{user}:{password}@{host}:{port}/{database}'\
       .format(**connparams)
+engine = create_engine(uri)
 
 k = 7500 # top 5% of parcels in Cincinnati
 
@@ -18,29 +23,26 @@ path_to_feature_importances = os.path.join(output_folder,
                                           'feature_importances.csv')
 path_to_all_top_k = os.path.join(output_folder, 'all_top_k.csv')
 
-top_models = pd.read_sql_table('model_reasons', 
-                               con=uri, 
+top_models = pd.read_sql_table('model_reasons', engine,
                                schema='model_results')
 model_groups = top_models.model_group.values
 
-models_grouped = pd.read_sql_table('model_groups', 
-                                    con=uri, 
+models_grouped = pd.read_sql_table('model_groups', engine,
                                     schema='model_results')
 
-all_models = pd.read_sql_table('all_models', 
-                                con=uri, 
+all_models = pd.read_sql_table('all_models', engine,
                                 schema='model_results', 
                                 index_col='model_id')
 
-neighborhood = pd.read_sql_table('neighborhood_score_400m_12months',
-                                 con=uri, 
+neighborhood_table = 'neighborhood_score_' + space_delta + '_' + time_delta
+neighborhood = pd.read_sql_table(neighborhood_table,
+                                 engine,
                                  schema=validation_schema,
                                  index_col='parcel_id')
 
 engine.dispose()
 
 parcel_info = pd.DataFrame()
-
 parcel_info['inspection_density'] = neighborhood['unique_inspections']/\
                                     neighborhood['houses']
 parcel_info['violation_rate'] = neighborhood['unique_violations']/\

@@ -1,7 +1,11 @@
-
 POSTPROCESSING := ../field_test_preparation/postprocess
 RESULTS_SCHEMA := model_results
 EXPERIMENT_DIRECTORY := ./medium_models
+
+; these parameters can be changed for different analysis aims
+SPACE_DELTA='400m'
+TIME_DELTA='12months'
+VALIDATION_SCHEMA='features_31aug2016'
 
 ; run input SQL file and touch output
 psql()
@@ -23,7 +27,7 @@ $[OUTPUT_FOLDER]/tables/created/parcel_info <- tables/create_table_parcel_info.s
 
 ; collect all model info for experiment directory
 $[OUTPUT_FOLDER]/all_models.csv <- [-timecheck]
-  python get_all_model_info.py
+  python get_all_model_info.py $[EXPERIMENT_DIRECTORY] $[SPACE_DELTA] $[TIME_DELTA] $[VALIDATION_SCHEMA]
 
 ; copy that table to database
 TABLE=all_models
