@@ -1,16 +1,16 @@
 # Preparing Results for a Field Test - Retraining Models & Generating Lists
-First, you should have chosen a handful of models to retrain (see model exploration 
-section).
-
 Based on the results of the [model exploration step](../model_exploration/), 
 we did some hands-on analysis (primarily using Tableau) to select 5 models 
 that did the best with respect to precision (finding the 
 most violations), 5 models that identified parcels in neighborhoods that had a low
 inspection density, 5 models that identified parcels that had a low
 neighborhood violation rate, and 5 models that seemed to balance these three 
-aspects fairly well. Update the CSV here ([`top_model_reason_lookup.csv`](top_model_reason_lookup.csv)) 
-with the group numbers of these models and their respective reasons for selection
-before running the following steps.
+aspects fairly well. The results of this analysis are stored in a table 
+([`top_model_reason_lookup.csv`](top_model_reason_lookup.csv)).
+
+If you'd like to run a field test with different models, update 
+`top_model_reason_lookup.csv` with the group numbers of these models and their 
+respective reasons for selection before running the following steps.
 
 ## Retrain Models & Make a List
 Once you've chosen your final model(s), you'll want to retrain them using 
@@ -27,7 +27,7 @@ the neighborhood of that parcel.
 Once you have chosen a model and which list subset you want (options: `'All Parcels'`, 
 `'Below Insp. Density First Quartile'`, or `'Below Insp. Density Median'`), run
 `generate_list.py` to create a list (`inspection_list.csv`). Example: 
-> `python generate_list.py '23049' 'All Parcels'` 
+> python generate_list.py '23049' 'All Parcels'
 
 ## Feature Crosstabs: **_Which types of parcels are ranked highly by each model?_**
 We'd like to analyze how the models are making decisions, but sometimes 
