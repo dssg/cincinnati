@@ -73,15 +73,15 @@ by each model. Example [here](list_overlap_heatmap.png).
  
 
 # Running the Code 
-1. Start virtualenv, install requirements:
+1. Make a virtualenv and install required packages:
 ```
 virtualenv cinci-venv
 source cinci-venv/bin/activate
 pip install -r requirements.txt
 ```
-2. Adapt `../../env_sample.sh` as appropriate
-3. `source ../../env.sh` 
-4. `drake` 
+2. Specify environmental variables: (see [project README](../../README.md))
+> `source env.sh` 
+3. `drake` 
 
 ## Creating an Inspection List
 Once you have chosen a model and which list subset you want (options: `'All Parcels'`, 
