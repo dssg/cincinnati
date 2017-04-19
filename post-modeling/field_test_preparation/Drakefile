@@ -1,3 +1,16 @@
+POSTPROCESSING := ../field_test_preparation/postprocess
+RESULTS_SCHEMA := model_results
+EXPERIMENT_DIRECTORY := ./medium_models
+
+; run input SQL file and touch output
+psql()
+   psql -v ON_ERROR_STOP=1 -f $INPUT && touch $OUTPUT
+
+; parse a csv file, transfer it into the database and touch output
+psql_header() []
+        cat $INPUT  |
+        psql -v ON_ERROR_STOP=1 -c "\COPY ${RESULTS_SCHEMA}.${TABLE} FROM STDIN WITH CSV HEADER" && touch $OUTPUT
+
 ; add top model reason lookup to db
 TABLE=model_reasons
 $[OUTPUT_FOLDER]/tables/copied/model_reasons <- top_model_reason_lookup.csv, $[OUTPUT_FOLDER]/tables/created/model_reasons [method:psql_header]
