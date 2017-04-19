@@ -7,20 +7,8 @@ import yaml
 
 validation_schema = 'features_31aug2016'
 
-folder = os.environ['ROOT_FOLDER']
-name = 'config.yaml'
-path = "%s/%s" % (folder, name)
-f = open(path, 'r')
-text = f.read()
-main_yaml = yaml.load(text)
-logger = Logger(host=main_yaml['logger']['uri'],
-                db=main_yaml['logger']['db'],
-                collection=main_yaml['logger']['collection'])
-
 connparams = load('config.yaml')['db']
 uri = '{dialect}://{user}:{password}@{host}:{port}/{database}'\
-      .format(**connparams)
-libpq_uri = 'dbname={database} user={user} host={host} password={password} port={port}'\
       .format(**connparams)
 
 k = 7500 # top 5% of parcels in Cincinnati
@@ -48,6 +36,8 @@ neighborhood = pd.read_sql_table('neighborhood_score_400m_12months',
                                  con=uri, 
                                  schema=validation_schema,
                                  index_col='parcel_id')
+
+engine.dispose()
 
 parcel_info = pd.DataFrame()
 
