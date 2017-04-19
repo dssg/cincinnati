@@ -29,6 +29,7 @@ engine = create_engine(uri)
 
 query = 'SELECT * FROM model_results.all_models;'
 all_models = pd.read_sql(query, engine, index_col='model_id')
+engine.dispose()
 
 # add group number to all models
 all_models['group_number'] = None
