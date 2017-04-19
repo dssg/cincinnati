@@ -1,14 +1,14 @@
-# Model Selection & Exploration
+# Post-Modeling: Model Exploration & Selection and Field Test Preparation
 Once you've run some experiments and obtained some preliminary results, you'll 
 want to narrow down the field of models, analyze their performance, and 
-eventually generate an inspection list based on your results.
+use the model to choose some parcels to inspect.
 
-First, go through all of your trained models, compute metrics, and compare.
-Choose a few based on precision, inspection density, violation rate,
-and compromise. Do this in the [model_exploration](model_exploration/)
+First, go through all the models you trained, and choose some of the best-performing
+models based on precision, inspection density, violation rate, or some compromise
+between the three. The code to do this lives in the [model_exploration](model_exploration/)
 directory.
 
-Next, after you've evaluated and chosen models, you'll want to retrain those
-models on the most recent available data and generate a list of parcels
-to inspect. The code to do that is in the [field_test_preparation](field_test_preparation/)
-directory. 
+Next, after you've compared models and chosen some candidates, you'll want to 
+retrain them on current data, generate a list of inspections to perform, and 
+interpet your results. Code to do this lives in the 
+[field_test_preparation](field_test_preparation/) directory.
